@@ -1,14 +1,5 @@
-// App.js
-import { View, Text, StyleSheet } from 'react-native';
+import NavigationScreen from './src/screens/NavigationScreen';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Wheelchair Map is working!</Text>
-    </View>
-  );
+  return <NavigationScreen />;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' }
-});

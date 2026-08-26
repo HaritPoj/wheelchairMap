@@ -1,31 +1,17 @@
-export function findPath(startId, goalId, mapData) {
+const mapData = require('./assets/data/map.json');
+mapData.nodeMap = {};
+mapData.nodes.forEach(n => mapData.nodeMap[n.id] = n);
+
+function findPath(startId, goalId, mapData) {
   const { nodes, edges, nodeMap } = mapData;
 
   function edgeCost(edge) {
     let cost = 1;
-
-    // Corridor too narrow
     if (edge.width < 0.9) cost += 999;
-
-    // Slope too steep
-    if (edge.slope >= 5.0) cost += 999;
-    else if (edge.slope >= 3.0) cost += 50;
-
-    // Check destination node accessibility
-    const dest = nodeMap[edge.to];
-    if (dest) {
-      if (dest.door_width < 0.9)   cost += 999; // door too narrow
-      if (dest.threshold >= 0.02)  cost += 200; // high threshold
-      else if (dest.threshold >= 0.01) cost += 50; // small threshold
-    }
-
-    // Floor change must use lift (slope === 0)
-    const from = nodeMap[edge.from];
-    const to   = nodeMap[edge.to];
-    if (from && to && from.floor !== to.floor) {
-      if (from.type !== 'lift' && to.type !== 'lift') cost += 999;
-    }
-
+    const a = nodeMap[edge.from];
+    const b = nodeMap[edge.to];
+    if (a.floor !== b.floor && !edge.hasElevator) cost += 999;
+    if (a.floor !== b.floor && !edge.hasRamp)     cost += 500;
     return cost;
   }
 
@@ -52,3 +38,6 @@ export function findPath(startId, goalId, mapData) {
   for (let n = goalId; n; n = prev[n]) path.unshift(n);
   return path;
 }
+
+const result = findPath('entrance_1', 'room_213', mapData)
+console.log('Route:', result);
