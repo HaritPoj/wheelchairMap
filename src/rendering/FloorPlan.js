@@ -3,12 +3,12 @@ import Svg, { Circle, Text, Line } from 'react-native-svg';
 import { useState, useRef, useEffect } from 'react';
 
 const SCREEN = Dimensions.get('window');
-const MAP_WIDTH = 1300;
-const MAP_HEIGHT = 1200;
+const MAP_WIDTH = 2200;
+const MAP_HEIGHT = 1800;
 const LIMIT_X = SCREEN.width * 0.5;
 const LIMIT_Y = SCREEN.height * 0.5;
 
-export default function FloorPlan({ mapData, currentFloor, route, onNodeTap }) {
+export default function FloorPlan({ mapData, currentFloor, route, onNodeTap, destination }) {
   const routeSet = new Set(route);
   const nodes = mapData.nodes.filter(n => n.floor === currentFloor);
   const scaleX = SCREEN.width / MAP_WIDTH;
@@ -126,6 +126,7 @@ export default function FloorPlan({ mapData, currentFloor, route, onNodeTap }) {
               cy={node.y * scaleY}
               r={routeSet.has(node.id) ? 8 : 12}
               fill={
+                destination === node.id ? '#4CAF50' :
                 route[0] === node.id ? '#185FA5' :
                 route[route.length - 1] === node.id ? '#085041' :
                 routeSet.has(node.id) ? '#185FA5' :
