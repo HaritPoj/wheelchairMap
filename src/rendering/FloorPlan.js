@@ -148,7 +148,7 @@ export default function FloorPlan({
 
       onPanResponderTerminate: () => {
         gestureStartDistance.current = null;
-        this._wheelchairMapGestureStart = null;
+        gestureStartPoint.current = null;
       },
     })
   ).current;
@@ -225,7 +225,26 @@ export default function FloorPlan({
       onLayout={event => {
         const { width, height } = event.nativeEvent.layout;
         setViewport({ width, height });
-        updateOffset(currentOffset.current);
+
+        const contentWidth = IMAGE_WIDTH * currentScale.current;
+        const contentHeight = IMAGE_HEIGHT * currentScale.current;
+
+        const minX =
+          contentWidth <= width ? (width - contentWidth) / 2 : width - contentWidth;
+        const maxX =
+          contentWidth <= width ? minX : 0;
+        const minY =
+          contentHeight <= height ? (height - contentHeight) / 2 : height - contentHeight;
+        const maxY =
+          contentHeight <= height ? minY : 0;
+
+        const nextOffset = {
+          x: Math.max(minX, Math.min(currentOffset.current.x, maxX)),
+          y: Math.max(minY, Math.min(currentOffset.current.y, maxY)),
+        };
+
+        currentOffset.current = nextOffset;
+        setMapOffset(nextOffset);
       }}
     >
       <View
