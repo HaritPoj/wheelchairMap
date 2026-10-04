@@ -36,7 +36,7 @@ export default function NextStepBanner({ route, nodeMap, edges }) {
 const styles = StyleSheet.create({
   banner: {
     position: 'absolute',
-    top: 50,
+    bottom: 110,
     left: 16,
     right: 16,
     backgroundColor: '#185FA5',
