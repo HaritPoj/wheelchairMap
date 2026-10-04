@@ -1,43 +1,38 @@
+function numeric(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
 export function findPath(startId, goalId, mapData) {
   const { nodes, edges, nodeMap } = mapData;
 
-  if (!nodeMap[startId] || !nodeMap[goalId]) {
-    return [];
-  }
-
-  if (startId === goalId) {
-    return [startId];
-  }
+  if (!nodeMap[startId] || !nodeMap[goalId]) return [];
+  if (startId === goalId) return [startId];
 
   function edgeCost(edge, fromId, toId) {
-    let cost = Number.isFinite(edge.weight) ? edge.weight : 1;
-
+    const storedWeight = numeric(edge.weight);
+    let cost = storedWeight !== null ? storedWeight : 1;
     const from = nodeMap[fromId];
     const to = nodeMap[toId];
 
-    if (!from || !to) {
-      return Infinity;
-    }
+    if (!from || !to) return Infinity;
 
-    const width = Number(edge.width);
-    const slope = Number(edge.slope);
+    const width = numeric(edge.width);
+    const slope = numeric(edge.slope);
 
-    if (Number.isFinite(width) && width < 0.9) {
-      return Infinity;
-    }
+    if (width !== null && width < 0.9) return Infinity;
 
-    if (Number.isFinite(slope)) {
+    if (slope !== null) {
       if (slope >= 5.0) return Infinity;
       if (slope >= 3.0) cost += 50;
     }
 
-    const doorWidth = Number(to.door_width);
-    if (Number.isFinite(doorWidth) && doorWidth < 0.9) {
-      return Infinity;
-    }
+    const doorWidth = numeric(to.door_width);
+    if (doorWidth !== null && doorWidth < 0.9) return Infinity;
 
-    const threshold = Number(to.threshold);
-    if (Number.isFinite(threshold)) {
+    const threshold = numeric(to.threshold);
+    if (threshold !== null) {
       if (threshold >= 0.02) cost += 200;
       else if (threshold >= 0.01) cost += 50;
     }
@@ -48,10 +43,7 @@ export function findPath(startId, goalId, mapData) {
         from.type === 'lift' &&
         to.type === 'lift';
 
-      if (!validElevator) {
-        return Infinity;
-      }
-
+      if (!validElevator) return Infinity;
       cost += 10;
     }
 
@@ -62,10 +54,7 @@ export function findPath(startId, goalId, mapData) {
   const prev = {};
   const unvisited = new Set(nodes.map(node => node.id));
 
-  for (const node of nodes) {
-    dist[node.id] = Infinity;
-  }
-
+  for (const node of nodes) dist[node.id] = Infinity;
   dist[startId] = 0;
 
   while (unvisited.size > 0) {
@@ -79,37 +68,21 @@ export function findPath(startId, goalId, mapData) {
       }
     }
 
-    if (current === null) {
-      break;
-    }
-
+    if (current === null) break;
     unvisited.delete(current);
-
-    if (current === goalId) {
-      break;
-    }
+    if (current === goalId) break;
 
     for (const edge of edges) {
       let next = null;
+      if (edge.from === current) next = edge.to;
+      else if (edge.to === current) next = edge.from;
 
-      if (edge.from === current) {
-        next = edge.to;
-      } else if (edge.to === current) {
-        next = edge.from;
-      }
-
-      if (!next || !unvisited.has(next)) {
-        continue;
-      }
+      if (!next || !unvisited.has(next)) continue;
 
       const cost = edgeCost(edge, current, next);
-
-      if (!Number.isFinite(cost)) {
-        continue;
-      }
+      if (!Number.isFinite(cost)) continue;
 
       const candidate = dist[current] + cost;
-
       if (candidate < dist[next]) {
         dist[next] = candidate;
         prev[next] = current;
@@ -117,20 +90,14 @@ export function findPath(startId, goalId, mapData) {
     }
   }
 
-  if (!Number.isFinite(dist[goalId])) {
-    return [];
-  }
+  if (!Number.isFinite(dist[goalId])) return [];
 
   const path = [];
   let current = goalId;
 
   while (current !== undefined) {
     path.unshift(current);
-
-    if (current === startId) {
-      break;
-    }
-
+    if (current === startId) break;
     current = prev[current];
   }
 
