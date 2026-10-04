@@ -9,7 +9,7 @@ mapData.nodeMap = Object.fromEntries(
 
 const source = fs
   .readFileSync('./src/logic/pathfinder.js', 'utf8')
-  .replace('export function findPath', 'function findPath');
+  .replace('export default function findPath', 'function findPath');
 
 const sandbox = {};
 vm.createContext(sandbox);
