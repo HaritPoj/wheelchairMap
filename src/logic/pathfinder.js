@@ -4,7 +4,7 @@ function numeric(value) {
   return Number.isFinite(number) ? number : null;
 }
 
-export function findPath(startId, goalId, mapData) {
+export default function findPath(startId, goalId, mapData) {
   const { nodes, edges, nodeMap } = mapData;
 
   if (!nodeMap[startId] || !nodeMap[goalId]) return [];
