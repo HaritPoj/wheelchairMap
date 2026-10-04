@@ -75,4 +75,28 @@ assert.deepStrictEqual(
   []
 );
 
+
+assert.ok(
+  mapData.nodes.every(node => [
+    'room',
+    'corridor',
+    'lift',
+    'entrance',
+    'toilet',
+  ].includes(node.type)),
+  'Every node should have a supported type'
+);
+
+assert.ok(
+  mapData.edges.every(edge => Number.isFinite(edge.weight)),
+  'Every edge should have a numeric weight'
+);
+
+assert.ok(
+  mapData.edges
+    .filter(edge => mapData.nodeMap[edge.from].floor !== mapData.nodeMap[edge.to].floor)
+    .every(edge => edge.transition === 'elevator'),
+  'Every cross-floor edge should be an elevator transition'
+);
+
 console.log('Routing tests passed.');
