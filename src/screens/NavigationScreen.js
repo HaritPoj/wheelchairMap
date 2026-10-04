@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import mapData from '../../assets/data/map.json';
+import { getMapData } from '../../assets/data/mapLoader';
 import { findPath } from '../logic/pathfinder';
 import FloorPlan from '../rendering/FloorPlan';
 import HUD from '../rendering/HUD';
@@ -8,13 +8,8 @@ import DirectionsSheet from '../rendering/DirectionsSheet';
 import NextStepBanner from '../rendering/NextStepBanner';
 import CameraScanner from '../rendering/CameraScanner';
 
-mapData.nodeMap = {};
-mapData.nodes.forEach(n => {
-  n.label = n.name;
-  mapData.nodeMap[n.id] = n;
-});
-
 export default function NavigationScreen() {
+  const mapData = React.useMemo(() => getMapData(), []);
   const [currentFloor, setCurrentFloor] = useState(1);
   const [locationId, setLocationId] = useState(null);
   const [destination, setDestination] = useState(null);
@@ -92,6 +87,7 @@ export default function NavigationScreen() {
         route={route}
         onNodeTap={handleNodeTap}
         destination={destination}
+        startNode={locationId}
       />
       
       <HUD
