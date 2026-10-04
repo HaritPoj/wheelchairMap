@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -35,6 +35,25 @@ export default function FloorPlan({
   const gestureStartDistance = useRef(null);
   const gestureStartScale = useRef(1);
   const gestureStartPoint = useRef(null);
+
+  const centerMap = () => {
+    if (!viewport.width || !viewport.height) return;
+
+    const contentWidth = IMAGE_WIDTH * currentScale.current;
+    const contentHeight = IMAGE_HEIGHT * currentScale.current;
+
+    const centeredOffset = {
+      x: (viewport.width - contentWidth) / 2,
+      y: (viewport.height - contentHeight) / 2,
+    };
+
+    currentOffset.current = centeredOffset;
+    setMapOffset(centeredOffset);
+  };
+
+  useEffect(() => {
+    centerMap();
+  }, [currentFloor]);
 
   const clampOffset = (offset, scale = currentScale.current) => {
     const contentWidth = IMAGE_WIDTH * scale;
@@ -226,25 +245,13 @@ export default function FloorPlan({
         const { width, height } = event.nativeEvent.layout;
         setViewport({ width, height });
 
-        const contentWidth = IMAGE_WIDTH * currentScale.current;
-        const contentHeight = IMAGE_HEIGHT * currentScale.current;
-
-        const minX =
-          contentWidth <= width ? (width - contentWidth) / 2 : width - contentWidth;
-        const maxX =
-          contentWidth <= width ? minX : 0;
-        const minY =
-          contentHeight <= height ? (height - contentHeight) / 2 : height - contentHeight;
-        const maxY =
-          contentHeight <= height ? minY : 0;
-
-        const nextOffset = {
-          x: Math.max(minX, Math.min(currentOffset.current.x, maxX)),
-          y: Math.max(minY, Math.min(currentOffset.current.y, maxY)),
+        const centeredOffset = {
+          x: (width - IMAGE_WIDTH * currentScale.current) / 2,
+          y: (height - IMAGE_HEIGHT * currentScale.current) / 2,
         };
 
-        currentOffset.current = nextOffset;
-        setMapOffset(nextOffset);
+        currentOffset.current = centeredOffset;
+        setMapOffset(centeredOffset);
       }}
     >
       <View
