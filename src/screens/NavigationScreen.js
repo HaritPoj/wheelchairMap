@@ -7,7 +7,7 @@ import {
   Text,
 } from 'react-native';
 import { getMapData } from '../../assets/data/mapLoader';
-import { findPath } from '../logic/pathfinder';
+import findPath from '../logic/pathfinder';
 import FloorPlan from '../rendering/FloorPlan';
 import HUD from '../rendering/HUD';
 import DirectionsSheet from '../rendering/DirectionsSheet';
