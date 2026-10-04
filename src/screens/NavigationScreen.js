@@ -37,11 +37,16 @@ export default function NavigationScreen() {
   }, [locationId, destination]);
 
   function handleNodeTap(id) {
-    if (mode === 'location') {
-      setLocationId(id);
-      setMode('destination');
-    } else {
+    if (mode === 'destination') {
+      // 1. Set the destination
       setDestination(id);
+      // 2. Automatically switch mode so the next tap is the starting location
+      setMode('location'); 
+    } else if (mode === 'location') {
+      // 3. Set the starting location
+      setLocationId(id);
+      // 4. Switch back to destination mode for the next time they search
+      setMode('destination'); 
     }
   }
 
@@ -78,7 +83,7 @@ export default function NavigationScreen() {
         style={styles.scanButton}
         onPress={() => setIsScanning(true)}
       >
-        <Text style={styles.scanButtonText}>📷 Scan Sign</Text>
+        <Text style={styles.scanButtonText}>Scan Room Sign</Text>
       </TouchableOpacity>
 
       <FloorPlan 

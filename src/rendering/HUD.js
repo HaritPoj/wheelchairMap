@@ -49,7 +49,7 @@ export default function HUD({ mapData, currentFloor, onFloor,
           onPress={() => { setMode('location'); setQuery(''); }}>
           <Text style={mode === 'location'
             ? styles.modeBtnTextActive : styles.modeBtnText}>
-            📍 My location
+            My location
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -58,7 +58,7 @@ export default function HUD({ mapData, currentFloor, onFloor,
           onPress={() => { setMode('destination'); setQuery(''); }}>
           <Text style={mode === 'destination'
             ? styles.modeBtnTextActive : styles.modeBtnText}>
-            🏁 Destination
+            Destination
           </Text>
         </TouchableOpacity>
       </View>
