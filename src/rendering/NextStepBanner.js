@@ -1,26 +1,33 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { generateRouteSteps } from '../logic/routeInstructions';
 
 function getIcon(type) {
-  switch(type) {
-    case 'lift':     return '🛗';
-    case 'toilet':   return '🚻';
+  switch (type) {
+    case 'lift': return '🛗';
+    case 'toilet': return '🚻';
     case 'entrance': return '🚪';
-    default:         return '🚶';
+    default: return '🚶';
   }
 }
 
-export default function NextStepBanner({ route, nodeMap }) {
+export default function NextStepBanner({ route, nodeMap, edges }) {
   if (!route || route.length < 2) return null;
 
-  const destNode = nodeMap[route[route.length - 1]];
-  const nextNode = nodeMap[route[1]] || destNode;
+  const steps = generateRouteSteps(route, nodeMap, edges);
+  const firstAction = steps[1] || steps[0];
+  const destination = nodeMap[route[route.length - 1]];
+
+  if (!firstAction || !destination) return null;
 
   return (
     <View style={styles.banner}>
-      <Text style={styles.icon}>{getIcon(nextNode.type)}</Text>
+      <Text style={styles.icon}>{getIcon(firstAction.icon)}</Text>
+
       <View style={styles.textBox}>
-        <Text style={styles.next}>Head to {nextNode.name}</Text>
-        <Text style={styles.dest}>Destination: {destNode.name}</Text>
+        <Text style={styles.next}>{firstAction.instruction}</Text>
+        <Text style={styles.dest}>
+          Destination: {destination.name}
+        </Text>
       </View>
     </View>
   );
@@ -41,8 +48,20 @@ const styles = StyleSheet.create({
     elevation: 5,
     zIndex: 15,
   },
-  icon: { fontSize: 24 },
-  textBox: { flex: 1 },
-  next: { color: 'white', fontSize: 15, fontWeight: '600' },
-  dest: { color: '#E6F1FB', fontSize: 12, marginTop: 2 },
+  icon: {
+    fontSize: 24,
+  },
+  textBox: {
+    flex: 1,
+  },
+  next: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  dest: {
+    color: '#E6F1FB',
+    fontSize: 12,
+    marginTop: 2,
+  },
 });
