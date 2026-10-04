@@ -1,140 +1,226 @@
-import { View, Text, TextInput, TouchableOpacity,
-         ScrollView, StyleSheet, Keyboard } from 'react-native';
-import { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  Keyboard,
+} from 'react-native';
+import { useMemo, useState } from 'react';
 
-export default function HUD({ mapData, currentFloor, onFloor,
-                               onDestination, onLocation,
-                               locationId, destination,
-                               mode, setMode, onClearAll }) { 
+function getIcon(type) {
+  switch (type) {
+    case 'lift': return '🛗';
+    case 'toilet': return '🚻';
+    case 'entrance': return '🚪';
+    default: return '📍';
+  }
+}
+
+export default function HUD({
+  mapData,
+  currentFloor,
+  onFloor,
+  locationId,
+  destination,
+  mode,
+  setMode,
+  onSelectNode,
+  onClearLocation,
+  onClearDestination,
+  onClearAll,
+  routeMessage,
+}) {
   const [query, setQuery] = useState('');
-  //const [mode, setMode] = useState('destination'); // 'destination' or 'location'
+
+  const searchableNodes = useMemo(
+    () => mapData.nodes.filter(node => node.type !== 'corridor'),
+    [mapData.nodes]
+  );
 
   const results = query.length > 0
-    ? mapData.nodes.filter(n =>
-        n.label.toLowerCase().includes(query.toLowerCase())
-      )
+    ? searchableNodes
+        .filter(node =>
+          (node.label || node.name || node.id)
+            .toLowerCase()
+            .includes(query.toLowerCase())
+        )
+        .slice(0, 8)
     : [];
 
-  function handleSelect(id) {
+  const floors = useMemo(
+    () => [...new Set(mapData.nodes.map(node => node.floor))]
+      .sort((a, b) => a - b),
+    [mapData.nodes]
+  );
+
+  function selectNode(id) {
     Keyboard.dismiss();
     setQuery('');
-    if (mode === 'location') {
-      onLocation(id);
-      setMode('destination'); // switch back after setting
-    } else {
-      onDestination(id);
-    }
+    onSelectNode(id);
   }
 
-  function handleClear() {
-    Keyboard.dismiss();
-    setQuery('');
-    if (mode === 'destination') onDestination(null);
-    else onLocation(null);
-  }
-
-  const locationNode = locationId
-    ? mapData.nodeMap[locationId] : null;
-  const destinationNode = destination
-    ? mapData.nodeMap[destination] : null;
+  const locationNode = locationId ? mapData.nodeMap[locationId] : null;
+  const destinationNode = destination ? mapData.nodeMap[destination] : null;
 
   return (
     <View style={styles.hud}>
-
-      {/* Mode toggle */}
       <View style={styles.modeRow}>
         <TouchableOpacity
-          style={[styles.modeBtn,
-            mode === 'location' && styles.modeBtnActive]}
-          onPress={() => { setMode('location'); setQuery(''); }}>
-          <Text style={mode === 'location'
-            ? styles.modeBtnTextActive : styles.modeBtnText}>
+          style={[styles.modeBtn, mode === 'location' && styles.modeBtnActive]}
+          onPress={() => {
+            setMode('location');
+            setQuery('');
+          }}
+          accessibilityRole="button"
+          accessibilityState={{ selected: mode === 'location' }}
+        >
+          <Text style={mode === 'location' ? styles.modeBtnTextActive : styles.modeBtnText}>
             My location
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
-          style={[styles.modeBtn,
-            mode === 'destination' && styles.modeBtnActive]}
-          onPress={() => { setMode('destination'); setQuery(''); }}>
-          <Text style={mode === 'destination'
-            ? styles.modeBtnTextActive : styles.modeBtnText}>
+          style={[styles.modeBtn, mode === 'destination' && styles.modeBtnActive]}
+          onPress={() => {
+            setMode('destination');
+            setQuery('');
+          }}
+          accessibilityRole="button"
+          accessibilityState={{ selected: mode === 'destination' }}
+        >
+          <Text style={mode === 'destination' ? styles.modeBtnTextActive : styles.modeBtnText}>
             Destination
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Current selections display */}
       <View style={styles.selectionBox}>
-        <Text style={styles.selectionLabel}>From:</Text>
+        <Text style={styles.selectionLabel}>From</Text>
         <Text style={styles.selectionValue} numberOfLines={1}>
-          {locationNode ? locationNode.name : 'Not set — tap map or search'}
+          {locationNode ? locationNode.name : 'Not set'}
         </Text>
-      </View>
-      <View style={styles.selectionBox}>
-        <Text style={styles.selectionLabel}>To:</Text>
-        <Text style={styles.selectionValue} numberOfLines={1}>
-          {destinationNode ? destinationNode.name : 'Not set — tap map or search'}
-        </Text>
-      </View>
-
-      {/* Search bar */}
-      <View style={styles.searchRow}>
-        <TextInput
-          style={styles.search}
-          placeholder={mode === 'location'
-            ? 'Search your location...'
-            : 'Search destination...'}
-          value={query}
-          onChangeText={setQuery}
-          returnKeyType="done"
-          onSubmitEditing={() => Keyboard.dismiss()}
-        />
-        {query.length > 0 && (
-          <TouchableOpacity style={styles.clearBtn} onPress={handleClear}>
+        {locationNode && (
+          <TouchableOpacity
+            style={styles.selectionClear}
+            onPress={onClearLocation}
+            accessibilityRole="button"
+            accessibilityLabel="Clear starting location"
+          >
             <Text style={styles.clearText}>✕</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Search results */}
+      <View style={styles.selectionBox}>
+        <Text style={styles.selectionLabel}>To</Text>
+        <Text style={styles.selectionValue} numberOfLines={1}>
+          {destinationNode ? destinationNode.name : 'Not set'}
+        </Text>
+        {destinationNode && (
+          <TouchableOpacity
+            style={styles.selectionClear}
+            onPress={onClearDestination}
+            accessibilityRole="button"
+            accessibilityLabel="Clear destination"
+          >
+            <Text style={styles.clearText}>✕</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <View style={styles.searchRow}>
+        <TextInput
+          style={styles.search}
+          placeholder={
+            mode === 'location'
+              ? 'Search starting location...'
+              : 'Search destination...'
+          }
+          value={query}
+          onChangeText={setQuery}
+          returnKeyType="done"
+          onSubmitEditing={() => Keyboard.dismiss()}
+          accessibilityLabel={
+            mode === 'location'
+              ? 'Search starting location'
+              : 'Search destination'
+          }
+        />
+
+        {query.length > 0 && (
+          <TouchableOpacity
+            style={styles.clearBtn}
+            onPress={() => {
+              Keyboard.dismiss();
+              setQuery('');
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Clear search"
+          >
+            <Text style={styles.clearText}>✕</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
       {results.length > 0 && (
-        <ScrollView style={styles.results} keyboardShouldPersistTaps="handled">
-          {results.map(n => (
+        <ScrollView
+          style={styles.results}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled
+        >
+          {results.map(node => (
             <TouchableOpacity
-              key={n.id}
+              key={node.id}
               style={styles.resultItem}
-              onPress={() => handleSelect(n.id)}
+              onPress={() => selectNode(node.id)}
+              accessibilityRole="button"
+              accessibilityLabel={
+                (node.name || node.id) + ', Floor ' + node.floor
+              }
             >
               <Text style={styles.resultText}>
-                {n.type === 'lift' ? '🛗' :
-                 n.type === 'toilet' ? '🚻' :
-                 n.type === 'entrance' ? '🚪' : '📍'} {n.label}
+                {getIcon(node.type)} {node.label || node.name || node.id}
               </Text>
-              <Text style={styles.resultSub}>Floor {n.floor}</Text>
+              <Text style={styles.resultSub}>Floor {node.floor}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
       )}
 
-      {/* Floor switcher */}
+      {routeMessage && (
+        <View style={styles.messageBox}>
+          <Text style={styles.messageText}>{routeMessage}</Text>
+        </View>
+      )}
+
       <View style={styles.floorRow}>
-        {[1, 2].map(f => (
+        {floors.map(floor => (
           <TouchableOpacity
-            key={f}
-            style={[styles.floorBtn,
-              currentFloor === f && styles.floorBtnActive]}
-            onPress={() => onFloor(f)}
+            key={floor}
+            style={[
+              styles.floorBtn,
+              currentFloor === floor && styles.floorBtnActive,
+            ]}
+            onPress={() => onFloor(floor)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: currentFloor === floor }}
           >
-            <Text style={currentFloor === f
-              ? styles.floorBtnTextActive : styles.floorBtnText}>
-              Floor {f}
+            <Text style={currentFloor === floor ? styles.floorBtnTextActive : styles.floorBtnText}>
+              Floor {floor}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
-      {/* Clear all button — only show when something is selected */}
+
       {(locationId || destination) && (
-        <TouchableOpacity style={styles.clearAllBtn} onPress={onClearAll}>
+        <TouchableOpacity
+          style={styles.clearAllBtn}
+          onPress={onClearAll}
+          accessibilityRole="button"
+          accessibilityLabel="Clear route"
+        >
           <Text style={styles.clearAllText}>✕ Clear route</Text>
         </TouchableOpacity>
       )}
@@ -144,8 +230,11 @@ export default function HUD({ mapData, currentFloor, onFloor,
 
 const styles = StyleSheet.create({
   hud: {
-    position: 'absolute', top: 50,
-    left: 16, right: 16, zIndex: 10,
+    position: 'absolute',
+    top: 50,
+    left: 16,
+    right: 16,
+    zIndex: 10,
   },
   modeRow: {
     flexDirection: 'row',
@@ -195,6 +284,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#333',
   },
+  selectionClear: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f0f0f0',
+  },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -223,7 +320,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 10,
     marginBottom: 4,
-    maxHeight: 180,
+    maxHeight: 220,
     elevation: 3,
   },
   resultItem: {
@@ -243,6 +340,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#888',
   },
+  messageBox: {
+    backgroundColor: '#FFF3CD',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: '#E6C96A',
+  },
+  messageText: {
+    fontSize: 12,
+    color: '#633806',
+    lineHeight: 17,
+  },
   floorRow: {
     flexDirection: 'row',
     gap: 8,
@@ -255,9 +366,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     elevation: 2,
   },
-  floorBtnActive: { backgroundColor: '#185FA5' },
-  floorBtnText: { color: '#333', fontWeight: '500' },
-  floorBtnTextActive: { color: 'white', fontWeight: '500' },
+  floorBtnActive: {
+    backgroundColor: '#185FA5',
+  },
+  floorBtnText: {
+    color: '#333',
+    fontWeight: '500',
+  },
+  floorBtnTextActive: {
+    color: 'white',
+    fontWeight: '500',
+  },
   clearAllBtn: {
     backgroundColor: '#FCEBEB',
     borderRadius: 8,
