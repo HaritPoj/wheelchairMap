@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import {
   View,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   PanResponder,
@@ -27,60 +26,129 @@ export default function FloorPlan({
   startNode,
 }) {
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
+  const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
+
   const currentScale = useRef(1);
-  const initialScale = useRef(1);
-  const initialDistance = useRef(null);
+  const currentOffset = useRef({ x: 0, y: 0 });
+  const gestureStartOffset = useRef({ x: 0, y: 0 });
+  const gestureStartDistance = useRef(null);
+  const gestureStartScale = useRef(1);
+  const gestureStartPoint = useRef(null);
+
+  const clampOffset = (offset, scale = currentScale.current) => {
+    const contentWidth = IMAGE_WIDTH * scale;
+    const contentHeight = IMAGE_HEIGHT * scale;
+
+    const minX =
+      contentWidth <= viewport.width
+        ? (viewport.width - contentWidth) / 2
+        : viewport.width - contentWidth;
+
+    const maxX =
+      contentWidth <= viewport.width
+        ? minX
+        : 0;
+
+    const minY =
+      contentHeight <= viewport.height
+        ? (viewport.height - contentHeight) / 2
+        : viewport.height - contentHeight;
+
+    const maxY =
+      contentHeight <= viewport.height
+        ? minY
+        : 0;
+
+    return {
+      x: Math.max(minX, Math.min(offset.x, maxX)),
+      y: Math.max(minY, Math.min(offset.y, maxY)),
+    };
+  };
+
+  const updateOffset = (offset, scale = currentScale.current) => {
+    const next = clampOffset(offset, scale);
+    currentOffset.current = next;
+    setMapOffset(next);
+  };
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: event =>
         event.nativeEvent.touches.length >= 2,
-      onMoveShouldSetPanResponder: event =>
-        event.nativeEvent.touches.length >= 2,
+
+      onMoveShouldSetPanResponder: () => true,
 
       onPanResponderGrant: event => {
-        if (event.nativeEvent.touches.length < 2) return;
+        const touches = event.nativeEvent.touches;
 
-        const [first, second] = event.nativeEvent.touches;
-        const dx = first.pageX - second.pageX;
-        const dy = first.pageY - second.pageY;
+        gestureStartOffset.current = { ...currentOffset.current };
+        gestureStartScale.current = currentScale.current;
 
-        initialDistance.current = Math.sqrt(dx * dx + dy * dy);
-        initialScale.current = currentScale.current;
+        if (touches.length === 1) {
+          gestureStartPoint.current = {
+            x: touches[0].pageX,
+            y: touches[0].pageY,
+          };
+        } else {
+          gestureStartPoint.current = null;
+        }
+
+        if (touches.length >= 2) {
+          const [first, second] = touches;
+          const dx = first.pageX - second.pageX;
+          const dy = first.pageY - second.pageY;
+          gestureStartDistance.current = Math.sqrt(dx * dx + dy * dy);
+        } else {
+          gestureStartDistance.current = null;
+        }
       },
 
       onPanResponderMove: event => {
-        if (
-          event.nativeEvent.touches.length < 2 ||
-          initialDistance.current === null
-        ) {
+        const touches = event.nativeEvent.touches;
+
+        if (touches.length >= 2 && gestureStartDistance.current !== null) {
+          const [first, second] = touches;
+          const dx = first.pageX - second.pageX;
+          const dy = first.pageY - second.pageY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          const scaleFactor =
+            gestureStartDistance.current > 0
+              ? distance / gestureStartDistance.current
+              : 1;
+
+          const nextScale = Math.max(
+            0.6,
+            Math.min(3.5, gestureStartScale.current * scaleFactor)
+          );
+
+          currentScale.current = nextScale;
+          setZoomLevel(nextScale);
+          updateOffset(gestureStartOffset.current, nextScale);
           return;
         }
 
-        const [first, second] = event.nativeEvent.touches;
-        const dx = first.pageX - second.pageX;
-        const dy = first.pageY - second.pageY;
+        if (touches.length === 1 && gestureStartPoint.current) {
+          const touch = touches[0];
 
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const scaleFactor =
-          initialDistance.current > 0
-            ? distance / initialDistance.current
-            : 1;
-
-        const nextZoom = Math.max(
-          0.6,
-          Math.min(initialScale.current * scaleFactor, 3.5)
-        );
-
-        currentScale.current = nextZoom;
-        setZoomLevel(nextZoom);
+          updateOffset({
+            x: gestureStartOffset.current.x +
+              (touch.pageX - gestureStartPoint.current.x),
+            y: gestureStartOffset.current.y +
+              (touch.pageY - gestureStartPoint.current.y),
+          });
+        }
       },
 
       onPanResponderRelease: () => {
-        initialDistance.current = null;
+        gestureStartDistance.current = null;
+        gestureStartPoint.current = null;
       },
+
       onPanResponderTerminate: () => {
-        initialDistance.current = null;
+        gestureStartDistance.current = null;
+        this._wheelchairMapGestureStart = null;
       },
     })
   ).current;
@@ -151,30 +219,26 @@ export default function FloorPlan({
     .join(' ');
 
   return (
-    <View style={styles.wrapper} {...panResponder.panHandlers}>
-      <ScrollView
-        style={styles.verticalScroll}
-        contentContainerStyle={{
-          width: mapWidth,
-          minHeight: mapHeight,
-          justifyContent: 'center',
-        }}
-        centerContent
-        showsVerticalScrollIndicator={false}
-      >
-        <ScrollView
-          horizontal
-          contentContainerStyle={{
+    <View
+      style={styles.wrapper}
+      {...panResponder.panHandlers}
+      onLayout={event => {
+        const { width, height } = event.nativeEvent.layout;
+        setViewport({ width, height });
+        updateOffset(currentOffset.current);
+      }}
+    >
+      <View
+        style={[
+          styles.mapLayer,
+          {
             width: mapWidth,
             height: mapHeight,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-          centerContent
-          showsHorizontalScrollIndicator={false}
-          nestedScrollEnabled
-        >
-          <View style={{ width: mapWidth, height: mapHeight }}>
+            left: mapOffset.x,
+            top: mapOffset.y,
+          },
+        ]}
+      >
             <Svg
               width={mapWidth}
               height={mapHeight}
@@ -369,9 +433,7 @@ export default function FloorPlan({
                 />
               );
             })}
-          </View>
-        </ScrollView>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -380,9 +442,10 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     backgroundColor: '#d8e3e8',
+    overflow: 'hidden',
   },
-  verticalScroll: {
-    flex: 1,
+  mapLayer: {
+    position: 'absolute',
   },
   svg: {
     overflow: 'visible',
