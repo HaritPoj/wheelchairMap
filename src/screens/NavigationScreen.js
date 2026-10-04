@@ -1,6 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import mapData from '../../assets/data/map.json';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Alert,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
+import { getMapData } from '../../assets/data/mapLoader';
 import { findPath } from '../logic/pathfinder';
 import FloorPlan from '../rendering/FloorPlan';
 import HUD from '../rendering/HUD';
@@ -8,45 +14,60 @@ import DirectionsSheet from '../rendering/DirectionsSheet';
 import NextStepBanner from '../rendering/NextStepBanner';
 import CameraScanner from '../rendering/CameraScanner';
 
-mapData.nodeMap = {};
-mapData.nodes.forEach(n => {
-  n.label = n.name;
-  mapData.nodeMap[n.id] = n;
-});
-
 export default function NavigationScreen() {
+  const mapData = useMemo(() => getMapData(), []);
   const [currentFloor, setCurrentFloor] = useState(1);
   const [locationId, setLocationId] = useState(null);
   const [destination, setDestination] = useState(null);
   const [route, setRoute] = useState([]);
   const [showDirections, setShowDirections] = useState(false);
   const [mode, setMode] = useState('destination');
-  
-  // State to show/hide the camera
-  const [isScanning, setIsScanning] = useState(false); 
+  const [routeMessage, setRouteMessage] = useState(null);
+  const [isScanning, setIsScanning] = useState(false);
 
   useEffect(() => {
-    if (locationId && destination) {
-      const path = findPath(locationId, destination, mapData);
-      setRoute(path);
-      setShowDirections(true);
-    } else {
+    if (!locationId || !destination) {
       setRoute([]);
       setShowDirections(false);
+      setRouteMessage(null);
+      return;
     }
-  }, [locationId, destination]);
 
-  function handleNodeTap(id) {
+    const path = findPath(locationId, destination, mapData);
+    setRoute(path);
+
+    if (path.length === 0) {
+      setShowDirections(false);
+      setRouteMessage(
+        'No wheelchair-accessible route was found between these locations.'
+      );
+      return;
+    }
+
+    if (path.length === 1) {
+      setShowDirections(false);
+      setRouteMessage('You are already at the destination.');
+      return;
+    }
+
+    setRouteMessage(null);
+    setShowDirections(true);
+  }, [locationId, destination, mapData]);
+
+  function handleNodeSelect(id) {
+    const node = mapData.nodeMap[id];
+
+    if (!node) return;
+
+    setCurrentFloor(node.floor);
+    setRouteMessage(null);
+
     if (mode === 'destination') {
-      // 1. Set the destination
       setDestination(id);
-      // 2. Automatically switch mode so the next tap is the starting location
-      setMode('location'); 
-    } else if (mode === 'location') {
-      // 3. Set the starting location
+      setMode('location');
+    } else {
       setLocationId(id);
-      // 4. Switch back to destination mode for the next time they search
-      setMode('destination'); 
+      setMode('destination');
     }
   }
 
@@ -55,20 +76,41 @@ export default function NavigationScreen() {
     setDestination(null);
     setRoute([]);
     setShowDirections(false);
+    setRouteMessage(null);
     setMode('destination');
   }
 
-  // Handler for when the camera finds a room
-  const handleRoomDetected = (roomId) => {
-    setLocationId(roomId); 
-    setMode('destination'); 
-    setIsScanning(false); 
-  };
+  function handleClearLocation() {
+    setLocationId(null);
+    setRouteMessage(null);
+  }
 
-  // If scanning is active, render the camera instead of the map
+  function handleClearDestination() {
+    setDestination(null);
+    setRouteMessage(null);
+  }
+
+  function handleRoomDetected(roomId) {
+    const room = mapData.nodeMap[roomId];
+
+    if (!room || room.type !== 'room') {
+      Alert.alert(
+        'Location not found',
+        'That room is not on the current map.'
+      );
+      return;
+    }
+
+    setLocationId(roomId);
+    setCurrentFloor(room.floor);
+    setMode('destination');
+    setRouteMessage(null);
+    setIsScanning(false);
+  }
+
   if (isScanning) {
     return (
-      <CameraScanner 
+      <CameraScanner
         mapData={mapData}
         onRoomDetected={handleRoomDetected}
         onClose={() => setIsScanning(false)}
@@ -78,35 +120,39 @@ export default function NavigationScreen() {
 
   return (
     <View style={styles.container}>
-      {/* FLOATING SCAN BUTTON */}
-      <TouchableOpacity 
-        style={styles.scanButton}
-        onPress={() => setIsScanning(true)}
-      >
-        <Text style={styles.scanButtonText}>Scan Room Sign</Text>
-      </TouchableOpacity>
-
-      <FloorPlan 
+      <FloorPlan
         mapData={mapData}
         currentFloor={currentFloor}
         route={route}
-        onNodeTap={handleNodeTap}
+        onNodeTap={handleNodeSelect}
         destination={destination}
+        startNode={locationId}
       />
-      
+
       <HUD
         mapData={mapData}
         currentFloor={currentFloor}
         onFloor={setCurrentFloor}
-        onDestination={setDestination}
-        onLocation={setLocationId}
         locationId={locationId}
         destination={destination}
         mode={mode}
         setMode={setMode}
+        onSelectNode={handleNodeSelect}
+        onClearLocation={handleClearLocation}
+        onClearDestination={handleClearDestination}
         onClearAll={handleClearAll}
+        routeMessage={routeMessage}
       />
-      
+
+      <TouchableOpacity
+        style={styles.scanButton}
+        onPress={() => setIsScanning(true)}
+        accessibilityRole="button"
+        accessibilityLabel="Scan room sign"
+      >
+        <Text style={styles.scanButtonText}>Scan Room Sign</Text>
+      </TouchableOpacity>
+
       {showDirections && (
         <DirectionsSheet
           route={route}
@@ -115,9 +161,13 @@ export default function NavigationScreen() {
           onClose={() => setShowDirections(false)}
         />
       )}
-      
-      {route.length > 0 && (
-        <NextStepBanner route={route} nodeMap={mapData.nodeMap} />
+
+      {route.length > 1 && (
+        <NextStepBanner
+          route={route}
+          nodeMap={mapData.nodeMap}
+          edges={mapData.edges}
+        />
       )}
     </View>
   );
@@ -132,17 +182,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
     paddingVertical: 15,
     paddingHorizontal: 20,
-    borderRadius: 30, 
-    zIndex: 10,       
-    elevation: 5,     
-    shadowColor: '#000', 
+    borderRadius: 30,
+    zIndex: 10,
+    elevation: 5,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
   },
   scanButtonText: {
-    color: 'white', 
+    color: 'white',
     fontWeight: 'bold',
-    fontSize: 16
-  }
+    fontSize: 16,
+  },
 });

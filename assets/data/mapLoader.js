@@ -1,10 +1,23 @@
-import data from '../../assets/data/map.json';
+import rawMapData from './map.json';
+import { validateMapData } from './mapValidator';
 
 export function getMapData() {
-  data.nodeMap = {};
-  data.nodes.forEach(n => {
-    n.label = n.name;
-    data.nodeMap[n.id] = n;
-  });
+  const nodes = rawMapData.nodes.map(node => ({
+    ...node,
+    label: node.name || node.id,
+  }));
+
+  const data = {
+    ...rawMapData,
+    nodes,
+    nodeMap: Object.fromEntries(nodes.map(node => [node.id, node])),
+  };
+
+  const errors = validateMapData(data);
+
+  if (errors.length > 0) {
+    throw new Error('Invalid map data:\n' + errors.join('\n'));
+  }
+
   return data;
 }

@@ -1,127 +1,88 @@
-import { View, Text, ScrollView, 
-         TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
+import { generateRouteSteps } from '../logic/routeInstructions';
 
 const SCREEN = Dimensions.get('window');
 
 function getTypeIcon(type) {
-  switch(type) {
-    case 'lift':     return '🛗';
-    case 'toilet':   return '🚻';
+  switch (type) {
+    case 'lift': return '🛗';
+    case 'toilet': return '🚻';
     case 'entrance': return '🚪';
-    case 'corridor': return '🚶';
-    default:         return '📍';
+    default: return '📍';
   }
-}
-
-function generateSteps(route, nodeMap, edges) {
-  if (!route || route.length < 2) return [];
-  const steps = [];
-
-  for (let i = 0; i < route.length; i++) {
-    const node = nodeMap[route[i]];
-    const nextNode = i < route.length - 1 ? nodeMap[route[i + 1]] : null;
-
-    // Find edge between current and next node
-    const edge = nextNode ? edges.find(e =>
-      (e.from === route[i] && e.to === route[i + 1]) ||
-      (e.to === route[i] && e.from === route[i + 1])
-    ) : null;
-
-    // Build instruction
-    let instruction = '';
-    let warning = '';
-
-    if (i === 0) {
-      instruction = `Start at ${node.name}`;
-    } else if (node.type === 'lift') {
-      const prevNode = nodeMap[route[i - 1]];
-      if (prevNode.floor !== node.floor) {
-        instruction = `Take ${node.name} to Floor ${node.floor}`;
-      } else {
-        instruction = `Enter ${node.name}`;
-      }
-    } else if (node.type === 'corridor') {
-      instruction = `Continue through ${node.name}`;
-    } else if (i === route.length - 1) {
-      instruction = `Arrive at ${node.name}`;
-    } else {
-      instruction = `Head towards ${node.name}`;
-    }
-
-    // Add warnings based on next edge/node
-    if (nextNode) {
-      if (nextNode.threshold >= 0.02)
-        warning = `⚠️ Threshold ahead (${(nextNode.threshold * 100).toFixed(0)}cm)`;
-      else if (nextNode.door_width < 0.9)
-        warning = `⚠️ Narrow door ahead (${nextNode.door_width}m)`;
-      else if (edge && edge.slope >= 3.0)
-        warning = `⚠️ Slope ahead (${edge.slope}°)`;
-      else if (edge && edge.width < 1.2)
-        warning = `ℹ️ Corridor width ${edge.width}m`;
-    }
-
-    steps.push({
-      index: i,
-      icon: getTypeIcon(node.type),
-      instruction,
-      warning,
-      isFirst: i === 0,
-      isLast: i === route.length - 1,
-      node,
-    });
-  }
-
-  return steps;
 }
 
 export default function DirectionsSheet({ route, nodeMap, edges, onClose }) {
   if (!route || route.length < 2) return null;
 
-  const steps = generateSteps(route, nodeMap, edges);
-  const totalSteps = steps.length;
+  const steps = generateRouteSteps(route, nodeMap, edges);
 
   return (
     <View style={styles.sheet}>
-      {/* Handle bar */}
       <View style={styles.handle} />
 
-      {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Directions</Text>
-          <Text style={styles.headerSub}>{totalSteps - 1} steps to destination</Text>
+        <View style={styles.headerTextBox}>
+          <Text style={styles.headerTitle}>Accessible directions</Text>
+          <Text style={styles.headerSub}>
+            {steps.length} instructions
+          </Text>
         </View>
-        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+
+        <TouchableOpacity
+          style={styles.closeBtn}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Close directions"
+        >
           <Text style={styles.closeText}>✕</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Steps */}
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {steps.map((step, i) => (
-          <View key={i} style={styles.stepRow}>
-            {/* Left: icon + line */}
+      <ScrollView
+        style={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        {steps.map((step, index) => (
+          <View key={step.key} style={styles.stepRow}>
             <View style={styles.stepLeft}>
-              <View style={[
-                styles.iconCircle,
-                step.isFirst && styles.iconFirst,
-                step.isLast && styles.iconLast,
-              ]}>
-                <Text style={styles.iconText}>{step.icon}</Text>
+              <View
+                style={[
+                  styles.iconCircle,
+                  index === 0 && styles.iconFirst,
+                  index === steps.length - 1 && styles.iconLast,
+                ]}
+              >
+                <Text style={styles.iconText}>
+                  {getTypeIcon(step.icon)}
+                </Text>
               </View>
-              {!step.isLast && <View style={styles.stepLine} />}
+
+              {index < steps.length - 1 && <View style={styles.stepLine} />}
             </View>
 
-            {/* Right: instruction */}
             <View style={styles.stepRight}>
-              <Text style={[
-                styles.stepInstruction,
-                step.isLast && styles.stepInstructionLast,
-              ]}>
+              <Text
+                style={[
+                  styles.stepInstruction,
+                  index === steps.length - 1 &&
+                    styles.stepInstructionLast,
+                ]}
+              >
                 {step.instruction}
               </Text>
+
               {step.warning ? (
-                <Text style={styles.stepWarning}>{step.warning}</Text>
+                <Text style={styles.stepWarning}>
+                  {step.warning}
+                </Text>
               ) : null}
             </View>
           </View>
@@ -165,6 +126,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 0.5,
     borderBottomColor: '#eee',
+  },
+  headerTextBox: {
+    flex: 1,
   },
   headerTitle: {
     fontSize: 17,

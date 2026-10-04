@@ -30,6 +30,15 @@
       "eas": {
         "projectId": "7f94fada-1de4-404c-909d-a2b8036facb0"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Wheelchair Map to access the camera to scan room signs.",
+          "recordAudioAndroid": false
+        }
+      ]
+    ]
   }
 }

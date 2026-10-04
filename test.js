@@ -1,43 +1,102 @@
+const assert = require('assert');
+const fs = require('fs');
+const vm = require('vm');
+
 const mapData = require('./assets/data/map.json');
-mapData.nodeMap = {};
-mapData.nodes.forEach(n => mapData.nodeMap[n.id] = n);
+mapData.nodeMap = Object.fromEntries(
+  mapData.nodes.map(node => [node.id, node])
+);
 
-function findPath(startId, goalId, mapData) {
-  const { nodes, edges, nodeMap } = mapData;
+const source = fs
+  .readFileSync('./src/logic/pathfinder.js', 'utf8')
+  .replace('export function findPath', 'function findPath');
 
-  function edgeCost(edge) {
-    let cost = 1;
-    if (edge.width < 0.9) cost += 999;
-    const a = nodeMap[edge.from];
-    const b = nodeMap[edge.to];
-    if (a.floor !== b.floor && !edge.hasElevator) cost += 999;
-    if (a.floor !== b.floor && !edge.hasRamp)     cost += 500;
-    return cost;
-  }
+const sandbox = {};
+vm.createContext(sandbox);
+vm.runInContext(source + '\nthis.findPath = findPath;', sandbox);
 
-  const dist = {}, prev = {};
-  const unvisited = new Set(nodes.map(n => n.id));
-  nodes.forEach(n => dist[n.id] = Infinity);
-  dist[startId] = 0;
+const findPath = sandbox.findPath;
 
-  while (unvisited.size > 0) {
-    const u = [...unvisited]
-      .reduce((a, b) => dist[a] < dist[b] ? a : b);
-    if (u === goalId) break;
-    unvisited.delete(u);
-    edges
-      .filter(e => e.from === u || e.to === u)
-      .forEach(e => {
-        const v = e.from === u ? e.to : e.from;
-        const alt = dist[u] + edgeCost(e);
-        if (alt < dist[v]) { dist[v] = alt; prev[v] = u; }
-      });
-  }
-
-  const path = [];
-  for (let n = goalId; n; n = prev[n]) path.unshift(n);
-  return path;
+function assertRoute(startId, goalId, route) {
+  assert.ok(
+    route.length >= 1,
+    'Expected route ' + startId + ' -> ' + goalId
+  );
+  assert.strictEqual(route[0], startId);
+  assert.strictEqual(route[route.length - 1], goalId);
 }
 
-const result = findPath('entrance_1', 'room_213', mapData)
-console.log('Route:', result);
+assert.deepStrictEqual(findPath('124', '124', mapData), ['124']);
+
+const sameFloor = findPath('124', '120', mapData);
+assertRoute('124', '120', sameFloor);
+
+const crossFloor = findPath('124', '211', mapData);
+assertRoute('124', '211', crossFloor);
+assert.ok(crossFloor.includes('elevator_1'));
+assert.ok(crossFloor.includes('elevator_2'));
+
+assert.deepStrictEqual(
+  findPath('does-not-exist', '124', mapData),
+  []
+);
+
+const blockedMap = JSON.parse(JSON.stringify(mapData));
+blockedMap.nodeMap = Object.fromEntries(
+  blockedMap.nodes.map(node => [node.id, node])
+);
+
+blockedMap.edges = blockedMap.edges.map(edge => ({
+  ...edge,
+  width:
+    edge.from === '124' && edge.to === 'hall_1_60'
+      ? 0.5
+      : edge.width,
+}));
+
+assert.deepStrictEqual(
+  findPath('124', '120', blockedMap),
+  []
+);
+
+const brokenTransitionMap = JSON.parse(JSON.stringify(mapData));
+brokenTransitionMap.nodeMap = Object.fromEntries(
+  brokenTransitionMap.nodes.map(node => [node.id, node])
+);
+
+brokenTransitionMap.edges = brokenTransitionMap.edges.map(edge =>
+  edge.transition === 'elevator'
+    ? { ...edge, transition: undefined }
+    : edge
+);
+
+assert.deepStrictEqual(
+  findPath('124', '211', brokenTransitionMap),
+  []
+);
+
+
+assert.ok(
+  mapData.nodes.every(node => [
+    'room',
+    'corridor',
+    'lift',
+    'entrance',
+    'toilet',
+  ].includes(node.type)),
+  'Every node should have a supported type'
+);
+
+assert.ok(
+  mapData.edges.every(edge => Number.isFinite(edge.weight)),
+  'Every edge should have a numeric weight'
+);
+
+assert.ok(
+  mapData.edges
+    .filter(edge => mapData.nodeMap[edge.from].floor !== mapData.nodeMap[edge.to].floor)
+    .every(edge => edge.transition === 'elevator'),
+  'Every cross-floor edge should be an elevator transition'
+);
+
+console.log('Routing tests passed.');
