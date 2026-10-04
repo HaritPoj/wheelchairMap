@@ -1,54 +1,138 @@
 export function findPath(startId, goalId, mapData) {
   const { nodes, edges, nodeMap } = mapData;
 
-  function edgeCost(edge) {
-    let cost = 1;
+  if (!nodeMap[startId] || !nodeMap[goalId]) {
+    return [];
+  }
 
-    // Corridor too narrow
-    if (edge.width < 0.9) cost += 999;
+  if (startId === goalId) {
+    return [startId];
+  }
 
-    // Slope too steep
-    if (edge.slope >= 5.0) cost += 999;
-    else if (edge.slope >= 3.0) cost += 50;
+  function edgeCost(edge, fromId, toId) {
+    let cost = Number.isFinite(edge.weight) ? edge.weight : 1;
 
-    // Check destination node accessibility
-    const dest = nodeMap[edge.to];
-    if (dest) {
-      if (dest.door_width < 0.9)   cost += 999; // door too narrow
-      if (dest.threshold >= 0.02)  cost += 200; // high threshold
-      else if (dest.threshold >= 0.01) cost += 50; // small threshold
+    const from = nodeMap[fromId];
+    const to = nodeMap[toId];
+
+    if (!from || !to) {
+      return Infinity;
     }
 
-    // Floor change must use lift (slope === 0)
-    const from = nodeMap[edge.from];
-    const to   = nodeMap[edge.to];
-    if (from && to && from.floor !== to.floor) {
-      if (from.type !== 'lift' && to.type !== 'lift') cost += 999;
+    const width = Number(edge.width);
+    const slope = Number(edge.slope);
+
+    if (Number.isFinite(width) && width < 0.9) {
+      return Infinity;
+    }
+
+    if (Number.isFinite(slope)) {
+      if (slope >= 5.0) return Infinity;
+      if (slope >= 3.0) cost += 50;
+    }
+
+    const doorWidth = Number(to.door_width);
+    if (Number.isFinite(doorWidth) && doorWidth < 0.9) {
+      return Infinity;
+    }
+
+    const threshold = Number(to.threshold);
+    if (Number.isFinite(threshold)) {
+      if (threshold >= 0.02) cost += 200;
+      else if (threshold >= 0.01) cost += 50;
+    }
+
+    if (from.floor !== to.floor) {
+      const validElevator =
+        edge.transition === 'elevator' &&
+        from.type === 'lift' &&
+        to.type === 'lift';
+
+      if (!validElevator) {
+        return Infinity;
+      }
+
+      cost += 10;
     }
 
     return cost;
   }
 
-  const dist = {}, prev = {};
-  const unvisited = new Set(nodes.map(n => n.id));
-  nodes.forEach(n => dist[n.id] = Infinity);
+  const dist = {};
+  const prev = {};
+  const unvisited = new Set(nodes.map(node => node.id));
+
+  for (const node of nodes) {
+    dist[node.id] = Infinity;
+  }
+
   dist[startId] = 0;
 
   while (unvisited.size > 0) {
-    const u = [...unvisited]
-      .reduce((a, b) => dist[a] < dist[b] ? a : b);
-    if (u === goalId) break;
-    unvisited.delete(u);
-    edges
-      .filter(e => e.from === u || e.to === u)
-      .forEach(e => {
-        const v = e.from === u ? e.to : e.from;
-        const alt = dist[u] + edgeCost(e);
-        if (alt < dist[v]) { dist[v] = alt; prev[v] = u; }
-      });
+    let current = null;
+    let bestDistance = Infinity;
+
+    for (const id of unvisited) {
+      if (dist[id] < bestDistance) {
+        bestDistance = dist[id];
+        current = id;
+      }
+    }
+
+    if (current === null) {
+      break;
+    }
+
+    unvisited.delete(current);
+
+    if (current === goalId) {
+      break;
+    }
+
+    for (const edge of edges) {
+      let next = null;
+
+      if (edge.from === current) {
+        next = edge.to;
+      } else if (edge.to === current) {
+        next = edge.from;
+      }
+
+      if (!next || !unvisited.has(next)) {
+        continue;
+      }
+
+      const cost = edgeCost(edge, current, next);
+
+      if (!Number.isFinite(cost)) {
+        continue;
+      }
+
+      const candidate = dist[current] + cost;
+
+      if (candidate < dist[next]) {
+        dist[next] = candidate;
+        prev[next] = current;
+      }
+    }
+  }
+
+  if (!Number.isFinite(dist[goalId])) {
+    return [];
   }
 
   const path = [];
-  for (let n = goalId; n; n = prev[n]) path.unshift(n);
-  return path;
+  let current = goalId;
+
+  while (current !== undefined) {
+    path.unshift(current);
+
+    if (current === startId) {
+      break;
+    }
+
+    current = prev[current];
+  }
+
+  return path[0] === startId ? path : [];
 }
