@@ -35,7 +35,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Wheelchair Map to access the camera to scan room signs."
+          "cameraPermission": "Allow Wheelchair Map to access the camera to scan room signs.",
+          "recordAudioAndroid": false
         }
       ]
     ]
