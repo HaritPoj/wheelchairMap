@@ -1,10 +1,10 @@
-import sampleBuilding from "./sample_building.json";
+import lc2Building from "./lc2.json";
 
 const BUILDINGS = {
-  sample_building: sampleBuilding,
+  lc2: lc2Building,
 };
 
-export function getBuilding(buildingId = "sample_building") {
+export function getBuilding(buildingId = "lc2") {
   const building = BUILDINGS[buildingId];
 
   if (!building) {
