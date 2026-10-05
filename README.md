@@ -16,7 +16,7 @@ Each building file contains:
 The current example is:
 
 ```
-assets/data/buildings/sample_building.json
+assets/data/buildings/lc2.json
 ```
 
 To add another building, create another JSON file with the same schema and register it in:
