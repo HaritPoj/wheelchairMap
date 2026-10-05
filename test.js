@@ -2,42 +2,76 @@ const assert = require('assert');
 const fs = require('fs');
 const vm = require('vm');
 
-const mapData = require('./assets/data/map.json');
-mapData.nodeMap = Object.fromEntries(
-  mapData.nodes.map(node => [node.id, node])
-);
+const buildingData = require('./assets/data/buildings/sample_building.json');
 
-const source = fs
-  .readFileSync('./src/logic/pathfinder.js', 'utf8')
-  .replace('export function findPath', 'function findPath');
+function loadNamedExport(source, exportName) {
+  const sandbox = {};
+  vm.createContext(sandbox);
 
-const sandbox = {};
-vm.createContext(sandbox);
-vm.runInContext(source + '\nthis.findPath = findPath;', sandbox);
-
-const findPath = sandbox.findPath;
-
-function assertRoute(startId, goalId, route) {
-  assert.ok(
-    route.length >= 1,
-    'Expected route ' + startId + ' -> ' + goalId
+  const body = source.replace(
+    new RegExp('export\\s+function\\s+' + exportName),
+    'function ' + exportName
   );
-  assert.strictEqual(route[0], startId);
-  assert.strictEqual(route[route.length - 1], goalId);
+
+  vm.runInContext(
+    body + '\nthis.' + exportName + ' = ' + exportName + ';',
+    sandbox
+  );
+
+  return sandbox[exportName];
 }
 
-assert.deepStrictEqual(findPath('124', '124', mapData), ['124']);
+const normalizeBuildingData = loadNamedExport(
+  fs.readFileSync('./assets/data/buildingAdapter.js', 'utf8'),
+  'normalizeBuildingData'
+);
 
-const sameFloor = findPath('124', '120', mapData);
-assertRoute('124', '120', sameFloor);
+const validateBuildingData = loadNamedExport(
+  fs.readFileSync('./assets/data/mapValidator.js', 'utf8'),
+  'validateBuildingData'
+);
 
-const crossFloor = findPath('124', '211', mapData);
-assertRoute('124', '211', crossFloor);
-assert.ok(crossFloor.includes('elevator_1'));
-assert.ok(crossFloor.includes('elevator_2'));
+const findPath = loadNamedExport(
+  fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
+  'findPath'
+);
 
 assert.deepStrictEqual(
-  findPath('does-not-exist', '124', mapData),
+  validateBuildingData(buildingData),
+  [],
+  'Building schema should validate'
+);
+
+const mapData = normalizeBuildingData(buildingData);
+
+const roomByCode = code =>
+  mapData.nodes.find(node => node.type === 'room' && node.code === code);
+
+const room124 = roomByCode('124');
+const room120 = roomByCode('120');
+const room211 = roomByCode('211');
+
+assert.ok(room124 && room120 && room211, 'Expected sample rooms to exist');
+
+assert.deepStrictEqual(
+  findPath(room124.id, room124.id, mapData),
+  [room124.id]
+);
+
+const sameFloor = findPath(room124.id, room120.id, mapData);
+assert.strictEqual(sameFloor[0], room124.id);
+assert.strictEqual(sameFloor[sameFloor.length - 1], room120.id);
+
+const crossFloor = findPath(room124.id, room211.id, mapData);
+assert.strictEqual(crossFloor[0], room124.id);
+assert.strictEqual(crossFloor[crossFloor.length - 1], room211.id);
+assert.ok(
+  crossFloor.some(id => mapData.nodeMap[id].type === 'elevator'),
+  'Cross-floor route should use an elevator'
+);
+
+assert.deepStrictEqual(
+  findPath('does-not-exist', room124.id, mapData),
   []
 );
 
@@ -46,16 +80,22 @@ blockedMap.nodeMap = Object.fromEntries(
   blockedMap.nodes.map(node => [node.id, node])
 );
 
-blockedMap.edges = blockedMap.edges.map(edge => ({
-  ...edge,
-  width:
-    edge.from === '124' && edge.to === 'hall_1_60'
-      ? 0.5
-      : edge.width,
-}));
+const firstConnection = blockedMap.edges.find(edge => {
+  const otherId =
+    edge.from === room124.id
+      ? edge.to
+      : edge.to === room124.id
+        ? edge.from
+        : null;
+
+  return otherId && blockedMap.nodeMap[otherId]?.type === 'corridor';
+});
+
+assert.ok(firstConnection, 'Expected room 124 to connect to a corridor');
+firstConnection.width = 0.5;
 
 assert.deepStrictEqual(
-  findPath('124', '120', blockedMap),
+  findPath(room124.id, room120.id, blockedMap),
   []
 );
 
@@ -71,32 +111,37 @@ brokenTransitionMap.edges = brokenTransitionMap.edges.map(edge =>
 );
 
 assert.deepStrictEqual(
-  findPath('124', '211', brokenTransitionMap),
+  findPath(room124.id, room211.id, brokenTransitionMap),
   []
 );
 
-
 assert.ok(
-  mapData.nodes.every(node => [
-    'room',
-    'corridor',
-    'lift',
-    'entrance',
-    'toilet',
-  ].includes(node.type)),
-  'Every node should have a supported type'
+  buildingData.spaces.every(space => space.floorId && space.geometry),
+  'Every space should declare floor and geometry'
 );
 
 assert.ok(
-  mapData.edges.every(edge => Number.isFinite(edge.weight)),
-  'Every edge should have a numeric weight'
+  buildingData.connections.every(
+    connection =>
+      connection.routing &&
+      Number.isFinite(connection.routing.cost)
+  ),
+  'Every connection should declare a numeric routing cost'
 );
 
 assert.ok(
-  mapData.edges
-    .filter(edge => mapData.nodeMap[edge.from].floor !== mapData.nodeMap[edge.to].floor)
-    .every(edge => edge.transition === 'elevator'),
-  'Every cross-floor edge should be an elevator transition'
+  buildingData.connections
+    .filter(connection => {
+      const from = buildingData.spaces.find(
+        space => space.id === connection.from
+      );
+      const to = buildingData.spaces.find(
+        space => space.id === connection.to
+      );
+      return from && to && from.floorId !== to.floorId;
+    })
+    .every(connection => connection.transition?.type),
+  'Every cross-floor connection should declare a transition'
 );
 
-console.log('Routing tests passed.');
+console.log('Generic building schema and routing tests passed.');
