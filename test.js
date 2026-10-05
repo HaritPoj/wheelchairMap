@@ -2,7 +2,7 @@ const assert = require('assert');
 const fs = require('fs');
 const vm = require('vm');
 
-const buildingData = require('./assets/data/buildings/sample_building.json');
+const buildingData = require('./assets/data/buildings/lc2.json');
 
 function loadNamedExport(source, exportName) {
   const sandbox = {};
