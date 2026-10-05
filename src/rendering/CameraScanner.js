@@ -17,22 +17,46 @@ function normalizeOCRText(text) {
     .trim();
 }
 
-function extractRoomCandidates(text) {
-  const normalized = normalizeOCRText(text);
+function normalizeCode(value) {
+  return String(value || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '');
+}
+
+function extractRoomCandidates(text, mapData) {
+  const normalized = normalizeOCRText(text).toUpperCase();
+  const tokens = normalized
+    .split(/[^A-Z0-9]+/)
+    .filter(Boolean);
+
   const candidates = [];
+  const rooms = mapData.nodes.filter(node => node.type === 'room');
 
-  const matches = normalized.match(
-    /\b(?:room|rm)?\s*([12])\s*(\d{2})(?:[A-Za-z])?\b/gi
-  ) || [];
+  for (const room of rooms) {
+    const code = normalizeCode(room.code || room.id || room.name);
+    if (!code) continue;
 
-  for (const match of matches) {
-    const groups = match.match(/([12])\s*(\d{2})/i);
-    if (!groups) continue;
+    const found = tokens.some((token, index) => {
+      if (normalizeCode(token) === code) return true;
 
-    const roomId = groups[1] + groups[2];
+      for (
+        let length = 2;
+        length <= 4 && index + length <= tokens.length;
+        length += 1
+      ) {
+        const combined = tokens
+          .slice(index, index + length)
+          .map(normalizeCode)
+          .join('');
 
-    if (!candidates.includes(roomId)) {
-      candidates.push(roomId);
+        if (combined === code) return true;
+      }
+
+      return false;
+    });
+
+    if (found && !candidates.includes(room.id)) {
+      candidates.push(room.id);
     }
   }
 
@@ -95,7 +119,7 @@ export default function CameraScanner({ onRoomDetected, onClose, mapData }) {
       }
 
       const result = await TextRecognition.recognize(photo.uri);
-      const candidates = extractRoomCandidates(result?.text || '');
+      const candidates = extractRoomCandidates(result?.text || '', mapData);
 
       const foundId = candidates.find(
         roomId => mapData.nodeMap[roomId]?.type === 'room'
@@ -105,15 +129,18 @@ export default function CameraScanner({ onRoomDetected, onClose, mapData }) {
         Alert.alert(
           'Try again',
           candidates.length
-            ? 'A number was detected, but it does not match a mapped room.'
-            : 'No room number was detected.'
+            ? 'A room code was detected, but it does not match a mapped room.'
+            : 'No mapped room code was detected.'
         );
         return;
       }
 
+      const room = mapData.nodeMap[foundId];
+      const label = room.name || room.code || foundId;
+
       Alert.alert(
         'Location found',
-        'Are you at Room ' + foundId + '?',
+        'Are you at ' + label + '?',
         [
           { text: 'No', style: 'cancel' },
           {
@@ -145,7 +172,7 @@ export default function CameraScanner({ onRoomDetected, onClose, mapData }) {
           <View style={styles.topArea}>
             <Text style={styles.title}>Scan Room Sign</Text>
             <Text style={styles.instructions}>
-              Center the room number inside the frame.
+              Center the room code inside the frame.
             </Text>
           </View>
 
