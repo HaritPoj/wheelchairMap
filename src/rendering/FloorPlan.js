@@ -14,9 +14,6 @@ import Svg, {
   G,
 } from 'react-native-svg';
 
-const IMAGE_WIDTH = 1200;
-const IMAGE_HEIGHT = 450;
-
 export default function FloorPlan({
   mapData,
   currentFloor,
@@ -36,11 +33,19 @@ export default function FloorPlan({
   const gestureStartScale = useRef(1);
   const gestureStartPoint = useRef(null);
 
+  const currentFloorData =
+    mapData.floors.find(floor => floor.level === currentFloor) ||
+    mapData.floors[0] ||
+    { map: { width: 1200, height: 450 } };
+
+  const mapWidthSource = Number(currentFloorData.map?.width) || 1200;
+  const mapHeightSource = Number(currentFloorData.map?.height) || 450;
+
   const centerMap = () => {
     if (!viewport.width || !viewport.height) return;
 
-    const contentWidth = IMAGE_WIDTH * currentScale.current;
-    const contentHeight = IMAGE_HEIGHT * currentScale.current;
+    const contentWidth = mapWidthSource * currentScale.current;
+    const contentHeight = mapHeightSource * currentScale.current;
 
     const centeredOffset = {
       x: (viewport.width - contentWidth) / 2,
@@ -53,11 +58,17 @@ export default function FloorPlan({
 
   useEffect(() => {
     centerMap();
-  }, [currentFloor]);
+  }, [
+    currentFloor,
+    viewport.width,
+    viewport.height,
+    mapWidthSource,
+    mapHeightSource,
+  ]);
 
   const clampOffset = (offset, scale = currentScale.current) => {
-    const contentWidth = IMAGE_WIDTH * scale;
-    const contentHeight = IMAGE_HEIGHT * scale;
+    const contentWidth = mapWidthSource * scale;
+    const contentHeight = mapHeightSource * scale;
 
     const minX =
       contentWidth <= viewport.width
@@ -152,9 +163,11 @@ export default function FloorPlan({
           const touch = touches[0];
 
           updateOffset({
-            x: gestureStartOffset.current.x +
+            x:
+              gestureStartOffset.current.x +
               (touch.pageX - gestureStartPoint.current.x),
-            y: gestureStartOffset.current.y +
+            y:
+              gestureStartOffset.current.y +
               (touch.pageY - gestureStartPoint.current.y),
           });
         }
@@ -173,20 +186,15 @@ export default function FloorPlan({
   ).current;
 
   const scale = zoomLevel;
-  const mapWidth = IMAGE_WIDTH * scale;
-  const mapHeight = IMAGE_HEIGHT * scale;
+  const mapWidth = mapWidthSource * scale;
+  const mapHeight = mapHeightSource * scale;
 
   const toXY = (x, y) => ({
     x: x * scale,
     y: y * scale,
   });
 
-  const isWaypoint = node =>
-    node.type === 'corridor' ||
-    node.width === 0 ||
-    node.height === 0 ||
-    node.id.startsWith('hall_') ||
-    node.id.startsWith('corner_');
+  const isWaypoint = node => node.type === 'corridor';
 
   const floorNodes = mapData.nodes.filter(node => node.floor === currentFloor);
 
@@ -226,14 +234,18 @@ export default function FloorPlan({
     return { startX, startY, endX, endY };
   }
 
-  const buildingFramePoints = [
-    [5, 405],
-    [1205, 405],
-    [1205, 5],
-    [990, 5],
-    [990, 250],
-    [5, 250],
-  ]
+  const boundary =
+    Array.isArray(currentFloorData.map?.boundary) &&
+    currentFloorData.map.boundary.length >= 3
+      ? currentFloorData.map.boundary
+      : [
+          [0, 0],
+          [mapWidthSource, 0],
+          [mapWidthSource, mapHeightSource],
+          [0, mapHeightSource],
+        ];
+
+  const buildingFramePoints = boundary
     .map(([x, y]) => x * scale + ',' + y * scale)
     .join(' ');
 
@@ -246,8 +258,8 @@ export default function FloorPlan({
         setViewport({ width, height });
 
         const centeredOffset = {
-          x: (width - IMAGE_WIDTH * currentScale.current) / 2,
-          y: (height - IMAGE_HEIGHT * currentScale.current) / 2,
+          x: (width - mapWidthSource * currentScale.current) / 2,
+          y: (height - mapHeightSource * currentScale.current) / 2,
         };
 
         currentOffset.current = centeredOffset;
@@ -265,200 +277,198 @@ export default function FloorPlan({
           },
         ]}
       >
-            <Svg
-              width={mapWidth}
-              height={mapHeight}
-              style={styles.svg}
-              accessible
-              accessibilityLabel={'Floor ' + currentFloor + ' map'}
-            >
-              <Polygon
-                points={buildingFramePoints}
-                fill="#ffffff"
-                stroke="#888888"
-                strokeWidth={4 * scale}
-                strokeLinejoin="round"
+        <Svg
+          width={mapWidth}
+          height={mapHeight}
+          style={styles.svg}
+          accessible
+          accessibilityLabel={'Floor ' + currentFloor + ' map'}
+        >
+          <Polygon
+            points={buildingFramePoints}
+            fill="#ffffff"
+            stroke="#888888"
+            strokeWidth={4 * scale}
+            strokeLinejoin="round"
+          />
+
+          {floorNodes.map(node => {
+            if (isWaypoint(node)) return null;
+
+            const { x, y } = toXY(node.x, node.y);
+            const roomWidth =
+              Math.max(1, Number(node.width) || 50) * scale;
+            const roomHeight =
+              Math.max(1, Number(node.height) || 50) * scale;
+            const isElevator = node.type === 'elevator';
+
+            return (
+              <React.Fragment key={'structure-' + node.id}>
+                <Rect
+                  x={x - roomWidth / 2}
+                  y={y - roomHeight / 2}
+                  width={roomWidth}
+                  height={roomHeight}
+                  fill={isElevator ? '#d0d0d0' : '#f8f8f8'}
+                  stroke="#000000"
+                  strokeWidth={2}
+                />
+
+                <SvgText
+                  x={x}
+                  y={y + (isElevator ? 4 : 5)}
+                  fontSize={isElevator ? 11 * scale : 14 * scale}
+                  fill="#333333"
+                  textAnchor="middle"
+                  fontWeight="bold"
+                >
+                  {isElevator
+                    ? 'Elevator'
+                    : (node.code || node.label || node.id)}
+                </SvgText>
+              </React.Fragment>
+            );
+          })}
+
+          {route.map((nodeId, index) => {
+            if (index === 0) return null;
+
+            const previous = mapData.nodeMap[route[index - 1]];
+            const current = mapData.nodeMap[nodeId];
+
+            if (!previous || !current) return null;
+
+            if (
+              previous.floor !== currentFloor ||
+              current.floor !== currentFloor
+            ) {
+              return null;
+            }
+
+            const segment = getSegment(previous, current);
+
+            return segment ? (
+              <Line
+                key={'route-' + index}
+                x1={segment.startX}
+                y1={segment.startY}
+                x2={segment.endX}
+                y2={segment.endY}
+                stroke="#0066ff"
+                strokeWidth={6 * scale}
+                strokeLinecap="round"
               />
+            ) : null;
+          })}
 
-              {floorNodes.map(node => {
-                if (isWaypoint(node)) return null;
+          {route.map((nodeId, index) => {
+            if (index === 0) return null;
 
-                const { x, y } = toXY(node.x, node.y);
-                const roomWidth =
-                  Math.max(1, Number(node.width) || 50) * scale;
-                const roomHeight =
-                  Math.max(1, Number(node.height) || 50) * scale;
-                const isElevator =
-                  node.type === 'lift' ||
-                  node.id.startsWith('elevator_');
+            const previous = mapData.nodeMap[route[index - 1]];
+            const current = mapData.nodeMap[nodeId];
 
-                return (
-                  <React.Fragment key={'structure-' + node.id}>
-                    <Rect
-                      x={x - roomWidth / 2}
-                      y={y - roomHeight / 2}
-                      width={roomWidth}
-                      height={roomHeight}
-                      fill={isElevator ? '#d0d0d0' : '#f8f8f8'}
-                      stroke="#000000"
-                      strokeWidth={2}
-                    />
+            if (!previous || !current) return null;
 
-                    <SvgText
-                      x={x}
-                      y={y + (isElevator ? 4 : 5)}
-                      fontSize={isElevator ? 11 * scale : 14 * scale}
-                      fill="#333333"
-                      textAnchor="middle"
-                      fontWeight="bold"
-                    >
-                      {isElevator ? 'Elev' : node.id}
-                    </SvgText>
-                  </React.Fragment>
-                );
-              })}
+            if (previous.floor !== current.floor) {
+              const liftNode =
+                previous.type === 'elevator'
+                  ? previous
+                  : current.type === 'elevator'
+                    ? current
+                    : null;
 
-              {route.map((nodeId, index) => {
-                if (index === 0) return null;
-
-                const previous = mapData.nodeMap[route[index - 1]];
-                const current = mapData.nodeMap[nodeId];
-
-                if (!previous || !current) return null;
-
-                if (
-                  previous.floor !== currentFloor ||
-                  current.floor !== currentFloor
-                ) {
-                  return null;
-                }
-
-                const segment = getSegment(previous, current);
-
-                return segment ? (
-                  <Line
-                    key={'route-' + index}
-                    x1={segment.startX}
-                    y1={segment.startY}
-                    x2={segment.endX}
-                    y2={segment.endY}
-                    stroke="#0066ff"
-                    strokeWidth={6 * scale}
-                    strokeLinecap="round"
-                  />
-                ) : null;
-              })}
-
-              {route.map((nodeId, index) => {
-                if (index === 0) return null;
-
-                const previous = mapData.nodeMap[route[index - 1]];
-                const current = mapData.nodeMap[nodeId];
-
-                if (!previous || !current) return null;
-
-                if (previous.floor !== current.floor) {
-                  const liftNode =
-                    previous.type === 'lift'
-                      ? previous
-                      : current.type === 'lift'
-                        ? current
-                        : null;
-
-                  if (!liftNode || liftNode.floor !== currentFloor) {
-                    return null;
-                  }
-
-                  const xy = toXY(liftNode.x, liftNode.y);
-
-                  return (
-                    <G
-                      key={'transition-' + index}
-                      x={xy.x}
-                      y={xy.y}
-                    >
-                      <Circle
-                        r={15 * scale}
-                        fill="#0066ff"
-                        stroke="#ffffff"
-                        strokeWidth={3 * scale}
-                      />
-                      <SvgText
-                        y={5 * scale}
-                        fontSize={12 * scale}
-                        fill="#ffffff"
-                        textAnchor="middle"
-                        fontWeight="bold"
-                      >
-                        E
-                      </SvgText>
-                    </G>
-                  );
-                }
-
+              if (!liftNode || liftNode.floor !== currentFloor) {
                 return null;
-              })}
-            </Svg>
-
-            {floorNodes.map(node => {
-              if (isWaypoint(node)) return null;
-
-              const { x, y } = toXY(node.x, node.y);
-              const isElevator =
-                node.type === 'lift' ||
-                node.id.startsWith('elevator_');
-
-              const touchWidth = Math.max(
-                48,
-                (Number(node.width) || 48) * scale
-              );
-              const touchHeight = Math.max(
-                48,
-                (Number(node.height) || 48) * scale
-              );
-
-              const isStart = startNode === node.id;
-              const isDest = destination === node.id;
-
-              let backgroundColor = 'transparent';
-              let borderColor = 'transparent';
-
-              if (isStart && isDest) {
-                backgroundColor = 'rgba(24,95,165,0.25)';
-                borderColor = '#185FA5';
-              } else if (isStart) {
-                backgroundColor = 'rgba(0,160,80,0.22)';
-                borderColor = '#00834A';
-              } else if (isDest) {
-                backgroundColor = 'rgba(200,60,60,0.22)';
-                borderColor = '#C63C3C';
               }
 
+              const xy = toXY(liftNode.x, liftNode.y);
+
               return (
-                <TouchableOpacity
-                  key={'touch-' + node.id}
-                  onPress={() => onNodeTap(node.id)}
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    (node.name || node.id) +
-                    ', Floor ' +
-                    node.floor
-                  }
-                  style={[
-                    styles.nodeTouchArea,
-                    {
-                      width: touchWidth,
-                      height: touchHeight,
-                      left: x - touchWidth / 2,
-                      top: y - touchHeight / 2,
-                      borderRadius: isElevator ? 8 : 10,
-                      backgroundColor,
-                      borderColor,
-                    },
-                  ]}
-                />
+                <G
+                  key={'transition-' + index}
+                  x={xy.x}
+                  y={xy.y}
+                >
+                  <Circle
+                    r={15 * scale}
+                    fill="#0066ff"
+                    stroke="#ffffff"
+                    strokeWidth={3 * scale}
+                  />
+                  <SvgText
+                    y={5 * scale}
+                    fontSize={12 * scale}
+                    fill="#ffffff"
+                    textAnchor="middle"
+                    fontWeight="bold"
+                  >
+                    E
+                  </SvgText>
+                </G>
               );
-            })}
+            }
+
+            return null;
+          })}
+        </Svg>
+
+        {floorNodes.map(node => {
+          if (isWaypoint(node)) return null;
+
+          const { x, y } = toXY(node.x, node.y);
+          const isElevator = node.type === 'elevator';
+
+          const touchWidth = Math.max(
+            48,
+            (Number(node.width) || 48) * scale
+          );
+          const touchHeight = Math.max(
+            48,
+            (Number(node.height) || 48) * scale
+          );
+
+          const isStart = startNode === node.id;
+          const isDest = destination === node.id;
+
+          let backgroundColor = 'transparent';
+          let borderColor = 'transparent';
+
+          if (isStart && isDest) {
+            backgroundColor = 'rgba(24,95,165,0.25)';
+            borderColor = '#185FA5';
+          } else if (isStart) {
+            backgroundColor = 'rgba(0,160,80,0.22)';
+            borderColor = '#00834A';
+          } else if (isDest) {
+            backgroundColor = 'rgba(200,60,60,0.22)';
+            borderColor = '#C63C3C';
+          }
+
+          return (
+            <TouchableOpacity
+              key={'touch-' + node.id}
+              onPress={() => onNodeTap(node.id)}
+              accessibilityRole="button"
+              accessibilityLabel={
+                (node.name || node.label || node.id) +
+                ', Floor ' +
+                node.floor
+              }
+              style={[
+                styles.nodeTouchArea,
+                {
+                  width: touchWidth,
+                  height: touchHeight,
+                  left: x - touchWidth / 2,
+                  top: y - touchHeight / 2,
+                  borderRadius: isElevator ? 8 : 10,
+                  backgroundColor,
+                  borderColor,
+                },
+              ]}
+            />
+          );
+        })}
       </View>
     </View>
   );

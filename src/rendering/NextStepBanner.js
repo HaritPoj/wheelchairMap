@@ -3,7 +3,7 @@ import { generateRouteSteps } from '../logic/routeInstructions';
 
 function getIcon(type) {
   switch (type) {
-    case 'lift': return '🛗';
+    case 'elevator': return '🛗';
     case 'toilet': return '🚻';
     case 'entrance': return '🚪';
     default: return '🚶';

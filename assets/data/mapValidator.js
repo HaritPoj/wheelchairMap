@@ -1,79 +1,171 @@
-const VALID_TYPES = new Set([
-  'room',
-  'corridor',
-  'lift',
-  'entrance',
-  'toilet',
+const SUPPORTED_SPACE_TYPES = new Set([
+  "room",
+  "corridor",
+  "elevator",
+  "entrance",
+  "toilet",
+  "stairs",
+  "ramp",
+  "restroom",
+  "lobby",
+  "exit",
+  "other"
+]);
+
+const SUPPORTED_TRANSITIONS = new Set([
+  "elevator",
+  "ramp",
+  "stairs"
 ]);
 
 function isNullableNumber(value) {
-  return value === null || value === undefined ||
-    (typeof value === 'number' && Number.isFinite(value));
+  return value === null ||
+    value === undefined ||
+    (typeof value === "number" && Number.isFinite(value));
 }
 
-export function validateMapData(data) {
+function hasFiniteNumber(value) {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+export function validateBuildingData(data) {
   const errors = [];
-  const ids = new Set();
+  const floorIds = new Set();
+  const spaceIds = new Set();
 
-  if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.edges)) {
-    return ['Map must contain nodes and edges arrays.'];
+  if (!data || data.schemaVersion !== "1.0") {
+    errors.push("schemaVersion must be 1.0.");
   }
 
-  for (const node of data.nodes) {
-    if (!node || typeof node.id !== 'string' || !node.id) {
-      errors.push('Node is missing a valid id.');
+  if (!data || !data.building || typeof data.building.id !== "string") {
+    errors.push("building.id is required.");
+  }
+
+  if (!data || !Array.isArray(data.floors) || data.floors.length === 0) {
+    errors.push("Building must contain at least one floor.");
+  }
+
+  for (const floor of data.floors || []) {
+    if (!floor || typeof floor.id !== "string" || !floor.id) {
+      errors.push("Floor is missing a valid id.");
       continue;
     }
 
-    if (ids.has(node.id)) errors.push('Duplicate node id: ' + node.id);
-    ids.add(node.id);
+    if (floorIds.has(floor.id)) {
+      errors.push("Duplicate floor id: " + floor.id);
+    }
+    floorIds.add(floor.id);
 
-    if (!Number.isFinite(node.floor)) {
-      errors.push(node.id + ': invalid floor.');
+    if (!hasFiniteNumber(floor.level)) {
+      errors.push(floor.id + ": invalid floor level.");
     }
 
-    if (!Number.isFinite(node.x) || !Number.isFinite(node.y)) {
-      errors.push(node.id + ': invalid coordinates.');
+    if (!floor.map || !hasFiniteNumber(floor.map.width) || !hasFiniteNumber(floor.map.height)) {
+      errors.push(floor.id + ": map width and height are required.");
     }
 
-    if (!VALID_TYPES.has(node.type)) {
-      errors.push(node.id + ': invalid or missing type.');
+    if (
+      floor.map &&
+      floor.map.boundary !== undefined &&
+      (!Array.isArray(floor.map.boundary) ||
+        floor.map.boundary.some(point =>
+          !Array.isArray(point) ||
+          point.length !== 2 ||
+          !hasFiniteNumber(point[0]) ||
+          !hasFiniteNumber(point[1])
+        ))
+    ) {
+      errors.push(floor.id + ": boundary must be an array of numeric [x, y] points.");
+    }
+  }
+
+  for (const space of data.spaces || []) {
+    if (!space || typeof space.id !== "string" || !space.id) {
+      errors.push("Space is missing a valid id.");
+      continue;
     }
 
-    for (const field of ['door_width', 'threshold']) {
-      if (field in node && !isNullableNumber(node[field])) {
-        errors.push(node.id + ': invalid ' + field + '.');
+    if (spaceIds.has(space.id)) {
+      errors.push("Duplicate space id: " + space.id);
+    }
+    spaceIds.add(space.id);
+
+    if (!floorIds.has(space.floorId)) {
+      errors.push(space.id + ": references missing floor " + space.floorId);
+    }
+
+    if (!SUPPORTED_SPACE_TYPES.has(space.type)) {
+      errors.push(space.id + ": unsupported space type " + space.type);
+    }
+
+    const geometry = space.geometry || {};
+    if (
+      (geometry.type !== "point" && geometry.type !== "rectangle") ||
+      !hasFiniteNumber(geometry.x) ||
+      !hasFiniteNumber(geometry.y)
+    ) {
+      errors.push(space.id + ": invalid geometry.");
+    }
+
+    if (geometry.type === "rectangle" &&
+        (!hasFiniteNumber(geometry.width) || !hasFiniteNumber(geometry.height))) {
+      errors.push(space.id + ": rectangle geometry requires width and height.");
+    }
+
+    const accessibility = space.accessibility || {};
+    for (const field of ["doorWidth", "threshold"]) {
+      if (field in accessibility && !isNullableNumber(accessibility[field])) {
+        errors.push(space.id + ": invalid accessibility." + field);
       }
     }
   }
 
-  for (const edge of data.edges) {
-    if (!edge || typeof edge.from !== 'string' || typeof edge.to !== 'string') {
-      errors.push('Edge is missing from/to.');
+  for (const connection of data.connections || []) {
+    if (!connection || typeof connection.from !== "string" || typeof connection.to !== "string") {
+      errors.push("Connection must contain from and to.");
       continue;
     }
 
-    if (!ids.has(edge.from)) errors.push('Edge references missing node: ' + edge.from);
-    if (!ids.has(edge.to)) errors.push('Edge references missing node: ' + edge.to);
-
-    if (!Number.isFinite(edge.weight)) {
-      errors.push('Edge ' + edge.from + ' -> ' + edge.to + ': weight must be numeric.');
+    if (!spaceIds.has(connection.from)) {
+      errors.push("Connection references missing space: " + connection.from);
+    }
+    if (!spaceIds.has(connection.to)) {
+      errors.push("Connection references missing space: " + connection.to);
     }
 
-    for (const field of ['width', 'slope']) {
-      if (field in edge && !isNullableNumber(edge[field])) {
-        errors.push('Edge ' + edge.from + ' -> ' + edge.to + ': invalid ' + field + '.');
+    const cost = connection.routing && connection.routing.cost;
+    if (!hasFiniteNumber(cost) || cost < 0) {
+      errors.push(connection.id + ": routing.cost must be a non-negative number.");
+    }
+
+    const accessibility = connection.accessibility || {};
+    for (const field of ["width", "slope"]) {
+      if (field in accessibility && !isNullableNumber(accessibility[field])) {
+        errors.push(connection.id + ": invalid accessibility." + field);
       }
     }
 
-    const from = data.nodes.find(node => node.id === edge.from);
-    const to = data.nodes.find(node => node.id === edge.to);
+    if (connection.transition) {
+      const transitionType = connection.transition.type;
+      if (!SUPPORTED_TRANSITIONS.has(transitionType)) {
+        errors.push(connection.id + ": unsupported transition type " + transitionType);
+      }
+    }
 
-    if (from && to && from.floor !== to.floor && edge.transition !== 'elevator') {
-      errors.push(
-        'Cross-floor edge must declare transition="elevator": ' +
-        edge.from + ' -> ' + edge.to
-      );
+    const fromSpace = data.spaces.find(space => space.id === connection.from);
+    const toSpace = data.spaces.find(space => space.id === connection.to);
+
+    if (fromSpace && toSpace) {
+      const fromFloor = data.floors.find(floor => floor.id === fromSpace.floorId);
+      const toFloor = data.floors.find(floor => floor.id === toSpace.floorId);
+
+      if (fromFloor && toFloor && fromFloor.id !== toFloor.id) {
+        if (!connection.transition || !connection.transition.type) {
+          errors.push(
+            connection.id + ": cross-floor connection must declare transition.type."
+          );
+        }
+      }
     }
   }
 

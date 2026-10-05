@@ -66,14 +66,21 @@ export function generateRouteSteps(route, nodeMap, edges) {
     }
 
     if (previous.floor !== current.floor) {
+      const edge = getEdge(edges, previous.id, current.id);
+      const transitionType = edge ? edge.transition : null;
+      let instruction = 'Continue to Floor ' + current.floor;
+
+      if (transitionType === 'elevator') {
+        instruction = 'Take the elevator to Floor ' + current.floor;
+      } else if (transitionType === 'ramp') {
+        instruction = 'Follow the accessible ramp to Floor ' + current.floor;
+      }
+
       steps.push({
         key: 'floor-' + index,
-        icon: 'lift',
-        instruction: 'Take the elevator to Floor ' + current.floor,
-        warning: getEdgeWarning(
-          getEdge(edges, previous.id, current.id),
-          current
-        ),
+        icon: transitionType || 'corridor',
+        instruction,
+        warning: getEdgeWarning(edge, current),
         node: current,
       });
       index += 1;
@@ -122,10 +129,10 @@ export function generateRouteSteps(route, nodeMap, edges) {
         ),
         node: current,
       });
-    } else if (current.type === 'lift') {
+    } else if (current.type === 'elevator') {
       steps.push({
-        key: 'lift-' + index,
-        icon: 'lift',
+        key: 'elevator-' + index,
+        icon: 'elevator',
         instruction: 'Enter ' + current.name,
         warning: '',
         node: current,
