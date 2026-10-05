@@ -64,13 +64,19 @@ export default function FloorPlan({
     const contentWidth = mapWidthSource * scale;
     const contentHeight = mapHeightSource * scale;
 
-    // Allow the map to be dragged even when it is smaller than the
-    // viewport. The user can move it until an edge reaches the viewport.
-    const minX = viewport.width - contentWidth;
-    const maxX = 0;
+    // When the map is larger than the viewport, its top-left position
+    // can move from (viewport - content) to 0.
+    //
+    // When the map is smaller than the viewport, it can move from 0 to
+    // (viewport - content), so the user can scroll it all the way down/right.
+    const xDifference = viewport.width - contentWidth;
+    const yDifference = viewport.height - contentHeight;
 
-    const minY = viewport.height - contentHeight;
-    const maxY = 0;
+    const minX = Math.min(0, xDifference);
+    const maxX = Math.max(0, xDifference);
+
+    const minY = Math.min(0, yDifference);
+    const maxY = Math.max(0, yDifference);
 
     return {
       x: Math.max(minX, Math.min(offset.x, maxX)),
