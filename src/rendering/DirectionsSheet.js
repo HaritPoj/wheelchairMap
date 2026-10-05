@@ -12,7 +12,7 @@ const SCREEN = Dimensions.get('window');
 
 function getTypeIcon(type) {
   switch (type) {
-    case 'lift': return '🛗';
+    case 'elevator': return '🛗';
     case 'toilet': return '🚻';
     case 'entrance': return '🚪';
     default: return '📍';
