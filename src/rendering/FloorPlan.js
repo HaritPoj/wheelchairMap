@@ -58,37 +58,19 @@ export default function FloorPlan({
 
   useEffect(() => {
     centerMap();
-  }, [
-    currentFloor,
-    viewport.width,
-    viewport.height,
-    mapWidthSource,
-    mapHeightSource,
-  ]);
+  }, [currentFloor, mapWidthSource, mapHeightSource]);
 
   const clampOffset = (offset, scale = currentScale.current) => {
     const contentWidth = mapWidthSource * scale;
     const contentHeight = mapHeightSource * scale;
 
-    const minX =
-      contentWidth <= viewport.width
-        ? (viewport.width - contentWidth) / 2
-        : viewport.width - contentWidth;
+    // Allow the map to be dragged even when it is smaller than the
+    // viewport. The user can move it until an edge reaches the viewport.
+    const minX = viewport.width - contentWidth;
+    const maxX = 0;
 
-    const maxX =
-      contentWidth <= viewport.width
-        ? minX
-        : 0;
-
-    const minY =
-      contentHeight <= viewport.height
-        ? (viewport.height - contentHeight) / 2
-        : viewport.height - contentHeight;
-
-    const maxY =
-      contentHeight <= viewport.height
-        ? minY
-        : 0;
+    const minY = viewport.height - contentHeight;
+    const maxY = 0;
 
     return {
       x: Math.max(minX, Math.min(offset.x, maxX)),
@@ -104,10 +86,15 @@ export default function FloorPlan({
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: event =>
-        event.nativeEvent.touches.length >= 2,
+      onStartShouldSetPanResponder: () => false,
 
-      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        if (Math.abs(gestureState.dx) > 4 || Math.abs(gestureState.dy) > 4) {
+          return true;
+        }
+
+        return false;
+      },
 
       onPanResponderGrant: event => {
         const touches = event.nativeEvent.touches;
@@ -134,7 +121,7 @@ export default function FloorPlan({
         }
       },
 
-      onPanResponderMove: event => {
+      onPanResponderMove: (event, gestureState) => {
         const touches = event.nativeEvent.touches;
 
         if (touches.length >= 2 && gestureStartDistance.current !== null) {
@@ -159,16 +146,10 @@ export default function FloorPlan({
           return;
         }
 
-        if (touches.length === 1 && gestureStartPoint.current) {
-          const touch = touches[0];
-
+        if (touches.length === 1) {
           updateOffset({
-            x:
-              gestureStartOffset.current.x +
-              (touch.pageX - gestureStartPoint.current.x),
-            y:
-              gestureStartOffset.current.y +
-              (touch.pageY - gestureStartPoint.current.y),
+            x: gestureStartOffset.current.x + gestureState.dx,
+            y: gestureStartOffset.current.y + gestureState.dy,
           });
         }
       },
@@ -257,13 +238,17 @@ export default function FloorPlan({
         const { width, height } = event.nativeEvent.layout;
         setViewport({ width, height });
 
-        const centeredOffset = {
-          x: (width - mapWidthSource * currentScale.current) / 2,
-          y: (height - mapHeightSource * currentScale.current) / 2,
-        };
+        // Initial centering is handled by the effect above. Do not recenter
+        // every layout pass, otherwise a normal gesture can appear to snap.
+        if (!viewport.width || !viewport.height) {
+          const centeredOffset = {
+            x: (width - mapWidthSource * currentScale.current) / 2,
+            y: (height - mapHeightSource * currentScale.current) / 2,
+          };
 
-        currentOffset.current = centeredOffset;
-        setMapOffset(centeredOffset);
+          currentOffset.current = centeredOffset;
+          setMapOffset(centeredOffset);
+        }
       }}
     >
       <View
