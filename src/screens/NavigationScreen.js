@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
-import { getMapData } from '../../assets/data/mapLoader';
+import { getMapData } from '../../assets/data/buildingLoader';
 import { findPath } from '../logic/pathfinder';
 import FloorPlan from '../rendering/FloorPlan';
 import HUD from '../rendering/HUD';
@@ -16,7 +16,9 @@ import CameraScanner from '../rendering/CameraScanner';
 
 export default function NavigationScreen() {
   const mapData = useMemo(() => getMapData(), []);
-  const [currentFloor, setCurrentFloor] = useState(1);
+  const [currentFloor, setCurrentFloor] = useState(
+    () => mapData.floors[0]?.level ?? 1
+  );
   const [locationId, setLocationId] = useState(null);
   const [destination, setDestination] = useState(null);
   const [route, setRoute] = useState([]);
