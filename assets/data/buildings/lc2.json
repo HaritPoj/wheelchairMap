@@ -80,348 +80,6 @@
   ],
   "spaces": [
     {
-      "id": "room_124",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 124",
-      "geometry": {
-        "type": "rectangle",
-        "x": 60,
-        "y": 340,
-        "width": 80,
-        "height": 100
-      },
-      "code": "124",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_123",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 123",
-      "geometry": {
-        "type": "rectangle",
-        "x": 125,
-        "y": 340,
-        "width": 50,
-        "height": 100
-      },
-      "code": "123",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_122",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 122",
-      "geometry": {
-        "type": "rectangle",
-        "x": 175,
-        "y": 340,
-        "width": 50,
-        "height": 100
-      },
-      "code": "122",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_121",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 121",
-      "geometry": {
-        "type": "rectangle",
-        "x": 225,
-        "y": 340,
-        "width": 50,
-        "height": 100
-      },
-      "code": "121",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_120",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 120",
-      "geometry": {
-        "type": "rectangle",
-        "x": 275,
-        "y": 340,
-        "width": 50,
-        "height": 100
-      },
-      "code": "120",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_119",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 119",
-      "geometry": {
-        "type": "rectangle",
-        "x": 330,
-        "y": 315,
-        "width": 60,
-        "height": 50
-      },
-      "code": "119",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_118",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 118",
-      "geometry": {
-        "type": "rectangle",
-        "x": 390,
-        "y": 340,
-        "width": 60,
-        "height": 100
-      },
-      "code": "118",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_117",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 117",
-      "geometry": {
-        "type": "rectangle",
-        "x": 440,
-        "y": 315,
-        "width": 40,
-        "height": 50
-      },
-      "code": "117",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_116",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 116",
-      "geometry": {
-        "type": "rectangle",
-        "x": 440,
-        "y": 365,
-        "width": 40,
-        "height": 50
-      },
-      "code": "116",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_115",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 115",
-      "geometry": {
-        "type": "rectangle",
-        "x": 485,
-        "y": 340,
-        "width": 50,
-        "height": 100
-      },
-      "code": "115",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_114",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 114",
-      "geometry": {
-        "type": "rectangle",
-        "x": 660,
-        "y": 340,
-        "width": 120,
-        "height": 100
-      },
-      "code": "114",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_113",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 113",
-      "geometry": {
-        "type": "rectangle",
-        "x": 735,
-        "y": 315,
-        "width": 30,
-        "height": 50
-      },
-      "code": "113",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_112",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 112",
-      "geometry": {
-        "type": "rectangle",
-        "x": 735,
-        "y": 365,
-        "width": 30,
-        "height": 50
-      },
-      "code": "112",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_111",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 111",
-      "geometry": {
-        "type": "rectangle",
-        "x": 830,
-        "y": 340,
-        "width": 100,
-        "height": 100
-      },
-      "code": "111",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_110",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 110",
-      "geometry": {
-        "type": "rectangle",
-        "x": 905,
-        "y": 340,
-        "width": 50,
-        "height": 100
-      },
-      "code": "110",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_109",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 109",
-      "geometry": {
-        "type": "rectangle",
-        "x": 960,
-        "y": 340,
-        "width": 60,
-        "height": 100
-      },
-      "code": "109",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_108",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 108",
-      "geometry": {
-        "type": "rectangle",
-        "x": 1130,
-        "y": 365,
-        "width": 120,
-        "height": 50
-      },
-      "code": "108",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_107",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 107",
-      "geometry": {
-        "type": "rectangle",
-        "x": 1130,
-        "y": 290,
-        "width": 120,
-        "height": 100
-      },
-      "code": "107",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
-      "id": "room_106",
-      "type": "room",
-      "floorId": "floor_1",
-      "name": "Room 106",
-      "geometry": {
-        "type": "rectangle",
-        "x": 1130,
-        "y": 85,
-        "width": 120,
-        "height": 150
-      },
-      "code": "106",
-      "accessibility": {
-        "doorWidth": 1,
-        "threshold": null
-      }
-    },
-    {
       "id": "room_230",
       "type": "room",
       "floorId": "floor_2",
@@ -997,7 +655,7 @@
       "name": "Elevator Floor 1",
       "geometry": {
         "type": "rectangle",
-        "x": 460,
+        "x": 420,
         "y": 220,
         "width": 30,
         "height": 30
@@ -1265,237 +923,384 @@
         "doorWidth": 1,
         "threshold": null
       }
+    },
+    {
+      "id": "room_126",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 126",
+      "code": "126",
+      "geometry": {
+        "type": "rectangle",
+        "x": 35,
+        "y": 340,
+        "width": 50,
+        "height": 100
+      },
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_125",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 125",
+      "code": "125",
+      "geometry": {
+        "type": "rectangle",
+        "x": 85,
+        "y": 315,
+        "width": 30,
+        "height": 50
+      },
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_124",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 124",
+      "geometry": {
+        "type": "rectangle",
+        "x": 85,
+        "y": 365,
+        "width": 30,
+        "height": 50
+      },
+      "code": "124",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_123",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 123",
+      "geometry": {
+        "type": "rectangle",
+        "x": 135,
+        "y": 340,
+        "width": 50,
+        "height": 100
+      },
+      "code": "123",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_122",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 122",
+      "geometry": {
+        "type": "rectangle",
+        "x": 185,
+        "y": 340,
+        "width": 50,
+        "height": 100
+      },
+      "code": "122",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_121",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 121",
+      "geometry": {
+        "type": "rectangle",
+        "x": 235,
+        "y": 340,
+        "width": 50,
+        "height": 100
+      },
+      "code": "121",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_120",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 120",
+      "geometry": {
+        "type": "rectangle",
+        "x": 285,
+        "y": 340,
+        "width": 50,
+        "height": 100
+      },
+      "code": "120",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_119",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 119",
+      "geometry": {
+        "type": "rectangle",
+        "x": 345,
+        "y": 315,
+        "width": 50,
+        "height": 50
+      },
+      "code": "119",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_116",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 116",
+      "geometry": {
+        "type": "rectangle",
+        "x": 405,
+        "y": 340,
+        "width": 45,
+        "height": 100
+      },
+      "code": "116",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_115_1",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 115/1",
+      "code": "115/1",
+      "geometry": {
+        "type": "rectangle",
+        "x": 455,
+        "y": 315,
+        "width": 45,
+        "height": 50
+      },
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_115",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 115",
+      "geometry": {
+        "type": "rectangle",
+        "x": 455,
+        "y": 365,
+        "width": 45,
+        "height": 50
+      },
+      "code": "115",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_114",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 114",
+      "geometry": {
+        "type": "rectangle",
+        "x": 660,
+        "y": 340,
+        "width": 120,
+        "height": 100
+      },
+      "code": "114",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_113",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 113",
+      "geometry": {
+        "type": "rectangle",
+        "x": 735,
+        "y": 315,
+        "width": 30,
+        "height": 50
+      },
+      "code": "113",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_112",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 112",
+      "geometry": {
+        "type": "rectangle",
+        "x": 735,
+        "y": 365,
+        "width": 30,
+        "height": 50
+      },
+      "code": "112",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_111",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 111",
+      "geometry": {
+        "type": "rectangle",
+        "x": 830,
+        "y": 340,
+        "width": 100,
+        "height": 100
+      },
+      "code": "111",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_110",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 110",
+      "geometry": {
+        "type": "rectangle",
+        "x": 905,
+        "y": 340,
+        "width": 50,
+        "height": 100
+      },
+      "code": "110",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_109",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 109",
+      "geometry": {
+        "type": "rectangle",
+        "x": 960,
+        "y": 340,
+        "width": 60,
+        "height": 100
+      },
+      "code": "109",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_108",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 108",
+      "geometry": {
+        "type": "rectangle",
+        "x": 1130,
+        "y": 365,
+        "width": 120,
+        "height": 50
+      },
+      "code": "108",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_107",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 107",
+      "geometry": {
+        "type": "rectangle",
+        "x": 1130,
+        "y": 290,
+        "width": 120,
+        "height": 100
+      },
+      "code": "107",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "room_106",
+      "type": "room",
+      "floorId": "floor_1",
+      "name": "Room 106",
+      "geometry": {
+        "type": "rectangle",
+        "x": 1130,
+        "y": 85,
+        "width": 120,
+        "height": 150
+      },
+      "code": "106",
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
+    },
+    {
+      "id": "entrance_f1_main",
+      "type": "entrance",
+      "floorId": "floor_1",
+      "name": "Main Entrance",
+      "geometry": {
+        "type": "point",
+        "x": 570,
+        "y": 280
+      },
+      "accessibility": {
+        "doorWidth": null,
+        "threshold": null
+      }
     }
   ],
   "connections": [
-    {
-      "id": "connection_001",
-      "from": "room_124",
-      "to": "corridor_f1_001",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_002",
-      "from": "room_123",
-      "to": "corridor_f1_002",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_003",
-      "from": "room_122",
-      "to": "corridor_f1_003",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_004",
-      "from": "room_121",
-      "to": "corridor_f1_004",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_005",
-      "from": "room_120",
-      "to": "corridor_f1_005",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_006",
-      "from": "room_119",
-      "to": "corridor_f1_006",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_007",
-      "from": "room_118",
-      "to": "corridor_f1_007",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_008",
-      "from": "room_117",
-      "to": "corridor_f1_008",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_009",
-      "from": "room_116",
-      "to": "corridor_f1_008",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_010",
-      "from": "room_115",
-      "to": "corridor_f1_010",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_011",
-      "from": "room_114",
-      "to": "corridor_f1_011",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_012",
-      "from": "room_113",
-      "to": "corridor_f1_012",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_013",
-      "from": "room_112",
-      "to": "corridor_f1_012",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_014",
-      "from": "room_111",
-      "to": "corridor_f1_013",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_015",
-      "from": "room_110",
-      "to": "corridor_f1_014",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_016",
-      "from": "room_109",
-      "to": "corridor_f1_015",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_017",
-      "from": "room_106",
-      "to": "corridor_f1_017",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_018",
-      "from": "room_107",
-      "to": "corridor_f1_018",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
-    {
-      "id": "connection_019",
-      "from": "room_108",
-      "to": "corridor_f1_019",
-      "routing": {
-        "cost": 5
-      },
-      "accessibility": {
-        "width": null,
-        "slope": null
-      }
-    },
     {
       "id": "connection_020",
       "from": "corridor_f1_001",
@@ -2241,6 +2046,270 @@
       },
       "transition": {
         "type": "elevator"
+      }
+    },
+    {
+      "id": "connection_082",
+      "from": "room_126",
+      "to": "corridor_f1_001",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_083",
+      "from": "room_125",
+      "to": "corridor_f1_002",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_084",
+      "from": "room_124",
+      "to": "corridor_f1_002",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_085",
+      "from": "room_123",
+      "to": "corridor_f1_003",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_086",
+      "from": "room_122",
+      "to": "corridor_f1_004",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_087",
+      "from": "room_121",
+      "to": "corridor_f1_005",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_088",
+      "from": "room_120",
+      "to": "corridor_f1_006",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_089",
+      "from": "room_119",
+      "to": "corridor_f1_007",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_090",
+      "from": "room_116",
+      "to": "corridor_f1_008",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_091",
+      "from": "room_115_1",
+      "to": "corridor_f1_009",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_092",
+      "from": "room_115",
+      "to": "corridor_f1_009",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_093",
+      "from": "room_114",
+      "to": "corridor_f1_011",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_094",
+      "from": "room_113",
+      "to": "corridor_f1_012",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_095",
+      "from": "room_112",
+      "to": "corridor_f1_012",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_096",
+      "from": "room_111",
+      "to": "corridor_f1_013",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_097",
+      "from": "room_110",
+      "to": "corridor_f1_014",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_098",
+      "from": "room_109",
+      "to": "corridor_f1_015",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_099",
+      "from": "room_108",
+      "to": "corridor_f1_019",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_100",
+      "from": "room_107",
+      "to": "corridor_f1_018",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_101",
+      "from": "room_106",
+      "to": "corridor_f1_017",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_102",
+      "from": "corridor_f1_010",
+      "to": "entrance_f1_main",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
+      }
+    },
+    {
+      "id": "connection_103",
+      "from": "entrance_f1_main",
+      "to": "corridor_f1_011",
+      "routing": {
+        "cost": 5
+      },
+      "accessibility": {
+        "width": null,
+        "slope": null
       }
     }
   ]
