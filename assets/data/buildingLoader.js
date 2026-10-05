@@ -2,7 +2,7 @@ import { validateBuildingData } from "./mapValidator";
 import { normalizeBuildingData } from "./buildingAdapter";
 import { getBuilding } from "./buildings";
 
-export function getMapData(buildingId = "sample_building") {
+export function getMapData(buildingId = "lc2") {
   const buildingData = getBuilding(buildingId);
   const errors = validateBuildingData(buildingData);
 
