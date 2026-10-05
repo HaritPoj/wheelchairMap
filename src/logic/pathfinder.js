@@ -38,13 +38,18 @@ export function findPath(startId, goalId, mapData) {
     }
 
     if (from.floor !== to.floor) {
-      const validElevator =
-        edge.transition === 'elevator' &&
-        from.type === 'lift' &&
-        to.type === 'lift';
+      const transitionType = edge.transition;
 
-      if (!validElevator) return Infinity;
-      cost += 10;
+      if (transitionType === 'elevator') {
+        if (from.type !== 'elevator' || to.type !== 'elevator') {
+          return Infinity;
+        }
+        cost += 10;
+      } else if (transitionType === 'ramp') {
+        cost += 20;
+      } else {
+        return Infinity;
+      }
     }
 
     return cost;
