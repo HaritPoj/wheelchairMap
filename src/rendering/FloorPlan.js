@@ -49,8 +49,8 @@ export default function FloorPlan({
     viewport.width > 0 && viewport.height > 0
       ? Math.min(
           1,
-          (viewport.width * 0.88) / mapWidthSource,
-          (viewport.height * 0.88) / mapHeightSource
+          (viewport.width * 0.98) / mapWidthSource,
+          (viewport.height * 0.98) / mapHeightSource
         )
       : 1;
 
@@ -369,23 +369,58 @@ export default function FloorPlan({
 
             return (
               <React.Fragment key={'structure-' + node.id}>
-                <Rect
-                  x={x - roomWidth / 2}
-                  y={y - roomHeight / 2}
-                  width={roomWidth}
-                  height={roomHeight}
-                  fill={
-                    isElevator
-                      ? '#d0d0d0'
-                      : isStairs
-                        ? '#e4e4e4'
-                        : isRestroom
-                          ? '#f2f5f6'
-                          : '#f8f8f8'
-                  }
-                  stroke="#000000"
-                  strokeWidth={2}
-                />
+                {Array.isArray(node.geometryParts) && node.geometryParts.length > 0 ? (
+                  <>
+                    {node.geometryParts.map((part, index) => (
+                      <Rect
+                        key={'shape-part-' + node.id + '-' + index}
+                        x={part.x * scale}
+                        y={part.y * scale}
+                        width={part.width * scale}
+                        height={part.height * scale}
+                        fill={
+                          isElevator
+                            ? '#d0d0d0'
+                            : isStairs
+                              ? '#e4e4e4'
+                              : isRestroom
+                                ? '#f2f5f6'
+                                : '#f8f8f8'
+                        }
+                        stroke="none"
+                      />
+                    ))}
+                    {Array.isArray(node.geometryOutline) && node.geometryOutline.length >= 3 ? (
+                      <Polygon
+                        points={node.geometryOutline
+                          .map(([pointX, pointY]) => pointX * scale + ',' + pointY * scale)
+                          .join(' ')}
+                        fill="none"
+                        stroke="#000000"
+                        strokeWidth={2}
+                        strokeLinejoin="miter"
+                      />
+                    ) : null}
+                  </>
+                ) : (
+                  <Rect
+                    x={x - roomWidth / 2}
+                    y={y - roomHeight / 2}
+                    width={roomWidth}
+                    height={roomHeight}
+                    fill={
+                      isElevator
+                        ? '#d0d0d0'
+                        : isStairs
+                          ? '#e4e4e4'
+                          : isRestroom
+                            ? '#f2f5f6'
+                            : '#f8f8f8'
+                    }
+                    stroke="#000000"
+                    strokeWidth={2}
+                  />
+                )}
 
                 <SvgText
                   x={x}
