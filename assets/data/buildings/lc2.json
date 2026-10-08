@@ -1285,10 +1285,10 @@
       }
     },
     {
-      "id": "entrance_f1_main",
-      "type": "entrance",
+      "id": "corridor_f1_main_junction",
+      "type": "corridor",
       "floorId": "floor_1",
-      "name": "Main Entrance",
+      "name": "corridor_f1_main_junction",
       "geometry": {
         "type": "point",
         "x": 604,
@@ -2727,7 +2727,7 @@
     {
       "id": "connection_102",
       "from": "corridor_f1_010",
-      "to": "entrance_f1_main",
+      "to": "corridor_f1_main_junction",
       "routing": {
         "cost": 5
       },
@@ -2738,7 +2738,7 @@
     },
     {
       "id": "connection_103",
-      "from": "entrance_f1_main",
+      "from": "corridor_f1_main_junction",
       "to": "corridor_f1_011",
       "routing": {
         "cost": 5
@@ -3074,7 +3074,7 @@
     },
     {
       "id": "connection_132",
-      "from": "entrance_f1_main",
+      "from": "corridor_f1_main_junction",
       "to": "corridor_f1_lower_11",
       "routing": {
         "cost": 2
