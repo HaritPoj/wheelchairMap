@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
+  Text,
   StyleSheet,
   TouchableOpacity,
   PanResponder,
@@ -48,8 +49,8 @@ export default function FloorPlan({
     viewport.width > 0 && viewport.height > 0
       ? Math.min(
           1,
-          (viewport.width * 0.94) / mapWidthSource,
-          (viewport.height * 0.94) / mapHeightSource
+          (viewport.width * 0.88) / mapWidthSource,
+          (viewport.height * 0.88) / mapHeightSource
         )
       : 1;
 
@@ -552,6 +553,19 @@ export default function FloorPlan({
           );
         })}
       </View>
+      <TouchableOpacity
+        style={styles.fitButton}
+        onPress={() => {
+          zoomMultiplier.current = 1;
+          currentScale.current = latestMapState.current.fitScale;
+          setZoomLevel(1);
+          centerMap();
+        }}
+        accessibilityRole="button"
+        accessibilityLabel="Fit full floor plan in view"
+      >
+        <Text style={styles.fitButtonText}>Fit map</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -567,6 +581,26 @@ const styles = StyleSheet.create({
   },
   svg: {
     overflow: 'visible',
+  },
+  fitButton: {
+    position: 'absolute',
+    left: 16,
+    bottom: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: '#ffffff',
+    zIndex: 20,
+    elevation: 4,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 3,
+  },
+  fitButtonText: {
+    color: '#185FA5',
+    fontSize: 14,
+    fontWeight: '600',
   },
   nodeTouchArea: {
     position: 'absolute',
