@@ -11,6 +11,7 @@ function getEdgeCost(edge, fromId, toId, nodeMap) {
   const to = nodeMap[toId];
 
   if (!from || !to) return Infinity;
+  if (from.type === 'stairs' || to.type === 'stairs') return Infinity;
 
   const width = numeric(edge.width);
   const slope = numeric(edge.slope);
@@ -83,6 +84,7 @@ export function findPath(startId, goalId, mapData) {
       else if (edge.to === current) next = edge.from;
 
       if (!next || !unvisited.has(next)) continue;
+      if (nodeMap[next]?.type === 'room' && next !== goalId) continue;
 
       const cost = getEdgeCost(edge, current, next, nodeMap);
       if (!Number.isFinite(cost)) continue;
@@ -141,6 +143,7 @@ export function findAllPaths(startId, goalId, mapData) {
 
     for (const { edge, next } of adjacency.get(current) || []) {
       if (visited.has(next)) continue;
+      if (nodeMap[next]?.type === 'room' && next !== goalId) continue;
 
       const stepCost = getEdgeCost(edge, current, next, nodeMap);
       if (!Number.isFinite(stepCost)) continue;

@@ -245,35 +245,30 @@ export default function FloorPlan({
 
     const a = toXY(nodeA.x, nodeA.y);
     const b = toXY(nodeB.x, nodeB.y);
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
 
-    let startX = a.x;
-    let startY = a.y;
-    let endX = b.x;
-    let endY = b.y;
+    const hasBounds = node =>
+      Number(node.width) > 0 && Number(node.height) > 0;
+    const boundaryFraction = node => {
+      const halfWidth = (Number(node.width) * scale) / 2;
+      const halfHeight = (Number(node.height) * scale) / 2;
+      const fractionX =
+        Math.abs(dx) > 0 ? halfWidth / Math.abs(dx) : Infinity;
+      const fractionY =
+        Math.abs(dy) > 0 ? halfHeight / Math.abs(dy) : Infinity;
+      return Math.min(fractionX, fractionY);
+    };
 
-    if (!isWaypoint(nodeA)) {
-      const width = Math.max(1, Number(nodeA.width) || 50) * scale;
-      const height = Math.max(1, Number(nodeA.height) || 50) * scale;
+    const startFraction = hasBounds(nodeA) ? boundaryFraction(nodeA) : 0;
+    const endFraction = hasBounds(nodeB) ? boundaryFraction(nodeB) : 0;
 
-      if (a.x === b.x) {
-        startY = a.y < b.y ? a.y + height / 2 : a.y - height / 2;
-      } else if (a.y === b.y) {
-        startX = a.x < b.x ? a.x + width / 2 : a.x - width / 2;
-      }
-    }
-
-    if (!isWaypoint(nodeB)) {
-      const width = Math.max(1, Number(nodeB.width) || 50) * scale;
-      const height = Math.max(1, Number(nodeB.height) || 50) * scale;
-
-      if (a.x === b.x) {
-        endY = a.y < b.y ? b.y - height / 2 : b.y + height / 2;
-      } else if (a.y === b.y) {
-        endX = a.x < b.x ? b.x - width / 2 : b.x + width / 2;
-      }
-    }
-
-    return { startX, startY, endX, endY };
+    return {
+      startX: a.x + dx * startFraction,
+      startY: a.y + dy * startFraction,
+      endX: b.x - dx * endFraction,
+      endY: b.y - dy * endFraction,
+    };
   }
 
   const boundary =
