@@ -26,6 +26,8 @@ function geometryToNodeFields(geometry) {
     y: source.type === "rectangle" ? y + height / 2 : y,
     width,
     height,
+    parts: Array.isArray(source.parts) ? source.parts : null,
+    outline: Array.isArray(source.outline) ? source.outline : null,
   };
 }
 
@@ -50,6 +52,8 @@ export function normalizeBuildingData(buildingData) {
       y: geometry.y,
       width: geometry.width,
       height: geometry.height,
+      geometryParts: geometry.parts,
+      geometryOutline: geometry.outline,
       type: SUPPORTED_SPACE_TYPES.has(space.type) ? space.type : space.type,
       door_width:
         accessibility.doorWidth === undefined
