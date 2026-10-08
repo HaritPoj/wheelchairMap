@@ -112,6 +112,36 @@ export function validateBuildingData(data) {
       errors.push(space.id + ": rectangle geometry requires width and height.");
     }
 
+    if (geometry.parts !== undefined) {
+      if (
+        !Array.isArray(geometry.parts) ||
+        geometry.parts.length === 0 ||
+        geometry.parts.some(part =>
+          !part ||
+          !hasFiniteNumber(part.x) ||
+          !hasFiniteNumber(part.y) ||
+          !hasFiniteNumber(part.width) ||
+          !hasFiniteNumber(part.height) ||
+          part.width <= 0 ||
+          part.height <= 0
+        )
+      ) {
+        errors.push(space.id + ": geometry.parts must contain positive rectangle parts.");
+      }
+      if (
+        !Array.isArray(geometry.outline) ||
+        geometry.outline.length < 3 ||
+        geometry.outline.some(point =>
+          !Array.isArray(point) ||
+          point.length !== 2 ||
+          !hasFiniteNumber(point[0]) ||
+          !hasFiniteNumber(point[1])
+        )
+      ) {
+        errors.push(space.id + ": multipart geometry requires a numeric outline.");
+      }
+    }
+
     const accessibility = space.accessibility || {};
     for (const field of ["doorWidth", "threshold"]) {
       if (field in accessibility && !isNullableNumber(accessibility[field])) {
