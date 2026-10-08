@@ -7,7 +7,7 @@ import {
   Text,
 } from 'react-native';
 import { getMapData } from '../../assets/data/buildingLoader';
-import { findAllPaths } from '../logic/pathfinder';
+import { findPath } from '../logic/pathfinder';
 import FloorPlan from '../rendering/FloorPlan';
 import HUD from '../rendering/HUD';
 import DirectionsSheet from '../rendering/DirectionsSheet';
@@ -38,10 +38,10 @@ export default function NavigationScreen() {
       return;
     }
 
-    const paths = findAllPaths(locationId, destination, mapData);
+    const path = findPath(locationId, destination, mapData);
+    const paths = path.length > 0 ? [path] : [];
     setRouteOptions(paths);
     setSelectedRouteIndex(0);
-    const path = paths[0] || [];
 
     if (path.length === 0) {
       setShowDirections(false);
