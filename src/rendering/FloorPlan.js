@@ -407,53 +407,6 @@ export default function FloorPlan({
             );
           })}
 
-          {(mapData.edges || []).map(edge => {
-            const previous = mapData.nodeMap[edge.from];
-            const current = mapData.nodeMap[edge.to];
-
-            if (!previous || !current) return null;
-            if (
-              previous.floor !== currentFloor ||
-              current.floor !== currentFloor ||
-              previous.type === 'stairs' ||
-              current.type === 'stairs'
-            ) {
-              return null;
-            }
-
-            const width = edge.width == null ? null : Number(edge.width);
-            const slope = edge.slope == null ? null : Number(edge.slope);
-            if (width !== null && width < 0.9) return null;
-            if (slope !== null && slope >= 5.0) return null;
-            if (
-              Number(previous.door_width) > 0 &&
-              Number(previous.door_width) < 0.9
-            ) {
-              return null;
-            }
-            if (
-              Number(current.door_width) > 0 &&
-              Number(current.door_width) < 0.9
-            ) {
-              return null;
-            }
-
-            const segment = getSegment(previous, current);
-            return segment ? (
-              <Line
-                key={'network-' + edge.id}
-                x1={segment.startX}
-                y1={segment.startY}
-                x2={segment.endX}
-                y2={segment.endY}
-                stroke="#36b6f5"
-                strokeWidth={3.5 * scale}
-                strokeOpacity={0.92}
-                strokeLinecap="round"
-              />
-            ) : null;
-          })}
-
           {routeDrawOrder.map(routeIndex =>
             routePaths[routeIndex].map((nodeId, index) => {
               if (index === 0) return null;
