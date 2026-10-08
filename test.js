@@ -8,10 +8,7 @@ function loadNamedExport(source, exportName) {
   const sandbox = {};
   vm.createContext(sandbox);
 
-  const body = source.replace(
-    new RegExp('export\\s+function\\s+' + exportName),
-    'function ' + exportName
-  );
+  const body = source.replace(/export\s+function\s+/g, 'function ');
 
   vm.runInContext(
     body + '\nthis.' + exportName + ' = ' + exportName + ';',
@@ -34,6 +31,11 @@ const validateBuildingData = loadNamedExport(
 const findPath = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
   'findPath'
+);
+
+const findAllPaths = loadNamedExport(
+  fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
+  'findAllPaths'
 );
 
 assert.deepStrictEqual(
@@ -89,10 +91,56 @@ assert.ok(stairs.every(stair => !mapData.edges.some(edge => edge.from === stair.
   'Stairs must remain outside the wheelchair route graph');
 
 const entrance = mapData.nodes.find(node => node.type === 'entrance');
+
+const routeDestinations = mapData.nodes.filter(
+  node => node.type === 'room' || node.type === 'restroom'
+);
+for (const start of routeDestinations) {
+  for (const goal of routeDestinations) {
+    const options = findAllPaths(start.id, goal.id, mapData);
+    assert.ok(
+      options.length > 0,
+      'Every room and restroom should be reachable from every other destination'
+    );
+    assert.ok(
+      options.every(
+        path =>
+          path[0] === start.id &&
+          path[path.length - 1] === goal.id &&
+          path.every(id => mapData.nodeMap[id].type !== 'stairs')
+      ),
+      'Every route option should use the requested endpoints and avoid stairs'
+    );
+  }
+}
+
 for (const destination of mapData.nodes.filter(
   node => node.type === 'room' || node.type === 'restroom'
 )) {
   const accessibleRoute = findPath(entrance.id, destination.id, mapData);
+  const accessibleRoutes = findAllPaths(
+    entrance.id,
+    destination.id,
+    mapData
+  );
+  assert.ok(
+    accessibleRoutes.length >= 2,
+    'Each LC2 destination should have route alternatives'
+  );
+  assert.strictEqual(
+    new Set(accessibleRoutes.map(path => path.join('->'))).size,
+    accessibleRoutes.length,
+    'Alternative routes should be unique'
+  );
+  assert.ok(
+    accessibleRoutes.every(
+      path =>
+        path[0] === entrance.id &&
+        path[path.length - 1] === destination.id &&
+        path.every(id => mapData.nodeMap[id].type !== 'stairs')
+    ),
+    'Every route option must reach its destination without using stairs'
+  );
   assert.strictEqual(accessibleRoute[0], entrance.id);
   assert.strictEqual(accessibleRoute[accessibleRoute.length - 1], destination.id);
   assert.ok(

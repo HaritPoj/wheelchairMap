@@ -7,6 +7,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { generateRouteSteps } from '../logic/routeInstructions';
+import { getRouteColor } from './routeColors';
 
 const SCREEN = Dimensions.get('window');
 
@@ -19,9 +20,18 @@ function getTypeIcon(type) {
   }
 }
 
-export default function DirectionsSheet({ route, nodeMap, edges, onClose }) {
+export default function DirectionsSheet({
+  route,
+  routes,
+  selectedRouteIndex = 0,
+  onSelectRoute,
+  nodeMap,
+  edges,
+  onClose,
+}) {
   if (!route || route.length < 2) return null;
 
+  const routeOptions = routes && routes.length > 0 ? routes : [route];
   const steps = generateRouteSteps(route, nodeMap, edges);
 
   return (
@@ -32,7 +42,7 @@ export default function DirectionsSheet({ route, nodeMap, edges, onClose }) {
         <View style={styles.headerTextBox}>
           <Text style={styles.headerTitle}>Accessible directions</Text>
           <Text style={styles.headerSub}>
-            {steps.length} instructions
+            {`${routeOptions.length} wheelchair route${routeOptions.length === 1 ? '' : 's'} · ${steps.length} instructions`}
           </Text>
         </View>
 
@@ -45,6 +55,62 @@ export default function DirectionsSheet({ route, nodeMap, edges, onClose }) {
           <Text style={styles.closeText}>✕</Text>
         </TouchableOpacity>
       </View>
+
+      {routeOptions.length > 1 && (
+        <View style={styles.routeOptions}>
+          <Text style={styles.routeOptionsLabel}>Available routes</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.routeOptionList}
+          >
+            {routeOptions.map((option, index) => {
+              const isSelected = index === selectedRouteIndex;
+              const optionStepCount = generateRouteSteps(
+                option,
+                nodeMap,
+                edges
+              ).length;
+
+              return (
+                <TouchableOpacity
+                  key={'route-option-' + index}
+                  style={[
+                    styles.routeOption,
+                    isSelected && styles.routeOptionSelected,
+                    { borderColor: getRouteColor(index) },
+                  ]}
+                  onPress={() => onSelectRoute(index)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  accessibilityLabel={
+                    'Route ' +
+                    (index + 1) +
+                    ', ' +
+                    optionStepCount +
+                    ' instructions'
+                  }
+                >
+                  <View
+                    style={[
+                      styles.routeColorDot,
+                      { backgroundColor: getRouteColor(index) },
+                    ]}
+                  />
+                  <View style={styles.routeOptionTextBox}>
+                    <Text style={styles.routeOptionTitle}>
+                      Route {index + 1}{isSelected ? ' · Selected' : ''}
+                    </Text>
+                    <Text style={styles.routeOptionSub}>
+                      {optionStepCount} instructions
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
 
       <ScrollView
         style={styles.scroll}
@@ -151,6 +217,55 @@ const styles = StyleSheet.create({
   closeText: {
     fontSize: 14,
     color: '#555',
+  },
+  routeOptions: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#eee',
+  },
+  routeOptionsLabel: {
+    color: '#666',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  routeOptionList: {
+    paddingRight: 4,
+  },
+  routeOption: {
+    minWidth: 136,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1.5,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginRight: 8,
+    backgroundColor: 'white',
+  },
+  routeOptionSelected: {
+    backgroundColor: '#F3F8FC',
+  },
+  routeColorDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  routeOptionTextBox: {
+    flex: 1,
+  },
+  routeOptionTitle: {
+    color: '#333',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  routeOptionSub: {
+    color: '#777',
+    fontSize: 11,
+    marginTop: 2,
   },
   scroll: {
     flex: 1,

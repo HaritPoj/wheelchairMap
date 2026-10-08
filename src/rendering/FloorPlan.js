@@ -13,11 +13,14 @@ import Svg, {
   Polygon,
   G,
 } from 'react-native-svg';
+import { getRouteColor } from './routeColors';
 
 export default function FloorPlan({
   mapData,
   currentFloor,
   route,
+  routes = [],
+  selectedRouteIndex = 0,
   onNodeTap,
   destination,
   startNode,
@@ -226,6 +229,16 @@ export default function FloorPlan({
     !(Number(node.width) > 0 && Number(node.height) > 0);
 
   const floorNodes = mapData.nodes.filter(node => node.floor === currentFloor);
+  const routePaths =
+    routes.length > 0 ? routes : route && route.length > 0 ? [route] : [];
+  const activeRouteIndex =
+    routePaths.length > 0
+      ? Math.max(0, Math.min(selectedRouteIndex, routePaths.length - 1))
+      : 0;
+  const routeDrawOrder = routePaths
+    .map((_, index) => index)
+    .filter(index => index !== activeRouteIndex)
+    .concat(routePaths.length > 0 ? [activeRouteIndex] : []);
 
   function getSegment(nodeA, nodeB) {
     if (!nodeA || !nodeB) return null;
@@ -398,36 +411,42 @@ export default function FloorPlan({
             );
           })}
 
-          {route.map((nodeId, index) => {
-            if (index === 0) return null;
+          {routeDrawOrder.map(routeIndex =>
+            routePaths[routeIndex].map((nodeId, index) => {
+              if (index === 0) return null;
 
-            const previous = mapData.nodeMap[route[index - 1]];
-            const current = mapData.nodeMap[nodeId];
+              const routePath = routePaths[routeIndex];
+              const previous = mapData.nodeMap[routePath[index - 1]];
+              const current = mapData.nodeMap[nodeId];
 
-            if (!previous || !current) return null;
+              if (!previous || !current) return null;
 
-            if (
-              previous.floor !== currentFloor ||
-              current.floor !== currentFloor
-            ) {
-              return null;
-            }
+              if (
+                previous.floor !== currentFloor ||
+                current.floor !== currentFloor
+              ) {
+                return null;
+              }
 
-            const segment = getSegment(previous, current);
+              const segment = getSegment(previous, current);
 
-            return segment ? (
-              <Line
-                key={'route-' + index}
-                x1={segment.startX}
-                y1={segment.startY}
-                x2={segment.endX}
-                y2={segment.endY}
-                stroke="#0066ff"
-                strokeWidth={6 * scale}
-                strokeLinecap="round"
-              />
-            ) : null;
-          })}
+              return segment ? (
+                <Line
+                  key={'route-' + routeIndex + '-' + index}
+                  x1={segment.startX}
+                  y1={segment.startY}
+                  x2={segment.endX}
+                  y2={segment.endY}
+                  stroke={getRouteColor(routeIndex)}
+                  strokeWidth={
+                    (routeIndex === activeRouteIndex ? 6 : 4) * scale
+                  }
+                  strokeOpacity={routeIndex === activeRouteIndex ? 1 : 0.75}
+                  strokeLinecap="round"
+                />
+              ) : null;
+            })
+          )}
 
           {route.map((nodeId, index) => {
             if (index === 0) return null;
@@ -459,7 +478,7 @@ export default function FloorPlan({
                 >
                   <Circle
                     r={15 * scale}
-                    fill="#0066ff"
+                    fill={getRouteColor(activeRouteIndex)}
                     stroke="#ffffff"
                     strokeWidth={3 * scale}
                   />

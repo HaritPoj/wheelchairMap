@@ -7,7 +7,7 @@ import {
   Text,
 } from 'react-native';
 import { getMapData } from '../../assets/data/buildingLoader';
-import { findPath } from '../logic/pathfinder';
+import { findAllPaths } from '../logic/pathfinder';
 import FloorPlan from '../rendering/FloorPlan';
 import HUD from '../rendering/HUD';
 import DirectionsSheet from '../rendering/DirectionsSheet';
@@ -21,7 +21,9 @@ export default function NavigationScreen() {
   );
   const [locationId, setLocationId] = useState(null);
   const [destination, setDestination] = useState(null);
-  const [route, setRoute] = useState([]);
+  const [routeOptions, setRouteOptions] = useState([]);
+  const [selectedRouteIndex, setSelectedRouteIndex] = useState(0);
+  const route = routeOptions[selectedRouteIndex] || [];
   const [showDirections, setShowDirections] = useState(false);
   const [mode, setMode] = useState('destination');
   const [routeMessage, setRouteMessage] = useState(null);
@@ -29,14 +31,17 @@ export default function NavigationScreen() {
 
   useEffect(() => {
     if (!locationId || !destination) {
-      setRoute([]);
+      setRouteOptions([]);
+      setSelectedRouteIndex(0);
       setShowDirections(false);
       setRouteMessage(null);
       return;
     }
 
-    const path = findPath(locationId, destination, mapData);
-    setRoute(path);
+    const paths = findAllPaths(locationId, destination, mapData);
+    setRouteOptions(paths);
+    setSelectedRouteIndex(0);
+    const path = paths[0] || [];
 
     if (path.length === 0) {
       setShowDirections(false);
@@ -76,7 +81,8 @@ export default function NavigationScreen() {
   function handleClearAll() {
     setLocationId(null);
     setDestination(null);
-    setRoute([]);
+    setRouteOptions([]);
+    setSelectedRouteIndex(0);
     setShowDirections(false);
     setRouteMessage(null);
     setMode('destination');
@@ -126,6 +132,8 @@ export default function NavigationScreen() {
         mapData={mapData}
         currentFloor={currentFloor}
         route={route}
+        routes={routeOptions}
+        selectedRouteIndex={selectedRouteIndex}
         onNodeTap={handleNodeSelect}
         destination={destination}
         startNode={locationId}
@@ -158,6 +166,9 @@ export default function NavigationScreen() {
       {showDirections && (
         <DirectionsSheet
           route={route}
+          routes={routeOptions}
+          selectedRouteIndex={selectedRouteIndex}
+          onSelectRoute={setSelectedRouteIndex}
           nodeMap={mapData.nodeMap}
           edges={mapData.edges}
           onClose={() => setShowDirections(false)}
