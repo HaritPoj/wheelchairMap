@@ -27,6 +27,7 @@ export default function FloorPlan({
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
 
   const currentScale = useRef(1);
+  const zoomMultiplier = useRef(1);
   const currentOffset = useRef({ x: 0, y: 0 });
   const gestureStartOffset = useRef({ x: 0, y: 0 });
   const gestureStartDistance = useRef(null);
@@ -40,16 +41,45 @@ export default function FloorPlan({
 
   const mapWidthSource = Number(currentFloorData.map?.width) || 1200;
   const mapHeightSource = Number(currentFloorData.map?.height) || 450;
+  const fitScale =
+    viewport.width > 0 && viewport.height > 0
+      ? Math.min(
+          1,
+          (viewport.width * 0.94) / mapWidthSource,
+          (viewport.height * 0.94) / mapHeightSource
+        )
+      : 1;
+
+  const latestMapState = useRef({
+    viewport,
+    mapWidthSource,
+    mapHeightSource,
+    fitScale,
+  });
+  latestMapState.current = {
+    viewport,
+    mapWidthSource,
+    mapHeightSource,
+    fitScale,
+  };
 
   const centerMap = () => {
-    if (!viewport.width || !viewport.height) return;
+    const {
+      viewport: currentViewport,
+      mapWidthSource: width,
+      mapHeightSource: height,
+      fitScale: baseScale,
+    } = latestMapState.current;
+    if (!currentViewport.width || !currentViewport.height) return;
 
-    const contentWidth = mapWidthSource * currentScale.current;
-    const contentHeight = mapHeightSource * currentScale.current;
+    const scale = baseScale * zoomMultiplier.current;
+    const contentWidth = width * scale;
+    const contentHeight = height * scale;
 
+    currentScale.current = scale;
     const centeredOffset = {
-      x: (viewport.width - contentWidth) / 2,
-      y: (viewport.height - contentHeight) / 2,
+      x: (currentViewport.width - contentWidth) / 2,
+      y: (currentViewport.height - contentHeight) / 2,
     };
 
     currentOffset.current = centeredOffset;
@@ -57,20 +87,28 @@ export default function FloorPlan({
   };
 
   useEffect(() => {
+    zoomMultiplier.current = 1;
+    currentScale.current = fitScale;
+    setZoomLevel(1);
     centerMap();
-  }, [currentFloor, mapWidthSource, mapHeightSource]);
+  }, [currentFloor, mapWidthSource, mapHeightSource, fitScale]);
 
   const clampOffset = (offset, scale = currentScale.current) => {
-    const contentWidth = mapWidthSource * scale;
-    const contentHeight = mapHeightSource * scale;
+    const {
+      viewport: currentViewport,
+      mapWidthSource: width,
+      mapHeightSource: height,
+    } = latestMapState.current;
+    const contentWidth = width * scale;
+    const contentHeight = height * scale;
 
     // When the map is larger than the viewport, its top-left position
     // can move from (viewport - content) to 0.
     //
     // When the map is smaller than the viewport, it can move from 0 to
     // (viewport - content), so the user can scroll it all the way down/right.
-    const xDifference = viewport.width - contentWidth;
-    const yDifference = viewport.height - contentHeight;
+    const xDifference = currentViewport.width - contentWidth;
+    const yDifference = currentViewport.height - contentHeight;
 
     const minX = Math.min(0, xDifference);
     const maxX = Math.max(0, xDifference);
@@ -106,7 +144,7 @@ export default function FloorPlan({
         const touches = event.nativeEvent.touches;
 
         gestureStartOffset.current = { ...currentOffset.current };
-        gestureStartScale.current = currentScale.current;
+        gestureStartScale.current = zoomMultiplier.current;
 
         if (touches.length === 1) {
           gestureStartPoint.current = {
@@ -141,13 +179,15 @@ export default function FloorPlan({
               ? distance / gestureStartDistance.current
               : 1;
 
-          const nextScale = Math.max(
+          const nextZoom = Math.max(
             0.6,
             Math.min(3.5, gestureStartScale.current * scaleFactor)
           );
+          const nextScale = latestMapState.current.fitScale * nextZoom;
 
+          zoomMultiplier.current = nextZoom;
           currentScale.current = nextScale;
-          setZoomLevel(nextScale);
+          setZoomLevel(nextZoom);
           updateOffset(gestureStartOffset.current, nextScale);
           return;
         }
@@ -172,7 +212,7 @@ export default function FloorPlan({
     })
   ).current;
 
-  const scale = zoomLevel;
+  const scale = fitScale * zoomLevel;
   const mapWidth = mapWidthSource * scale;
   const mapHeight = mapHeightSource * scale;
 
@@ -244,19 +284,11 @@ export default function FloorPlan({
       {...panResponder.panHandlers}
       onLayout={event => {
         const { width, height } = event.nativeEvent.layout;
-        setViewport({ width, height });
-
-        // Initial centering is handled by the effect above. Do not recenter
-        // every layout pass, otherwise a normal gesture can appear to snap.
-        if (!viewport.width || !viewport.height) {
-          const centeredOffset = {
-            x: (width - mapWidthSource * currentScale.current) / 2,
-            y: (height - mapHeightSource * currentScale.current) / 2,
-          };
-
-          currentOffset.current = centeredOffset;
-          setMapOffset(centeredOffset);
-        }
+        setViewport(current =>
+          current.width === width && current.height === height
+            ? current
+            : { width, height }
+        );
       }}
     >
       <View
