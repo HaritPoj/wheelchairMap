@@ -234,9 +234,6 @@ export function findPath(startId, goalId, mapData) {
     }
 
     for (const { edge, next } of adjacency.get(current.id) || []) {
-      if (!bestCost.has(next) && nodeMap[next]?.type === 'room' && next !== goalId) {
-        continue;
-      }
       if (nodeMap[next]?.type === 'room' && next !== goalId) continue;
 
       const edgeCost = getEdgeCost(edge, current.id, next, nodeMap);
