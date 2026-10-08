@@ -181,7 +181,9 @@ export default function FloorPlan({
     y: y * scale,
   });
 
-  const isWaypoint = node => node.type === 'corridor';
+  const isWaypoint = node =>
+    node.type === 'corridor' &&
+    !(Number(node.width) > 0 && Number(node.height) > 0);
 
   const floorNodes = mapData.nodes.filter(node => node.floor === currentFloor);
 
@@ -284,7 +286,34 @@ export default function FloorPlan({
           />
 
           {floorNodes.map(node => {
-            if (isWaypoint(node)) return null;
+            if (
+              node.type !== 'corridor' ||
+              !(Number(node.width) > 0) ||
+              !(Number(node.height) > 0)
+            ) {
+              return null;
+            }
+
+            const { x, y } = toXY(node.x, node.y);
+            const corridorWidth = node.width * scale;
+            const corridorHeight = node.height * scale;
+
+            return (
+              <Rect
+                key={'corridor-area-' + node.id}
+                x={x - corridorWidth / 2}
+                y={y - corridorHeight / 2}
+                width={corridorWidth}
+                height={corridorHeight}
+                fill="#eef2f3"
+                stroke="#000000"
+                strokeWidth={2 * scale}
+              />
+            );
+          })}
+
+          {floorNodes.map(node => {
+            if (isWaypoint(node) || node.type === 'corridor') return null;
 
             const { x, y } = toXY(node.x, node.y);
             const roomWidth =
@@ -292,6 +321,10 @@ export default function FloorPlan({
             const roomHeight =
               Math.max(1, Number(node.height) || 50) * scale;
             const isElevator = node.type === 'elevator';
+            const isStairs = node.type === 'stairs';
+            const isRestroom =
+              node.type === 'restroom' || node.type === 'toilet';
+            const isSmallFacility = isStairs || isRestroom;
 
             return (
               <React.Fragment key={'structure-' + node.id}>
@@ -300,7 +333,15 @@ export default function FloorPlan({
                   y={y - roomHeight / 2}
                   width={roomWidth}
                   height={roomHeight}
-                  fill={isElevator ? '#d0d0d0' : '#f8f8f8'}
+                  fill={
+                    isElevator
+                      ? '#d0d0d0'
+                      : isStairs
+                        ? '#e4e4e4'
+                        : isRestroom
+                          ? '#f2f5f6'
+                          : '#f8f8f8'
+                  }
                   stroke="#000000"
                   strokeWidth={2}
                 />
@@ -308,14 +349,18 @@ export default function FloorPlan({
                 <SvgText
                   x={x}
                   y={y + (isElevator ? 4 : 5)}
-                  fontSize={isElevator ? 11 * scale : 14 * scale}
+                  fontSize={isElevator ? 11 * scale : isSmallFacility ? 9 * scale : 14 * scale}
                   fill="#333333"
                   textAnchor="middle"
                   fontWeight="bold"
                 >
                   {isElevator
                     ? 'Elevator'
-                    : (node.code || node.label || node.id)}
+                    : isStairs
+                      ? 'Stairs'
+                      : isRestroom
+                        ? (node.code || 'WC')
+                        : (node.code || node.label || node.id)}
                 </SvgText>
               </React.Fragment>
             );
@@ -404,7 +449,7 @@ export default function FloorPlan({
         </Svg>
 
         {floorNodes.map(node => {
-          if (isWaypoint(node)) return null;
+          if (isWaypoint(node) || node.type === 'corridor' || node.type === 'stairs') return null;
 
           const { x, y } = toXY(node.x, node.y);
           const isElevator = node.type === 'elevator';

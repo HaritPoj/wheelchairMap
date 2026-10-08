@@ -14,11 +14,18 @@ const SUPPORTED_SPACE_TYPES = new Set([
 
 function geometryToNodeFields(geometry) {
   const source = geometry || {};
+  const x = Number(source.x) || 0;
+  const y = Number(source.y) || 0;
+  const width = Number(source.width) || 0;
+  const height = Number(source.height) || 0;
+
+  // Rectangle coordinates in building data describe the top-left corner.
+  // The renderer and route overlay use the rectangle center as the node point.
   return {
-    x: Number(source.x) || 0,
-    y: Number(source.y) || 0,
-    width: Number(source.width) || 0,
-    height: Number(source.height) || 0,
+    x: source.type === "rectangle" ? x + width / 2 : x,
+    y: source.type === "rectangle" ? y + height / 2 : y,
+    width,
+    height,
   };
 }
 

@@ -50,8 +50,56 @@ const roomByCode = code =>
 const room124 = roomByCode('124');
 const room120 = roomByCode('120');
 const room211 = roomByCode('211');
+const room230 = roomByCode('230');
+const room2241 = roomByCode('224/1');
 
-assert.ok(room124 && room120 && room211, 'Expected sample rooms to exist');
+assert.ok(room124 && room120 && room211 && room230 && room2241, 'Expected reference rooms to exist');
+
+const floorOneRoomCodes = buildingData.spaces
+  .filter(space => space.type === 'room' && space.floorId === 'floor_1')
+  .map(space => space.code)
+  .sort();
+const floorTwoRoomCodes = buildingData.spaces
+  .filter(space => space.type === 'room' && space.floorId === 'floor_2')
+  .map(space => space.code)
+  .sort();
+assert.deepStrictEqual(floorOneRoomCodes, [
+  '106', '107', '108', '109', '110', '111', '112', '113', '114',
+  '115', '115/1', '116', '119', '120', '121', '122', '123', '124', '125', '126'
+].sort());
+assert.deepStrictEqual(floorTwoRoomCodes, [
+  '211', '212', '213', '214', '215', '216', '217', '218', '219', '220',
+  '221', '222', '223', '224', '224/1', '225', '226', '227', '228', '229', '230'
+].sort());
+
+for (const space of buildingData.spaces.filter(item => item.type === 'room')) {
+  const floor = buildingData.floors.find(item => item.id === space.floorId);
+  const geometry = space.geometry;
+  assert.ok(geometry.x >= 0 && geometry.y >= 0);
+  assert.ok(geometry.x + geometry.width <= floor.map.width);
+  assert.ok(geometry.y + geometry.height <= floor.map.height);
+  const normalized = mapData.nodeMap[space.id];
+  assert.strictEqual(normalized.x, geometry.x + geometry.width / 2);
+  assert.strictEqual(normalized.y, geometry.y + geometry.height / 2);
+}
+
+const stairs = mapData.nodes.filter(node => node.type === 'stairs');
+assert.ok(stairs.length >= 2);
+assert.ok(stairs.every(stair => !mapData.edges.some(edge => edge.from === stair.id || edge.to === stair.id)),
+  'Stairs must remain outside the wheelchair route graph');
+
+const entrance = mapData.nodes.find(node => node.type === 'entrance');
+for (const destination of mapData.nodes.filter(
+  node => node.type === 'room' || node.type === 'restroom'
+)) {
+  const accessibleRoute = findPath(entrance.id, destination.id, mapData);
+  assert.strictEqual(accessibleRoute[0], entrance.id);
+  assert.strictEqual(accessibleRoute[accessibleRoute.length - 1], destination.id);
+  assert.ok(
+    accessibleRoute.every(id => mapData.nodeMap[id].type !== 'stairs'),
+    'Accessible routes must not pass through stairs'
+  );
+}
 
 assert.deepStrictEqual(
   findPath(room124.id, room124.id, mapData),
@@ -68,6 +116,19 @@ assert.strictEqual(crossFloor[crossFloor.length - 1], room211.id);
 assert.ok(
   crossFloor.some(id => mapData.nodeMap[id].type === 'elevator'),
   'Cross-floor route should use an elevator'
+);
+
+const lowerFloorRoute = findPath(room230.id, room2241.id, mapData);
+assert.strictEqual(lowerFloorRoute[0], room230.id);
+assert.strictEqual(lowerFloorRoute[lowerFloorRoute.length - 1], room2241.id);
+
+const restroomRoute = findPath(room124.id, 'restroom_f1_south', mapData);
+assert.strictEqual(restroomRoute[0], room124.id);
+assert.strictEqual(restroomRoute[restroomRoute.length - 1], 'restroom_f1_south');
+assert.ok(
+  [...sameFloor, ...crossFloor, ...lowerFloorRoute, ...restroomRoute]
+    .every(id => mapData.nodeMap[id].type !== 'stairs'),
+  'Wheelchair routes must not include stairs'
 );
 
 assert.deepStrictEqual(
