@@ -14,10 +14,16 @@ const SCREEN = Dimensions.get('window');
 function getTypeIcon(type) {
   switch (type) {
     case 'elevator': return '🛗';
-    case 'toilet': return '🚻';
+    case 'toilet':
+    case 'restroom': return '🚻';
     case 'entrance': return '🚪';
-    default: return '📍';
+    case 'stairs': return '↕';
+    default: return '•';
   }
+}
+
+function nodeLabel(node) {
+  return node?.name || node?.code || node?.label || node?.id || 'Location';
 }
 
 export default function DirectionsSheet({
@@ -33,21 +39,26 @@ export default function DirectionsSheet({
 
   const routeOptions = routes && routes.length > 0 ? routes : [route];
   const steps = generateRouteSteps(route, nodeMap, edges);
+  const start = nodeMap[route[0]];
+  const destination = nodeMap[route[route.length - 1]];
 
   return (
     <View style={styles.sheet}>
       <View style={styles.handle} />
 
       <View style={styles.header}>
-        <View style={styles.headerTextBox}>
-          <Text style={styles.headerTitle}>Accessible directions</Text>
-          <Text style={styles.headerSub}>
-            {`${routeOptions.length} wheelchair route${routeOptions.length === 1 ? '' : 's'} · ${steps.length} instructions`}
+        <View style={styles.headerCopy}>
+          <View style={styles.accessibleBadge}>
+            <Text style={styles.accessibleBadgeText}>♿ ACCESSIBLE ROUTE</Text>
+          </View>
+          <Text style={styles.title}>Directions</Text>
+          <Text style={styles.routeSummary} numberOfLines={1}>
+            {nodeLabel(start)}  →  {nodeLabel(destination)}
           </Text>
         </View>
 
         <TouchableOpacity
-          style={styles.closeBtn}
+          style={styles.closeButton}
           onPress={onClose}
           accessibilityRole="button"
           accessibilityLabel="Close directions"
@@ -56,21 +67,34 @@ export default function DirectionsSheet({
         </TouchableOpacity>
       </View>
 
+      <View style={styles.statsRow}>
+        <View style={styles.statPill}>
+          <Text style={styles.statValue}>{steps.length}</Text>
+          <Text style={styles.statLabel}>STEPS</Text>
+        </View>
+        <View style={styles.statPill}>
+          <Text style={styles.statValue}>{routeOptions.length}</Text>
+          <Text style={styles.statLabel}>
+            {routeOptions.length === 1 ? 'ROUTE' : 'ROUTES'}
+          </Text>
+        </View>
+        <View style={[styles.statPill, styles.elevatorStat]}>
+          <Text style={styles.statValue}>🛗</Text>
+          <Text style={styles.statLabel}>ELEVATOR OK</Text>
+        </View>
+      </View>
+
       {routeOptions.length > 1 && (
-        <View style={styles.routeOptions}>
-          <Text style={styles.routeOptionsLabel}>Available routes</Text>
+        <View style={styles.routeOptionsWrap}>
+          <Text style={styles.sectionLabel}>CHOOSE ROUTE</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.routeOptionList}
+            contentContainerStyle={styles.routeOptions}
           >
             {routeOptions.map((option, index) => {
               const isSelected = index === selectedRouteIndex;
-              const optionStepCount = generateRouteSteps(
-                option,
-                nodeMap,
-                edges
-              ).length;
+              const optionSteps = generateRouteSteps(option, nodeMap, edges).length;
 
               return (
                 <TouchableOpacity
@@ -78,32 +102,27 @@ export default function DirectionsSheet({
                   style={[
                     styles.routeOption,
                     isSelected && styles.routeOptionSelected,
-                    { borderColor: getRouteColor(index) },
                   ]}
                   onPress={() => onSelectRoute(index)}
                   accessibilityRole="button"
                   accessibilityState={{ selected: isSelected }}
-                  accessibilityLabel={
-                    'Route ' +
-                    (index + 1) +
-                    ', ' +
-                    optionStepCount +
-                    ' instructions'
-                  }
                 >
                   <View
                     style={[
-                      styles.routeColorDot,
+                      styles.routeColor,
                       { backgroundColor: getRouteColor(index) },
                     ]}
                   />
-                  <View style={styles.routeOptionTextBox}>
-                    <Text style={styles.routeOptionTitle}>
-                      Route {index + 1}{isSelected ? ' · Selected' : ''}
+                  <View>
+                    <Text
+                      style={[
+                        styles.routeOptionTitle,
+                        isSelected && styles.routeOptionTitleSelected,
+                      ]}
+                    >
+                      Route {index + 1}
                     </Text>
-                    <Text style={styles.routeOptionSub}>
-                      {optionStepCount} instructions
-                    </Text>
+                    <Text style={styles.routeOptionSub}>{optionSteps} steps</Text>
                   </View>
                 </TouchableOpacity>
               );
@@ -112,49 +131,57 @@ export default function DirectionsSheet({
         </View>
       )}
 
+      <View style={styles.listHeader}>
+        <Text style={styles.sectionLabel}>TURN-BY-TURN</Text>
+      </View>
+
       <ScrollView
         style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {steps.map((step, index) => (
-          <View key={step.key} style={styles.stepRow}>
-            <View style={styles.stepLeft}>
-              <View
-                style={[
-                  styles.iconCircle,
-                  index === 0 && styles.iconFirst,
-                  index === steps.length - 1 && styles.iconLast,
-                ]}
-              >
-                <Text style={styles.iconText}>
-                  {getTypeIcon(step.icon)}
-                </Text>
+        {steps.map((step, index) => {
+          const isFirst = index === 0;
+          const isLast = index === steps.length - 1;
+
+          return (
+            <View key={step.key} style={styles.stepRow}>
+              <View style={styles.timelineCol}>
+                <View
+                  style={[
+                    styles.stepIcon,
+                    isFirst && styles.stepIconStart,
+                    isLast && styles.stepIconFinish,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.stepIconText,
+                      (isFirst || isLast) && styles.stepIconTextStrong,
+                    ]}
+                  >
+                    {isLast ? '✓' : getTypeIcon(step.icon)}
+                  </Text>
+                </View>
+                {!isLast && <View style={styles.timelineLine} />}
               </View>
 
-              {index < steps.length - 1 && <View style={styles.stepLine} />}
-            </View>
-
-            <View style={styles.stepRight}>
-              <Text
-                style={[
-                  styles.stepInstruction,
-                  index === steps.length - 1 &&
-                    styles.stepInstructionLast,
-                ]}
-              >
-                {step.instruction}
-              </Text>
-
-              {step.warning ? (
-                <Text style={styles.stepWarning}>
-                  {step.warning}
+              <View style={[styles.stepCard, isLast && styles.stepCardLast]}>
+                <Text style={styles.stepNumber}>
+                  {isFirst ? 'START' : isLast ? 'ARRIVE' : `STEP ${index}`}
                 </Text>
-              ) : null}
-            </View>
-          </View>
-        ))}
+                <Text style={styles.instruction}>{step.instruction}</Text>
 
-        <View style={{ height: 40 }} />
+                {step.warning ? (
+                  <View style={styles.warningBox}>
+                    <Text style={styles.warningIcon}>!</Text>
+                    <Text style={styles.warningText}>{step.warning}</Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -163,173 +190,260 @@ export default function DirectionsSheet({
 const styles = StyleSheet.create({
   sheet: {
     position: 'absolute',
-    bottom: 0,
     left: 0,
     right: 0,
-    height: SCREEN.height * 0.5,
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 10,
-    zIndex: 20,
+    bottom: 0,
+    height: SCREEN.height * 0.64,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    zIndex: 60,
+    elevation: 18,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 18,
   },
   handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: '#D3D1C7',
-    borderRadius: 2,
+    width: 42,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: '#CBD5E1',
     alignSelf: 'center',
     marginTop: 10,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#eee',
+    paddingTop: 14,
+    paddingBottom: 12,
   },
-  headerTextBox: {
+  headerCopy: {
     flex: 1,
   },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#1a1a1a',
+  accessibleBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 7,
+    backgroundColor: '#DCFCE7',
+    marginBottom: 7,
   },
-  headerSub: {
+  accessibleBadgeText: {
+    color: '#15803D',
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.8,
+  },
+  title: {
+    color: '#111827',
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  routeSummary: {
+    color: '#64748B',
     fontSize: 13,
-    color: '#888',
-    marginTop: 2,
+    fontWeight: '500',
+    marginTop: 3,
+    paddingRight: 8,
   },
-  closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#f0f0f0',
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#F1F5F9',
   },
   closeText: {
-    fontSize: 14,
-    color: '#555',
+    color: '#475569',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingBottom: 14,
+  },
+  statPill: {
+    flex: 1,
+    minHeight: 54,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    justifyContent: 'center',
+  },
+  elevatorStat: {
+    backgroundColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
+  },
+  statValue: {
+    color: '#111827',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  statLabel: {
+    color: '#94A3B8',
+    fontSize: 8,
+    fontWeight: '900',
+    letterSpacing: 0.8,
+    marginTop: 2,
+  },
+  routeOptionsWrap: {
+    paddingBottom: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E7EB',
+  },
+  sectionLabel: {
+    color: '#94A3B8',
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 1.2,
+    paddingHorizontal: 20,
+    marginBottom: 8,
   },
   routeOptions: {
     paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 10,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#eee',
-  },
-  routeOptionsLabel: {
-    color: '#666',
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  routeOptionList: {
-    paddingRight: 4,
+    gap: 8,
   },
   routeOption: {
-    minWidth: 136,
+    minWidth: 126,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    borderWidth: 1.5,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginRight: 8,
-    backgroundColor: 'white',
+    gap: 9,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   routeOptionSelected: {
-    backgroundColor: '#F3F8FC',
+    backgroundColor: '#EFF6FF',
+    borderColor: '#93C5FD',
   },
-  routeColorDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  routeOptionTextBox: {
-    flex: 1,
+  routeColor: {
+    width: 4,
+    height: 30,
+    borderRadius: 2,
   },
   routeOptionTitle: {
-    color: '#333',
+    color: '#475569',
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  routeOptionTitleSelected: {
+    color: '#1D4ED8',
   },
   routeOptionSub: {
-    color: '#777',
-    fontSize: 11,
+    color: '#94A3B8',
+    fontSize: 10,
     marginTop: 2,
+  },
+  listHeader: {
+    paddingTop: 13,
   },
   scroll: {
     flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingBottom: 32,
   },
   stepRow: {
     flexDirection: 'row',
-    gap: 14,
-    minHeight: 60,
+    minHeight: 76,
   },
-  stepLeft: {
+  timelineCol: {
+    width: 38,
     alignItems: 'center',
-    width: 36,
   },
-  iconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#E6F1FB',
+  stepIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1.5,
+    borderColor: '#93C5FD',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#185FA5',
+    zIndex: 1,
   },
-  iconFirst: {
-    backgroundColor: '#185FA5',
+  stepIconStart: {
+    backgroundColor: '#16A34A',
+    borderColor: '#16A34A',
   },
-  iconLast: {
-    backgroundColor: '#085041',
-    borderColor: '#085041',
+  stepIconFinish: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
   },
-  iconText: {
-    fontSize: 16,
+  stepIconText: {
+    color: '#2563EB',
+    fontSize: 14,
+    fontWeight: '800',
   },
-  stepLine: {
+  stepIconTextStrong: {
+    color: '#FFFFFF',
+  },
+  timelineLine: {
     width: 2,
     flex: 1,
-    backgroundColor: '#B5D4F4',
-    marginVertical: 2,
+    backgroundColor: '#DBEAFE',
   },
-  stepRight: {
+  stepCard: {
     flex: 1,
-    paddingBottom: 16,
-    paddingTop: 6,
+    marginLeft: 10,
+    paddingTop: 2,
+    paddingBottom: 18,
   },
-  stepInstruction: {
+  stepCardLast: {
+    paddingBottom: 6,
+  },
+  stepNumber: {
+    color: '#94A3B8',
+    fontSize: 8,
+    fontWeight: '900',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  instruction: {
+    color: '#1F2937',
     fontSize: 14,
-    color: '#1a1a1a',
-    fontWeight: '500',
+    fontWeight: '650',
     lineHeight: 20,
   },
-  stepInstructionLast: {
-    color: '#085041',
-    fontWeight: '600',
+  warningBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 7,
+    paddingHorizontal: 9,
+    paddingVertical: 7,
+    borderRadius: 10,
+    backgroundColor: '#FFF7ED',
   },
-  stepWarning: {
-    fontSize: 12,
-    color: '#633806',
-    marginTop: 4,
-    backgroundColor: '#FFF3CD',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    overflow: 'hidden',
+  warningIcon: {
+    width: 20,
+    height: 20,
+    lineHeight: 20,
+    textAlign: 'center',
+    borderRadius: 10,
+    color: '#FFFFFF',
+    backgroundColor: '#EA580C',
+    fontSize: 11,
+    fontWeight: '900',
+    marginRight: 7,
+  },
+  warningText: {
+    flex: 1,
+    color: '#9A3412',
+    fontSize: 11,
+    fontWeight: '600',
+    lineHeight: 16,
   },
 });
