@@ -58,7 +58,7 @@ export default function NavigationScreen() {
     }
 
     setRouteMessage(null);
-    setShowDirections(true);
+    setShowDirections(false);
   }, [locationId, destination, mapData]);
 
   function handleNodeSelect(id) {
@@ -90,12 +90,16 @@ export default function NavigationScreen() {
 
   function handleClearLocation() {
     setLocationId(null);
+    setShowDirections(false);
     setRouteMessage(null);
+    setMode('location');
   }
 
   function handleClearDestination() {
     setDestination(null);
+    setShowDirections(false);
     setRouteMessage(null);
+    setMode('destination');
   }
 
   function handleRoomDetected(roomId) {
@@ -154,14 +158,27 @@ export default function NavigationScreen() {
         routeMessage={routeMessage}
       />
 
-      <TouchableOpacity
-        style={styles.scanButton}
-        onPress={() => setIsScanning(true)}
-        accessibilityRole="button"
-        accessibilityLabel="Scan room sign"
-      >
-        <Text style={styles.scanButtonText}>Scan Room Sign</Text>
-      </TouchableOpacity>
+      {!showDirections && (
+        <TouchableOpacity
+          style={styles.scanButton}
+          onPress={() => setIsScanning(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Scan room sign"
+          accessibilityHint="Uses the camera to set your current room"
+        >
+          <Text style={styles.scanIcon}>📷</Text>
+          <Text style={styles.scanButtonText}>Scan</Text>
+        </TouchableOpacity>
+      )}
+
+      {!showDirections && route.length > 1 && (
+        <NextStepBanner
+          route={route}
+          nodeMap={mapData.nodeMap}
+          edges={mapData.edges}
+          onPress={() => setShowDirections(true)}
+        />
+      )}
 
       {showDirections && (
         <DirectionsSheet
@@ -174,38 +191,41 @@ export default function NavigationScreen() {
           onClose={() => setShowDirections(false)}
         />
       )}
-
-      {route.length > 1 && (
-        <NextStepBanner
-          route={route}
-          nodeMap={mapData.nodeMap}
-          edges={mapData.edges}
-        />
-      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: '#EEF2F7',
+  },
   scanButton: {
     position: 'absolute',
-    bottom: 40,
-    right: 20,
-    backgroundColor: '#333',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 30,
-    zIndex: 10,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    right: 18,
+    bottom: 24,
+    minWidth: 92,
+    height: 52,
+    paddingHorizontal: 16,
+    borderRadius: 26,
+    backgroundColor: '#111827',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    zIndex: 20,
+    elevation: 8,
+    shadowColor: '#111827',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.22,
+    shadowRadius: 8,
+  },
+  scanIcon: {
+    fontSize: 19,
   },
   scanButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
   },
 });
