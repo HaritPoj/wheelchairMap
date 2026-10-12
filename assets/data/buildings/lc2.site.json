@@ -6,6 +6,7 @@
       "properties": {
         "buildingId": "lc2",
         "name": "LC2",
+        "floor": 1,
         "source": "surveyed GeoJSON footprint"
       },
       "geometry": {
