@@ -28,5 +28,6 @@ export function getAvailableBuildings() {
     id: building.facility.id,
     name: building.facility.name,
     levels: building.levels.length,
+    floors: building.levels.length,
   }));
 }
