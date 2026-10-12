@@ -31,9 +31,114 @@ function geometryToNodeFields(geometry) {
   };
 }
 
+function getGeoJsonRing(siteGeoJSON) {
+  const features = Array.isArray(siteGeoJSON?.features)
+    ? siteGeoJSON.features
+    : [];
+
+  const polygon = features.find(
+    feature =>
+      feature?.geometry?.type === "Polygon" &&
+      Array.isArray(feature.geometry.coordinates?.[0])
+  );
+
+  if (!polygon) return null;
+
+  const ring = polygon.geometry.coordinates[0]
+    .map(point => [Number(point?.[0]), Number(point?.[1])])
+    .filter(([lon, lat]) => Number.isFinite(lon) && Number.isFinite(lat));
+
+  return ring.length >= 3 ? ring : null;
+}
+
+function projectGeoRingToFloor(ring, mapWidth, mapHeight) {
+  if (!Array.isArray(ring) || ring.length < 3) return null;
+
+  const longitudes = ring.map(([lon]) => lon);
+  const latitudes = ring.map(([, lat]) => lat);
+  const minLon = Math.min(...longitudes);
+  const maxLon = Math.max(...longitudes);
+  const minLat = Math.min(...latitudes);
+  const maxLat = Math.max(...latitudes);
+  const averageLat =
+    latitudes.reduce((sum, value) => sum + value, 0) / latitudes.length;
+
+  // Equirectangular projection is sufficient for a single building footprint.
+  // It preserves the footprint proportions much better than treating longitude
+  // and latitude degrees as equal distances.
+  const metersPerDegreeLat = 111320;
+  const metersPerDegreeLon =
+    111320 * Math.cos((averageLat * Math.PI) / 180);
+
+  const projected = ring.map(([lon, lat]) => [
+    (lon - minLon) * metersPerDegreeLon,
+    (maxLat - lat) * metersPerDegreeLat,
+  ]);
+
+  const projectedWidth = Math.max(
+    1,
+    (maxLon - minLon) * metersPerDegreeLon
+  );
+  const projectedHeight = Math.max(
+    1,
+    (maxLat - minLat) * metersPerDegreeLat
+  );
+
+  // Keep a small margin around the floor plan and rotate 180 degrees so the
+  // geographic footprint matches the orientation of the room data already in
+  // lc2.json: long horizontal wing at the bottom, vertical wing on the right.
+  const horizontalPadding = Math.max(12, mapWidth * 0.012);
+  const verticalPadding = Math.max(6, mapHeight * 0.015);
+  const availableWidth = Math.max(1, mapWidth - horizontalPadding * 2);
+  const availableHeight = Math.max(1, mapHeight - verticalPadding * 2);
+  const scale = Math.min(
+    availableWidth / projectedWidth,
+    availableHeight / projectedHeight
+  );
+
+  const fittedWidth = projectedWidth * scale;
+  const fittedHeight = projectedHeight * scale;
+  const offsetX = (mapWidth - fittedWidth) / 2;
+  const offsetY = (mapHeight - fittedHeight) / 2;
+
+  return projected.map(([x, y]) => [
+    offsetX + (projectedWidth - x) * scale,
+    offsetY + (projectedHeight - y) * scale,
+  ]);
+}
+
+function applyGeoBoundaryToFloors(floors, siteGeoJSON) {
+  const geoRing = getGeoJsonRing(siteGeoJSON);
+
+  if (!geoRing) return floors;
+
+  return (floors || []).map(floor => {
+    const width = Number(floor?.map?.width) || 1200;
+    const height = Number(floor?.map?.height) || 450;
+    const boundary = projectGeoRingToFloor(geoRing, width, height);
+
+    if (!boundary) return floor;
+
+    return {
+      ...floor,
+      map: {
+        ...floor.map,
+        boundary,
+        boundarySource: "geojson",
+        geographicBoundary: geoRing,
+      },
+    };
+  });
+}
+
 export function normalizeBuildingData(buildingData) {
+  const floors = applyGeoBoundaryToFloors(
+    buildingData.floors || [],
+    buildingData.siteGeoJSON
+  );
+
   const floorsById = Object.fromEntries(
-    (buildingData.floors || []).map(floor => [floor.id, floor])
+    floors.map(floor => [floor.id, floor])
   );
 
   const nodes = (buildingData.spaces || []).map(space => {
@@ -91,6 +196,7 @@ export function normalizeBuildingData(buildingData) {
 
   return {
     ...buildingData,
+    floors,
     nodes,
     edges,
     nodeMap: Object.fromEntries(nodes.map(node => [node.id, node])),
