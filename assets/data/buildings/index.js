@@ -1,7 +1,11 @@
 import lc2Building from "./lc2.json";
+import lc2Site from "./lc2.site.json";
 
 const BUILDINGS = {
-  lc2: lc2Building,
+  lc2: {
+    ...lc2Building,
+    siteGeoJSON: lc2Site,
+  },
 };
 
 export function getBuilding(buildingId = "lc2") {
