@@ -332,33 +332,13 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
           />
         </G>
 
-        <SvgText
-          x={tx(565)}
-          y={ty(228)}
-          fill={LABEL}
-          fontSize={ts(13)}
-          fontWeight="600"
-          textAnchor="middle"
-        >
+        <SvgText x={tx(565)} y={ty(228)} fill={LABEL} fontSize={ts(13)} fontWeight="600" textAnchor="middle">
           Faculty of Science and Technology
         </SvgText>
-        <SvgText
-          x={tx(markerX)}
-          y={ty(505)}
-          fill="#4B5563"
-          fontSize={ts(15)}
-          fontWeight="700"
-          textAnchor="middle"
-        >
+        <SvgText x={tx(markerX)} y={ty(505)} fill="#4B5563" fontSize={ts(15)} fontWeight="700" textAnchor="middle">
           อาคารบรรยายเรียนรวม 2
         </SvgText>
-        <SvgText
-          x={tx(markerX)}
-          y={ty(524)}
-          fill="#7B8794"
-          fontSize={ts(11)}
-          textAnchor="middle"
-        >
+        <SvgText x={tx(markerX)} y={ty(524)} fill="#7B8794" fontSize={ts(11)} textAnchor="middle">
           LC2 · Floor 1 data fitted to building footprint
         </SvgText>
         <SvgText x={tx(700)} y={ty(452)} fill="#D97706" fontSize={ts(12)} fontWeight="600">
@@ -373,9 +353,7 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
         <View style={styles.placeTextBox}>
           <Text style={styles.placeEyebrow}>THAMMASAT UNIVERSITY</Text>
           <Text style={styles.placeTitle}>อาคารบรรยายเรียนรวม 2</Text>
-          <Text style={styles.placeSubtitle}>
-            LC2 · 1F indoor map fitted into the exterior building polygon
-          </Text>
+          <Text style={styles.placeSubtitle}>LC2 · 1F indoor map fitted into the exterior building polygon</Text>
         </View>
         <TouchableOpacity
           style={styles.enterButton}
