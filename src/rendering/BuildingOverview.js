@@ -81,7 +81,6 @@ function createIndoorToCampusTransform(points) {
     const px = Number(x) || 0;
     const py = Number(y) || 0;
 
-    // 180-degree rotation around the indoor-data bounds.
     const rotatedX = bounds.maxX - px;
     const rotatedY = bounds.maxY - py;
 
@@ -296,7 +295,6 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
           />
         ))}
 
-        {/* Exterior LC2 footprint fitted from the real floor boundary. */}
         <Polygon
           points={pointsToString(footprint, tx, ty)}
           fill="#E9EDF2"
@@ -305,12 +303,6 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
           strokeLinejoin="round"
         />
 
-        {/*
-          Render the actual 1F map data inside that exterior footprint.
-          Every room/corridor uses the same rotation, scale and translation as
-          the building boundary, so the indoor geometry stays spatially
-          consistent with the polygon seen on the campus map.
-        */}
         <G clipPath="url(#lc2-footprint-clip)">
           {groundFloorNodes.map(node => {
             const [campusX, campusY] = indoorTransform.point(node.x, node.y);
@@ -360,7 +352,6 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
           })}
         </G>
 
-        {/* Re-draw the exterior edge above the indoor data. */}
         <Polygon
           points={pointsToString(footprint, tx, ty)}
           fill="none"
@@ -454,7 +445,7 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
           <Text style={styles.placeEyebrow}>THAMMASAT UNIVERSITY</Text>
           <Text style={styles.placeTitle}>อาคารบรรยายเรียนรวม 2</Text>
           <Text style={styles.placeSubtitle}>
-            LC2 · 1F indoor data scaled into the campus footprint
+            LC2 · 1F indoor map fitted into the exterior building polygon
           </Text>
         </View>
 
