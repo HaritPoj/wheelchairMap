@@ -28,6 +28,8 @@ function nodeLabel(node) {
 export default function HUD({
   mapData,
   currentFloor,
+  viewMode = 'floor',
+  onShowSite,
   onFloor,
   locationId,
   destination,
@@ -61,6 +63,7 @@ export default function HUD({
 
   const floors = useMemo(
     () => [...new Set(mapData.nodes.map(node => node.floor))]
+      .filter(Number.isFinite)
       .sort((a, b) => a - b),
     [mapData.nodes]
   );
@@ -106,154 +109,176 @@ export default function HUD({
           )}
         </View>
 
-        <View style={styles.routeCard}>
-          <TouchableOpacity
-            style={[
-              styles.locationRow,
-              mode === 'location' && styles.locationRowActive,
-            ]}
-            onPress={() => chooseMode('location')}
-            accessibilityRole="button"
-            accessibilityState={{ selected: mode === 'location' }}
-            accessibilityLabel="Choose starting location"
-          >
-            <View style={[styles.routeMarker, styles.startMarker]} />
-            <View style={styles.locationTextBox}>
-              <Text style={styles.locationLabel}>FROM</Text>
-              <Text style={styles.locationValue} numberOfLines={1}>
-                {locationNode ? nodeLabel(locationNode) : 'Set your location'}
-              </Text>
-            </View>
-            {locationNode ? (
+        {viewMode !== 'site' && (
+          <>
+            <View style={styles.routeCard}>
               <TouchableOpacity
-                style={styles.rowClearButton}
-                onPress={onClearLocation}
+                style={[
+                  styles.locationRow,
+                  mode === 'location' && styles.locationRowActive,
+                ]}
+                onPress={() => chooseMode('location')}
                 accessibilityRole="button"
-                accessibilityLabel="Clear starting location"
+                accessibilityState={{ selected: mode === 'location' }}
+                accessibilityLabel="Choose starting location"
               >
-                <Text style={styles.rowClearText}>✕</Text>
-              </TouchableOpacity>
-            ) : (
-              <Text style={styles.rowChevron}>›</Text>
-            )}
-          </TouchableOpacity>
-
-          <View style={styles.routeDivider} />
-
-          <TouchableOpacity
-            style={[
-              styles.locationRow,
-              mode === 'destination' && styles.locationRowActive,
-            ]}
-            onPress={() => chooseMode('destination')}
-            accessibilityRole="button"
-            accessibilityState={{ selected: mode === 'destination' }}
-            accessibilityLabel="Choose destination"
-          >
-            <View style={[styles.routeMarker, styles.destinationMarker]} />
-            <View style={styles.locationTextBox}>
-              <Text style={styles.locationLabel}>TO</Text>
-              <Text style={styles.locationValue} numberOfLines={1}>
-                {destinationNode ? nodeLabel(destinationNode) : 'Choose destination'}
-              </Text>
-            </View>
-            {destinationNode ? (
-              <TouchableOpacity
-                style={styles.rowClearButton}
-                onPress={onClearDestination}
-                accessibilityRole="button"
-                accessibilityLabel="Clear destination"
-              >
-                <Text style={styles.rowClearText}>✕</Text>
-              </TouchableOpacity>
-            ) : (
-              <Text style={styles.rowChevron}>›</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.searchRow}>
-          <Text style={styles.searchIcon}>⌕</Text>
-          <TextInput
-            style={styles.searchInput}
-            placeholder={
-              mode === 'location'
-                ? 'Search your current room'
-                : 'Search room or destination'
-            }
-            placeholderTextColor="#9CA3AF"
-            value={query}
-            onChangeText={setQuery}
-            returnKeyType="search"
-            onSubmitEditing={() => Keyboard.dismiss()}
-            accessibilityLabel={
-              mode === 'location'
-                ? 'Search starting location'
-                : 'Search destination'
-            }
-          />
-
-          {query.length > 0 && (
-            <TouchableOpacity
-              style={styles.searchClearButton}
-              onPress={() => setQuery('')}
-              accessibilityRole="button"
-              accessibilityLabel="Clear search"
-            >
-              <Text style={styles.searchClearText}>✕</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {results.length > 0 && (
-          <ScrollView
-            style={styles.results}
-            keyboardShouldPersistTaps="handled"
-            nestedScrollEnabled
-          >
-            {results.map(node => (
-              <TouchableOpacity
-                key={node.id}
-                style={styles.resultItem}
-                onPress={() => selectNode(node.id)}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  nodeLabel(node) + ', Floor ' + node.floor
-                }
-              >
-                <View style={styles.resultIconBox}>
-                  <Text style={styles.resultIcon}>{getIcon(node.type)}</Text>
-                </View>
-                <View style={styles.resultTextBox}>
-                  <Text style={styles.resultText} numberOfLines={1}>
-                    {nodeLabel(node)}
+                <View style={[styles.routeMarker, styles.startMarker]} />
+                <View style={styles.locationTextBox}>
+                  <Text style={styles.locationLabel}>FROM</Text>
+                  <Text style={styles.locationValue} numberOfLines={1}>
+                    {locationNode ? nodeLabel(locationNode) : 'Set your location'}
                   </Text>
-                  <Text style={styles.resultSub}>Floor {node.floor}</Text>
                 </View>
-                <Text style={styles.resultChevron}>›</Text>
+                {locationNode ? (
+                  <TouchableOpacity
+                    style={styles.rowClearButton}
+                    onPress={onClearLocation}
+                    accessibilityRole="button"
+                    accessibilityLabel="Clear starting location"
+                  >
+                    <Text style={styles.rowClearText}>✕</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <Text style={styles.rowChevron}>›</Text>
+                )}
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        )}
 
-        {routeMessage && (
-          <View style={styles.messageBox}>
-            <Text style={styles.messageIcon}>!</Text>
-            <Text style={styles.messageText}>{routeMessage}</Text>
-          </View>
+              <View style={styles.routeDivider} />
+
+              <TouchableOpacity
+                style={[
+                  styles.locationRow,
+                  mode === 'destination' && styles.locationRowActive,
+                ]}
+                onPress={() => chooseMode('destination')}
+                accessibilityRole="button"
+                accessibilityState={{ selected: mode === 'destination' }}
+                accessibilityLabel="Choose destination"
+              >
+                <View style={[styles.routeMarker, styles.destinationMarker]} />
+                <View style={styles.locationTextBox}>
+                  <Text style={styles.locationLabel}>TO</Text>
+                  <Text style={styles.locationValue} numberOfLines={1}>
+                    {destinationNode ? nodeLabel(destinationNode) : 'Choose destination'}
+                  </Text>
+                </View>
+                {destinationNode ? (
+                  <TouchableOpacity
+                    style={styles.rowClearButton}
+                    onPress={onClearDestination}
+                    accessibilityRole="button"
+                    accessibilityLabel="Clear destination"
+                  >
+                    <Text style={styles.rowClearText}>✕</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <Text style={styles.rowChevron}>›</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.searchRow}>
+              <Text style={styles.searchIcon}>⌕</Text>
+              <TextInput
+                style={styles.searchInput}
+                placeholder={
+                  mode === 'location'
+                    ? 'Search your current room'
+                    : 'Search room or destination'
+                }
+                placeholderTextColor="#9CA3AF"
+                value={query}
+                onChangeText={setQuery}
+                returnKeyType="search"
+                onSubmitEditing={() => Keyboard.dismiss()}
+                accessibilityLabel={
+                  mode === 'location'
+                    ? 'Search starting location'
+                    : 'Search destination'
+                }
+              />
+
+              {query.length > 0 && (
+                <TouchableOpacity
+                  style={styles.searchClearButton}
+                  onPress={() => setQuery('')}
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear search"
+                >
+                  <Text style={styles.searchClearText}>✕</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {results.length > 0 && (
+              <ScrollView
+                style={styles.results}
+                keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled
+              >
+                {results.map(node => (
+                  <TouchableOpacity
+                    key={node.id}
+                    style={styles.resultItem}
+                    onPress={() => selectNode(node.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={nodeLabel(node) + ', Floor ' + node.floor}
+                  >
+                    <View style={styles.resultIconBox}>
+                      <Text style={styles.resultIcon}>{getIcon(node.type)}</Text>
+                    </View>
+                    <View style={styles.resultTextBox}>
+                      <Text style={styles.resultText} numberOfLines={1}>
+                        {nodeLabel(node)}
+                      </Text>
+                      <Text style={styles.resultSub}>Floor {node.floor}</Text>
+                    </View>
+                    <Text style={styles.resultChevron}>›</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+
+            {routeMessage && (
+              <View style={styles.messageBox}>
+                <Text style={styles.messageIcon}>!</Text>
+                <Text style={styles.messageText}>{routeMessage}</Text>
+              </View>
+            )}
+          </>
         )}
       </View>
 
-      <View style={styles.floorControl}>
-        <Text style={styles.floorLabel}>FLOOR</Text>
-        <View style={styles.floorSegments}>
+      <View style={styles.mapSwitcher}>
+        <Text style={styles.mapSwitcherLabel}>MAP</Text>
+        <View style={styles.mapSegments}>
+          <TouchableOpacity
+            style={[
+              styles.mapButton,
+              viewMode === 'site' && styles.siteButtonActive,
+            ]}
+            onPress={onShowSite}
+            accessibilityRole="button"
+            accessibilityState={{ selected: viewMode === 'site' }}
+            accessibilityLabel="Building site overview"
+          >
+            <Text
+              style={[
+                styles.mapButtonText,
+                viewMode === 'site' && styles.mapButtonTextActive,
+              ]}
+            >
+              SITE
+            </Text>
+          </TouchableOpacity>
+
           {floors.map(floor => {
-            const selected = currentFloor === floor;
+            const selected = viewMode !== 'site' && currentFloor === floor;
             return (
               <TouchableOpacity
                 key={floor}
                 style={[
-                  styles.floorButton,
+                  styles.mapButton,
                   selected && styles.floorButtonActive,
                 ]}
                 onPress={() => onFloor(floor)}
@@ -263,8 +288,8 @@ export default function HUD({
               >
                 <Text
                   style={[
-                    styles.floorButtonText,
-                    selected && styles.floorButtonTextActive,
+                    styles.mapButtonText,
+                    selected && styles.mapButtonTextActive,
                   ]}
                 >
                   {floor}F
@@ -305,7 +330,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 14,
-    backgroundColor: '#DBEAFE',
+    backgroundColor: '#DCFCE7',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -382,7 +407,7 @@ const styles = StyleSheet.create({
   locationValue: {
     color: '#1F2937',
     fontSize: 14,
-    fontWeight: '650',
+    fontWeight: '700',
     marginTop: 2,
   },
   routeDivider: {
@@ -514,7 +539,7 @@ const styles = StyleSheet.create({
     lineHeight: 17,
     fontWeight: '600',
   },
-  floorControl: {
+  mapSwitcher: {
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
@@ -529,20 +554,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 9,
   },
-  floorLabel: {
+  mapSwitcherLabel: {
     color: '#94A3B8',
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1,
     marginRight: 7,
   },
-  floorSegments: {
+  mapSegments: {
     flexDirection: 'row',
     gap: 4,
   },
-  floorButton: {
+  mapButton: {
     minWidth: 48,
-    height: 36,
+    height: 38,
+    paddingHorizontal: 12,
     borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
@@ -551,12 +577,15 @@ const styles = StyleSheet.create({
   floorButtonActive: {
     backgroundColor: '#2563EB',
   },
-  floorButtonText: {
-    color: '#475569',
-    fontSize: 13,
+  siteButtonActive: {
+    backgroundColor: '#16A34A',
+  },
+  mapButtonText: {
+    color: '#64748B',
+    fontSize: 12,
     fontWeight: '800',
   },
-  floorButtonTextActive: {
+  mapButtonTextActive: {
     color: '#FFFFFF',
   },
 });
