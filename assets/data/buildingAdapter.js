@@ -1,4 +1,4 @@
-const SUPPORTED_SPACE_TYPES = new Set([
+const SUPPORTED_UNIT_TYPES = new Set([
   "room",
   "corridor",
   "elevator",
@@ -19,8 +19,6 @@ function geometryToNodeFields(geometry) {
   const width = Number(source.width) || 0;
   const height = Number(source.height) || 0;
 
-  // Rectangle coordinates in building data describe the top-left corner.
-  // The renderer and route overlay use the rectangle center as the node point.
   return {
     x: source.type === "rectangle" ? x + width / 2 : x,
     y: source.type === "rectangle" ? y + height / 2 : y,
@@ -31,20 +29,16 @@ function geometryToNodeFields(geometry) {
   };
 }
 
-function getGeoJsonRing(siteGeoJSON) {
-  const features = Array.isArray(siteGeoJSON?.features)
-    ? siteGeoJSON.features
-    : [];
+function getGeographicRing(buildingData) {
+  const geometry = buildingData?.facility?.geometry;
+  if (
+    geometry?.type !== "Polygon" ||
+    !Array.isArray(geometry.coordinates?.[0])
+  ) {
+    return null;
+  }
 
-  const polygon = features.find(
-    feature =>
-      feature?.geometry?.type === "Polygon" &&
-      Array.isArray(feature.geometry.coordinates?.[0])
-  );
-
-  if (!polygon) return null;
-
-  const ring = polygon.geometry.coordinates[0]
+  const ring = geometry.coordinates[0]
     .map(point => [Number(point?.[0]), Number(point?.[1])])
     .filter(([lon, lat]) => Number.isFinite(lon) && Number.isFinite(lat));
 
@@ -54,7 +48,6 @@ function getGeoJsonRing(siteGeoJSON) {
 function getBounds(points) {
   const xs = points.map(([x]) => Number(x));
   const ys = points.map(([, y]) => Number(y));
-
   return {
     minX: Math.min(...xs),
     maxX: Math.max(...xs),
@@ -75,8 +68,6 @@ function projectGeoRingToFloor(ring, mapWidth, mapHeight) {
   const averageLat =
     latitudes.reduce((sum, value) => sum + value, 0) / latitudes.length;
 
-  // Equirectangular projection is accurate enough at one-building scale and
-  // keeps the real footprint proportions from the supplied GeoJSON.
   const metersPerDegreeLat = 111320;
   const metersPerDegreeLon =
     111320 * Math.cos((averageLat * Math.PI) / 180);
@@ -109,9 +100,7 @@ function projectGeoRingToFloor(ring, mapWidth, mapHeight) {
   const offsetX = (mapWidth - fittedWidth) / 2;
   const offsetY = (mapHeight - fittedHeight) / 2;
 
-  // Rotate 180 degrees so the real footprint matches the directory-board
-  // orientation used by the existing Floor 1 room data: the long wing runs
-  // left-to-right and the tall wing is on the right.
+  // LC2 Floor 1 is drawn in the same orientation as the directory board.
   return projected.map(([x, y]) => [
     offsetX + (projectedWidth - x) * scale,
     offsetY + (projectedHeight - y) * scale,
@@ -134,15 +123,7 @@ function createLayoutTransform(sourceBoundary, targetBoundary) {
   const sourceHeight = Math.max(1, source.maxY - source.minY);
   const targetWidth = Math.max(1, target.maxX - target.minX);
   const targetHeight = Math.max(1, target.maxY - target.minY);
-
-  // Uniform scaling preserves all room proportions from the photographed
-  // directory layout while moving the entire floor plan inside the GeoJSON
-  // footprint. This prevents rooms/facilities from "splitting out" beyond the
-  // building outline.
-  const scale = Math.min(
-    targetWidth / sourceWidth,
-    targetHeight / sourceHeight
-  );
+  const scale = Math.min(targetWidth / sourceWidth, targetHeight / sourceHeight);
 
   const sourceCenterX = (source.minX + source.maxX) / 2;
   const sourceCenterY = (source.minY + source.maxY) / 2;
@@ -182,72 +163,48 @@ function transformGeometry(geometry, transform) {
 
   if (geometry.type === "point") {
     const [x, y] = transform.point(geometry.x, geometry.y);
-    return {
-      ...geometry,
-      x,
-      y,
-    };
+    return { ...geometry, x, y };
   }
 
   if (geometry.type === "rectangle") {
     const result = transformRect(geometry, transform);
-
     if (Array.isArray(geometry.parts)) {
       result.parts = geometry.parts.map(part => transformRect(part, transform));
     }
-
     if (Array.isArray(geometry.outline)) {
       result.outline = geometry.outline.map(([x, y]) => transform.point(x, y));
     }
-
     return result;
   }
 
   return geometry;
 }
 
-function prepareFloors(floors, siteGeoJSON) {
-  const geoRing = getGeoJsonRing(siteGeoJSON);
+function prepareLevels(levels, buildingData) {
+  const geoRing = getGeographicRing(buildingData);
   const geometryTransforms = {};
 
-  if (!geoRing) {
-    return {
-      floors: floors || [],
-      geometryTransforms,
-    };
-  }
+  const nextLevels = (levels || []).map(level => {
+    // The surveyed GeoJSON supplied for LC2 represents Floor 1 only.
+    if (!geoRing || Number(level?.level) !== 1) return level;
 
-  const nextFloors = (floors || []).map(floor => {
-    // The supplied surveyed polygon and directory-board reference are only
-    // for Floor 1. Floor 2 keeps its original hand-traced outline.
-    if (Number(floor?.level) !== 1) {
-      return floor;
-    }
-
-    const width = Number(floor?.map?.width) || 1200;
-    const height = Number(floor?.map?.height) || 450;
-    const sourceBoundary = Array.isArray(floor?.map?.boundary)
-      ? floor.map.boundary
+    const width = Number(level?.map?.width) || 1200;
+    const height = Number(level?.map?.height) || 450;
+    const sourceBoundary = Array.isArray(level?.map?.boundary)
+      ? level.map.boundary
       : null;
     const targetBoundary = projectGeoRingToFloor(geoRing, width, height);
+    if (!targetBoundary) return level;
 
-    if (!targetBoundary) return floor;
-
-    const layoutTransform = createLayoutTransform(
-      sourceBoundary,
-      targetBoundary
-    );
-
-    if (layoutTransform) {
-      geometryTransforms[floor.id] = layoutTransform;
-    }
+    const layoutTransform = createLayoutTransform(sourceBoundary, targetBoundary);
+    if (layoutTransform) geometryTransforms[level.id] = layoutTransform;
 
     return {
-      ...floor,
+      ...level,
       map: {
-        ...floor.map,
+        ...level.map,
         boundary: targetBoundary,
-        boundarySource: "geojson",
+        boundarySource: "facility.geojson",
         geographicBoundary: geoRing,
         sourceBoundary,
         layoutFittedToGeoJSON: Boolean(layoutTransform),
@@ -255,78 +212,88 @@ function prepareFloors(floors, siteGeoJSON) {
     };
   });
 
-  return {
-    floors: nextFloors,
-    geometryTransforms,
-  };
+  return { levels: nextLevels, geometryTransforms };
+}
+
+function legacyTransitionType(type) {
+  if (typeof type !== "string") return undefined;
+  if (!type.startsWith("vertical.")) return undefined;
+  return type.slice("vertical.".length);
 }
 
 export function normalizeBuildingData(buildingData) {
-  const prepared = prepareFloors(
-    buildingData.floors || [],
-    buildingData.siteGeoJSON
-  );
-  const floors = prepared.floors;
-  const floorsById = Object.fromEntries(
-    floors.map(floor => [floor.id, floor])
-  );
+  const prepared = prepareLevels(buildingData.levels || [], buildingData);
+  const levels = prepared.levels;
+  const levelMap = Object.fromEntries(levels.map(level => [level.id, level]));
 
-  const nodes = (buildingData.spaces || []).map(space => {
-    const floor = floorsById[space.floorId];
-    const layoutTransform = prepared.geometryTransforms[space.floorId] || null;
-    const transformedGeometry = transformGeometry(
-      space.geometry,
-      layoutTransform
-    );
+  const nodes = (buildingData.units || []).map(unit => {
+    const level = levelMap[unit.levelId];
+    const transform = prepared.geometryTransforms[unit.levelId] || null;
+    const transformedGeometry = transformGeometry(unit.geometry, transform);
     const geometry = geometryToNodeFields(transformedGeometry);
-    const accessibility = space.accessibility || {};
+    const accessibility = unit.accessibility || {};
 
     return {
-      id: space.id,
-      name: space.name || space.code || space.id,
-      label: space.name || space.code || space.id,
-      code: space.code || null,
-      floorId: space.floorId,
-      floor: floor ? Number(floor.level) : null,
+      id: unit.id,
+      name: unit.name || unit.displayName || unit.code || unit.id,
+      label: unit.displayName || unit.name || unit.code || unit.id,
+      code: unit.code || null,
+      floorId: unit.levelId,
+      floor: level ? Number(level.level) : null,
       x: geometry.x,
       y: geometry.y,
       width: geometry.width,
       height: geometry.height,
       geometryParts: geometry.parts,
       geometryOutline: geometry.outline,
-      type: SUPPORTED_SPACE_TYPES.has(space.type) ? space.type : space.type,
+      type: SUPPORTED_UNIT_TYPES.has(unit.type) ? unit.type : "other",
+      categoryId: unit.categoryId || null,
       door_width:
-        accessibility.doorWidth === undefined
-          ? null
-          : accessibility.doorWidth,
+        accessibility.doorWidth === undefined ? null : accessibility.doorWidth,
       threshold:
-        accessibility.threshold === undefined
-          ? null
-          : accessibility.threshold,
+        accessibility.threshold === undefined ? null : accessibility.threshold,
       accessibility,
     };
   });
 
-  const edges = (buildingData.connections || []).map(connection => ({
-    id: connection.id,
-    from: connection.from,
-    to: connection.to,
-    weight:
-      connection.routing && connection.routing.cost !== undefined
-        ? connection.routing.cost
-        : 1,
-    width:
-      connection.accessibility && connection.accessibility.width !== undefined
-        ? connection.accessibility.width
-        : null,
-    slope:
-      connection.accessibility && connection.accessibility.slope !== undefined
-        ? connection.accessibility.slope
-        : null,
-    transition:
-      connection.transition && connection.transition.type
-        ? connection.transition.type
-        : undefined,
+  const stateMap = Object.fromEntries(
+    (buildingData.routing?.states || []).map(state => [state.id, state])
+  );
+
+  const edges = (buildingData.routing?.transitions || [])
+    .map(transition => {
+      const fromState = stateMap[transition.from];
+      const toState = stateMap[transition.to];
+      if (!fromState?.unitId || !toState?.unitId) return null;
+
+      return {
+        id: transition.id,
+        from: fromState.unitId,
+        to: toState.unitId,
+        weight: Number(transition.routing?.cost ?? 1),
+        width:
+          transition.accessibility?.width === undefined
+            ? null
+            : transition.accessibility.width,
+        slope:
+          transition.accessibility?.slope === undefined
+            ? null
+            : transition.accessibility.slope,
+        wheelchairAccessible:
+          transition.accessibility?.wheelchairAccessible !== false,
+        openingId: transition.openingId || null,
+        transition: legacyTransitionType(transition.type),
+      };
+    })
+    .filter(Boolean);
+
+  const floors = levels.map(level => ({
+    id: level.id,
+    level: Number(level.level),
+    name: level.name,
+    elevation: level.elevation,
+    floorToFloorHeight: level.floorToFloorHeight,
+    map: level.map,
   }));
 
   return {
@@ -335,8 +302,8 @@ export function normalizeBuildingData(buildingData) {
     nodes,
     edges,
     nodeMap: Object.fromEntries(nodes.map(node => [node.id, node])),
-    floorMap: floorsById,
-    buildingId: buildingData.building.id,
-    buildingName: buildingData.building.name,
+    floorMap: Object.fromEntries(floors.map(floor => [floor.id, floor])),
+    buildingId: buildingData.facility.id,
+    buildingName: buildingData.facility.name,
   };
 }
