@@ -19,7 +19,6 @@ import Svg, {
 
 const VIEW_WIDTH = 1000;
 const VIEW_HEIGHT = 650;
-
 const MAP_BG = '#F7F8FA';
 const BUILDING_FILL = '#E7EBF0';
 const BUILDING_STROKE = '#D0D7DF';
@@ -28,17 +27,11 @@ const WALKWAY = '#58B89C';
 const LABEL = '#667786';
 const PIN = '#EA4335';
 
-const LC2_TARGET = {
-  x: 175,
-  y: 270,
-  width: 665,
-  height: 220,
-};
+const LC2_TARGET = { x: 175, y: 270, width: 665, height: 220 };
 
 function getBounds(points) {
   const xs = points.map(point => Number(point[0]) || 0);
   const ys = points.map(point => Number(point[1]) || 0);
-
   return {
     minX: Math.min(...xs),
     maxX: Math.max(...xs),
@@ -63,12 +56,10 @@ function createIndoorToCampusTransform(points) {
   const bounds = getBounds(sourcePoints);
   const sourceWidth = Math.max(1, bounds.maxX - bounds.minX);
   const sourceHeight = Math.max(1, bounds.maxY - bounds.minY);
-
   const scale = Math.min(
     LC2_TARGET.width / sourceWidth,
     LC2_TARGET.height / sourceHeight
   );
-
   const fittedWidth = sourceWidth * scale;
   const fittedHeight = sourceHeight * scale;
   const offsetX = LC2_TARGET.x + (LC2_TARGET.width - fittedWidth) / 2;
@@ -77,12 +68,9 @@ function createIndoorToCampusTransform(points) {
   function point(x, y) {
     const px = Number(x) || 0;
     const py = Number(y) || 0;
-    const rotatedX = bounds.maxX - px;
-    const rotatedY = bounds.maxY - py;
-
     return [
-      offsetX + rotatedX * scale,
-      offsetY + rotatedY * scale,
+      offsetX + (bounds.maxX - px) * scale,
+      offsetY + (bounds.maxY - py) * scale,
     ];
   }
 
@@ -100,35 +88,19 @@ function pointsToString(points, transformX, transformY) {
 }
 
 function roomFill(type) {
-  switch (type) {
-    case 'elevator':
-      return '#DCEBFF';
-    case 'stairs':
-      return '#E5E7EB';
-    case 'toilet':
-    case 'restroom':
-      return '#DDF4EE';
-    case 'corridor':
-      return '#F2F5F8';
-    default:
-      return '#FFFFFF';
-  }
+  if (type === 'elevator') return '#DCEBFF';
+  if (type === 'stairs') return '#E5E7EB';
+  if (type === 'toilet' || type === 'restroom') return '#DDF4EE';
+  if (type === 'corridor') return '#F2F5F8';
+  return '#FFFFFF';
 }
 
 function roomStroke(type) {
-  switch (type) {
-    case 'elevator':
-      return '#4B83C4';
-    case 'toilet':
-    case 'restroom':
-      return '#4A9D87';
-    case 'stairs':
-      return '#8A94A3';
-    case 'corridor':
-      return '#C5CDD6';
-    default:
-      return '#8E99A8';
-  }
+  if (type === 'elevator') return '#4B83C4';
+  if (type === 'toilet' || type === 'restroom') return '#4A9D87';
+  if (type === 'stairs') return '#8A94A3';
+  if (type === 'corridor') return '#C5CDD6';
+  return '#8E99A8';
 }
 
 const CAMPUS_BUILDINGS = [
@@ -161,7 +133,6 @@ const FOOTPATHS = [
 
 export default function BuildingOverview({ mapData, onOpenFloor }) {
   const [zoom, setZoom] = useState(1);
-
   const buildingName = mapData.buildingName || 'LC2';
   const groundFloor = mapData.floors?.[0];
   const groundFloorLevel = Number(groundFloor?.level ?? 1);
@@ -170,9 +141,7 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
     () => createIndoorToCampusTransform(groundFloor?.map?.boundary),
     [groundFloor]
   );
-
   const footprint = indoorTransform.boundary;
-
   const groundFloorNodes = useMemo(
     () =>
       mapData.nodes.filter(
@@ -187,7 +156,6 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
   const footprintBounds = getBounds(footprint);
   const markerX = (footprintBounds.minX + footprintBounds.maxX) / 2;
   const markerY = footprintBounds.minY + 45;
-
   const centerX = VIEW_WIDTH / 2;
   const centerY = VIEW_HEIGHT / 2;
   const tx = value => centerX + (value - centerX) * zoom;
@@ -200,10 +168,6 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 
   function zoomOut() {
     setZoom(value => Math.max(0.78, Number((value - 0.12).toFixed(2))));
-  }
-
-  function resetZoom() {
-    setZoom(1);
   }
 
   return (
@@ -231,7 +195,6 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
           stroke={ROAD}
           strokeWidth={ts(22)}
         />
-
         <Line
           x1={tx(130)}
           y1={ty(135)}
@@ -241,7 +204,6 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
           strokeWidth={ts(18)}
           strokeLinecap="round"
         />
-
         <Line
           x1={tx(900)}
           y1={ty(0)}
@@ -251,7 +213,6 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
           strokeWidth={ts(17)}
           strokeLinecap="round"
         />
-
         <Line
           x1={tx(915)}
           y1={ty(455)}
@@ -304,7 +265,6 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
             const [campusX, campusY] = indoorTransform.point(node.x, node.y);
             const width = Number(node.width) * indoorTransform.scale;
             const height = Number(node.height) * indoorTransform.scale;
-            const isRoom = node.type === 'room';
             const label = node.code || node.name || '';
 
             return (
@@ -318,31 +278,30 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
                   stroke={roomStroke(node.type)}
                   strokeWidth={ts(node.type === 'corridor' ? 0.7 : 1)}
                 />
-
-                {(isRoom ||
+                {(node.type === 'room' ||
                   node.type === 'elevator' ||
                   node.type === 'stairs' ||
                   node.type === 'toilet' ||
                   node.type === 'restroom') &&
-                  width >= 16 &&
-                  height >= 12 ? (
-                    <SvgText
-                      x={tx(campusX)}
-                      y={ty(campusY) + ts(2.5)}
-                      fill="#425466"
-                      fontSize={ts(isRoom ? 7.5 : 6.5)}
-                      fontWeight="700"
-                      textAnchor="middle"
-                    >
-                      {node.type === 'elevator'
-                        ? 'E'
-                        : node.type === 'stairs'
-                          ? 'S'
-                          : node.type === 'toilet' || node.type === 'restroom'
-                            ? 'WC'
-                            : label}
-                    </SvgText>
-                  ) : null}
+                width >= 16 &&
+                height >= 12 ? (
+                  <SvgText
+                    x={tx(campusX)}
+                    y={ty(campusY) + ts(2.5)}
+                    fill="#425466"
+                    fontSize={ts(node.type === 'room' ? 7.5 : 6.5)}
+                    fontWeight="700"
+                    textAnchor="middle"
+                  >
+                    {node.type === 'elevator'
+                      ? 'E'
+                      : node.type === 'stairs'
+                        ? 'S'
+                        : node.type === 'toilet' || node.type === 'restroom'
+                          ? 'WC'
+                          : label}
+                  </SvgText>
+                ) : null}
               </G>
             );
           })}
@@ -357,18 +316,8 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
         />
 
         <G>
-          <Circle
-            cx={tx(markerX)}
-            cy={ty(markerY - 12)}
-            r={ts(13)}
-            fill={PIN}
-          />
-          <Circle
-            cx={tx(markerX)}
-            cy={ty(markerY - 12)}
-            r={ts(5)}
-            fill="#B3261E"
-          />
+          <Circle cx={tx(markerX)} cy={ty(markerY - 12)} r={ts(13)} fill={PIN} />
+          <Circle cx={tx(markerX)} cy={ty(markerY - 12)} r={ts(5)} fill="#B3261E" />
           <Polygon
             points={pointsToString(
               [
@@ -393,7 +342,6 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
         >
           Faculty of Science and Technology
         </SvgText>
-
         <SvgText
           x={tx(markerX)}
           y={ty(505)}
@@ -404,7 +352,6 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
         >
           อาคารบรรยายเรียนรวม 2
         </SvgText>
-
         <SvgText
           x={tx(markerX)}
           y={ty(524)}
@@ -414,24 +361,10 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
         >
           LC2 · Floor 1 data fitted to building footprint
         </SvgText>
-
-        <SvgText
-          x={tx(700)}
-          y={ty(452)}
-          fill="#D97706"
-          fontSize={ts(12)}
-          fontWeight="600"
-        >
+        <SvgText x={tx(700)} y={ty(452)} fill="#D97706" fontSize={ts(12)} fontWeight="600">
           59Degree coffee
         </SvgText>
-
-        <SvgText
-          x={tx(720)}
-          y={ty(608)}
-          fill={LABEL}
-          fontSize={ts(12)}
-          fontWeight="600"
-        >
+        <SvgText x={tx(720)} y={ty(608)} fill={LABEL} fontSize={ts(12)} fontWeight="600">
           Environmental Science Building
         </SvgText>
       </Svg>
@@ -444,7 +377,6 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
             LC2 · 1F indoor map fitted into the exterior building polygon
           </Text>
         </View>
-
         <TouchableOpacity
           style={styles.enterButton}
           onPress={() => onOpenFloor?.(groundFloorLevel)}
@@ -456,30 +388,15 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
       </View>
 
       <View style={styles.zoomControls}>
-        <TouchableOpacity
-          style={styles.zoomButton}
-          onPress={zoomIn}
-          accessibilityRole="button"
-          accessibilityLabel="Zoom in"
-        >
+        <TouchableOpacity style={styles.zoomButton} onPress={zoomIn} accessibilityRole="button" accessibilityLabel="Zoom in">
           <Text style={styles.zoomText}>＋</Text>
         </TouchableOpacity>
         <View style={styles.zoomDivider} />
-        <TouchableOpacity
-          style={styles.zoomButton}
-          onPress={zoomOut}
-          accessibilityRole="button"
-          accessibilityLabel="Zoom out"
-        >
+        <TouchableOpacity style={styles.zoomButton} onPress={zoomOut} accessibilityRole="button" accessibilityLabel="Zoom out">
           <Text style={styles.zoomText}>−</Text>
         </TouchableOpacity>
         <View style={styles.zoomDivider} />
-        <TouchableOpacity
-          style={styles.zoomButton}
-          onPress={resetZoom}
-          accessibilityRole="button"
-          accessibilityLabel="Reset campus map zoom"
-        >
+        <TouchableOpacity style={styles.zoomButton} onPress={() => setZoom(1)} accessibilityRole="button" accessibilityLabel="Reset campus map zoom">
           <Text style={styles.targetText}>◎</Text>
         </TouchableOpacity>
       </View>
@@ -493,11 +410,7 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: MAP_BG,
-    overflow: 'hidden',
-  },
+  container: { flex: 1, backgroundColor: MAP_BG, overflow: 'hidden' },
   placeCard: {
     position: 'absolute',
     left: 16,
@@ -516,27 +429,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.14,
     shadowRadius: 12,
   },
-  placeTextBox: {
-    flex: 1,
-    paddingRight: 10,
-  },
-  placeEyebrow: {
-    color: '#0F9D8A',
-    fontSize: 9,
-    fontWeight: '900',
-    letterSpacing: 1.1,
-  },
-  placeTitle: {
-    color: '#1F2937',
-    fontSize: 17,
-    fontWeight: '800',
-    marginTop: 3,
-  },
-  placeSubtitle: {
-    color: '#6B7280',
-    fontSize: 11,
-    marginTop: 2,
-  },
+  placeTextBox: { flex: 1, paddingRight: 10 },
+  placeEyebrow: { color: '#0F9D8A', fontSize: 9, fontWeight: '900', letterSpacing: 1.1 },
+  placeTitle: { color: '#1F2937', fontSize: 17, fontWeight: '800', marginTop: 3 },
+  placeSubtitle: { color: '#6B7280', fontSize: 11, marginTop: 2 },
   enterButton: {
     minHeight: 44,
     paddingHorizontal: 16,
@@ -545,11 +441,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  enterButtonText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '800',
-  },
+  enterButtonText: { color: '#FFFFFF', fontSize: 13, fontWeight: '800' },
   zoomControls: {
     position: 'absolute',
     right: 16,
@@ -564,25 +456,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 8,
   },
-  zoomButton: {
-    height: 46,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  zoomDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#D1D5DB',
-    marginHorizontal: 7,
-  },
-  zoomText: {
-    color: '#4B5563',
-    fontSize: 27,
-    fontWeight: '300',
-  },
-  targetText: {
-    color: '#4B5563',
-    fontSize: 23,
-  },
+  zoomButton: { height: 46, alignItems: 'center', justifyContent: 'center' },
+  zoomDivider: { height: StyleSheet.hairlineWidth, backgroundColor: '#D1D5DB', marginHorizontal: 7 },
+  zoomText: { color: '#4B5563', fontSize: 27, fontWeight: '300' },
+  targetText: { color: '#4B5563', fontSize: 23 },
   mapBadge: {
     position: 'absolute',
     left: 16,
@@ -595,14 +472,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 4,
   },
-  mapBadgeIcon: {
-    color: '#4B5563',
-    fontSize: 18,
-    marginRight: 7,
-  },
-  mapBadgeText: {
-    color: '#4B5563',
-    fontSize: 11,
-    fontWeight: '700',
-  },
+  mapBadgeIcon: { color: '#4B5563', fontSize: 18, marginRight: 7 },
+  mapBadgeText: { color: '#4B5563', fontSize: 11, fontWeight: '700' },
 });
