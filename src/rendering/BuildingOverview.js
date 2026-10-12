@@ -7,6 +7,8 @@ import {
 } from 'react-native';
 import Svg, {
   Circle,
+  ClipPath,
+  Defs,
   G,
   Line,
   Path,
@@ -26,9 +28,9 @@ const WALKWAY = '#58B89C';
 const LABEL = '#667786';
 const PIN = '#EA4335';
 
-// Position of LC2 in the campus overview, estimated from the supplied map
-// screenshot. The indoor floor boundary is fitted into this box after a 180°
-// rotation so the long wing and vertical wing match the real map orientation.
+// Position of LC2 in the campus overview, estimated from the supplied
+// Google Maps screenshot. The real indoor coordinate system is fitted into
+// this box and rotated 180 degrees to match the exterior orientation.
 const LC2_TARGET = {
   x: 175,
   y: 270,
@@ -48,19 +50,20 @@ function getBounds(points) {
   };
 }
 
-function fitIndoorBoundaryToCampus(points) {
-  if (!Array.isArray(points) || points.length < 3) {
-    return [
-      [185, 275],
-      [835, 275],
-      [835, 345],
-      [255, 345],
-      [255, 485],
-      [185, 485],
-    ];
-  }
+function createIndoorToCampusTransform(points) {
+  const sourcePoints =
+    Array.isArray(points) && points.length >= 3
+      ? points
+      : [
+          [14, 368],
+          [1201, 368],
+          [1201, 0],
+          [1089, 0],
+          [1089, 260],
+          [14, 260],
+        ];
 
-  const bounds = getBounds(points);
+  const bounds = getBounds(sourcePoints);
   const sourceWidth = Math.max(1, bounds.maxX - bounds.minX);
   const sourceHeight = Math.max(1, bounds.maxY - bounds.minY);
 
@@ -74,16 +77,25 @@ function fitIndoorBoundaryToCampus(points) {
   const offsetX = LC2_TARGET.x + (LC2_TARGET.width - fittedWidth) / 2;
   const offsetY = LC2_TARGET.y + (LC2_TARGET.height - fittedHeight) / 2;
 
-  return points.map(([x, y]) => {
-    // Rotate the indoor map 180° to match the orientation in the campus map.
-    const rotatedX = bounds.maxX - Number(x);
-    const rotatedY = bounds.maxY - Number(y);
+  function point(x, y) {
+    const px = Number(x) || 0;
+    const py = Number(y) || 0;
+
+    // 180-degree rotation around the indoor-data bounds.
+    const rotatedX = bounds.maxX - px;
+    const rotatedY = bounds.maxY - py;
 
     return [
       offsetX + rotatedX * scale,
       offsetY + rotatedY * scale,
     ];
-  });
+  }
+
+  return {
+    scale,
+    point,
+    boundary: sourcePoints.map(([x, y]) => point(x, y)),
+  };
 }
 
 function pointsToString(points, transformX, transformY) {
@@ -92,22 +104,49 @@ function pointsToString(points, transformX, transformY) {
     .join(' ');
 }
 
+function roomFill(type) {
+  switch (type) {
+    case 'elevator':
+      return '#DCEBFF';
+    case 'stairs':
+      return '#E5E7EB';
+    case 'toilet':
+    case 'restroom':
+      return '#DDF4EE';
+    case 'corridor':
+      return '#F2F5F8';
+    default:
+      return '#FFFFFF';
+  }
+}
+
+function roomStroke(type) {
+  switch (type) {
+    case 'elevator':
+      return '#4B83C4';
+    case 'toilet':
+    case 'restroom':
+      return '#4A9D87';
+    case 'stairs':
+      return '#8A94A3';
+    case 'corridor':
+      return '#C5CDD6';
+    default:
+      return '#8E99A8';
+  }
+}
+
 const CAMPUS_BUILDINGS = [
-  // North / roundabout area
   { x: 555, y: 45, width: 68, height: 62 },
   { x: 730, y: 35, width: 88, height: 130 },
   { x: 830, y: 26, width: 58, height: 148 },
   { x: 900, y: 30, width: 48, height: 160 },
   { x: 760, y: 170, width: 72, height: 62 },
   { x: 847, y: 175, width: 68, height: 55 },
-
-  // West / south-west context
   { x: 74, y: 78, width: 92, height: 112 },
   { x: 190, y: 58, width: 44, height: 138 },
   { x: 248, y: 50, width: 45, height: 146 },
   { x: 307, y: 58, width: 45, height: 136 },
-
-  // South context
   { x: 70, y: 515, width: 120, height: 80 },
   { x: 245, y: 522, width: 205, height: 78 },
   { x: 535, y: 515, width: 162, height: 82 },
@@ -130,15 +169,29 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 
   const buildingName = mapData.buildingName || 'LC2';
   const groundFloor = mapData.floors?.[0];
+  const groundFloorLevel = Number(groundFloor?.level ?? 1);
 
-  const footprint = useMemo(
-    () => fitIndoorBoundaryToCampus(groundFloor?.map?.boundary),
+  const indoorTransform = useMemo(
+    () => createIndoorToCampusTransform(groundFloor?.map?.boundary),
     [groundFloor]
+  );
+
+  const footprint = indoorTransform.boundary;
+
+  const groundFloorNodes = useMemo(
+    () =>
+      mapData.nodes.filter(
+        node =>
+          Number(node.floor) === groundFloorLevel &&
+          Number(node.width) > 0 &&
+          Number(node.height) > 0
+      ),
+    [mapData.nodes, groundFloorLevel]
   );
 
   const footprintBounds = getBounds(footprint);
   const markerX = (footprintBounds.minX + footprintBounds.maxX) / 2;
-  const markerY = footprintBounds.minY + 55;
+  const markerY = footprintBounds.minY + 45;
 
   const centerX = VIEW_WIDTH / 2;
   const centerY = VIEW_HEIGHT / 2;
@@ -167,9 +220,14 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
         preserveAspectRatio="xMidYMid slice"
         accessibilityLabel={`${buildingName} campus map overview`}
       >
+        <Defs>
+          <ClipPath id="lc2-footprint-clip">
+            <Polygon points={pointsToString(footprint, tx, ty)} />
+          </ClipPath>
+        </Defs>
+
         <Rect width={VIEW_WIDTH} height={VIEW_HEIGHT} fill={MAP_BG} />
 
-        {/* Campus roads based on the supplied map screenshot. */}
         <Circle
           cx={tx(575)}
           cy={ty(130)}
@@ -238,24 +296,77 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
           />
         ))}
 
-        {/* LC2 footprint generated from the real indoor building boundary. */}
+        {/* Exterior LC2 footprint fitted from the real floor boundary. */}
         <Polygon
           points={pointsToString(footprint, tx, ty)}
-          fill="#E1E5EA"
-          stroke="#C9D0D8"
-          strokeWidth={ts(2.4)}
+          fill="#E9EDF2"
+          stroke="#B8C1CC"
+          strokeWidth={ts(2.8)}
           strokeLinejoin="round"
         />
 
-        {/* Entrance / connector visible in the exterior reference. */}
-        <Rect
-          x={tx(495)}
-          y={ty(330)}
-          width={ts(38)}
-          height={ts(76)}
-          fill="#E1E5EA"
-          stroke="#C9D0D8"
-          strokeWidth={ts(1.6)}
+        {/*
+          Render the actual 1F map data inside that exterior footprint.
+          Every room/corridor uses the same rotation, scale and translation as
+          the building boundary, so the indoor geometry stays spatially
+          consistent with the polygon seen on the campus map.
+        */}
+        <G clipPath="url(#lc2-footprint-clip)">
+          {groundFloorNodes.map(node => {
+            const [campusX, campusY] = indoorTransform.point(node.x, node.y);
+            const width = Number(node.width) * indoorTransform.scale;
+            const height = Number(node.height) * indoorTransform.scale;
+            const isRoom = node.type === 'room';
+            const label = node.code || node.name || '';
+
+            return (
+              <G key={`overview-space-${node.id}`}>
+                <Rect
+                  x={tx(campusX) - ts(width) / 2}
+                  y={ty(campusY) - ts(height) / 2}
+                  width={ts(width)}
+                  height={ts(height)}
+                  fill={roomFill(node.type)}
+                  stroke={roomStroke(node.type)}
+                  strokeWidth={ts(node.type === 'corridor' ? 0.7 : 1)}
+                />
+
+                {(isRoom ||
+                  node.type === 'elevator' ||
+                  node.type === 'stairs' ||
+                  node.type === 'toilet' ||
+                  node.type === 'restroom') &&
+                  width >= 16 &&
+                  height >= 12 ? (
+                    <SvgText
+                      x={tx(campusX)}
+                      y={ty(campusY) + ts(2.5)}
+                      fill="#425466"
+                      fontSize={ts(isRoom ? 7.5 : 6.5)}
+                      fontWeight="700"
+                      textAnchor="middle"
+                    >
+                      {node.type === 'elevator'
+                        ? 'E'
+                        : node.type === 'stairs'
+                          ? 'S'
+                          : node.type === 'toilet' || node.type === 'restroom'
+                            ? 'WC'
+                            : label}
+                    </SvgText>
+                  ) : null}
+              </G>
+            );
+          })}
+        </G>
+
+        {/* Re-draw the exterior edge above the indoor data. */}
+        <Polygon
+          points={pointsToString(footprint, tx, ty)}
+          fill="none"
+          stroke="#9DA8B5"
+          strokeWidth={ts(2.2)}
+          strokeLinejoin="round"
         />
 
         <G>
@@ -298,9 +409,9 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 
         <SvgText
           x={tx(markerX)}
-          y={ty(365)}
+          y={ty(505)}
           fill="#4B5563"
-          fontSize={ts(16)}
+          fontSize={ts(15)}
           fontWeight="700"
           textAnchor="middle"
         >
@@ -309,12 +420,12 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 
         <SvgText
           x={tx(markerX)}
-          y={ty(386)}
+          y={ty(524)}
           fill="#7B8794"
-          fontSize={ts(12)}
+          fontSize={ts(11)}
           textAnchor="middle"
         >
-          Learning Center 2 · {buildingName}
+          LC2 · Floor 1 data fitted to building footprint
         </SvgText>
 
         <SvgText
@@ -343,17 +454,17 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
           <Text style={styles.placeEyebrow}>THAMMASAT UNIVERSITY</Text>
           <Text style={styles.placeTitle}>อาคารบรรยายเรียนรวม 2</Text>
           <Text style={styles.placeSubtitle}>
-            LC2 · Building footprint aligned to the campus map
+            LC2 · 1F indoor data scaled into the campus footprint
           </Text>
         </View>
 
         <TouchableOpacity
           style={styles.enterButton}
-          onPress={() => onOpenFloor?.(mapData.floors?.[0]?.level ?? 1)}
+          onPress={() => onOpenFloor?.(groundFloorLevel)}
           accessibilityRole="button"
           accessibilityLabel="Open first floor indoor map"
         >
-          <Text style={styles.enterButtonText}>Indoor map</Text>
+          <Text style={styles.enterButtonText}>Open 1F</Text>
         </TouchableOpacity>
       </View>
 
@@ -388,7 +499,7 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 
       <View style={styles.mapBadge}>
         <Text style={styles.mapBadgeIcon}>▧</Text>
-        <Text style={styles.mapBadgeText}>LC2 campus context</Text>
+        <Text style={styles.mapBadgeText}>LC2 · 1F overlay</Text>
       </View>
     </View>
   );
