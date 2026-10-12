@@ -250,7 +250,7 @@ export default function HUD({
       </View>
 
       <View style={styles.mapSwitcher}>
-        <Text style={styles.mapSwitcherLabel}>MAP</Text>
+        <Text style={styles.mapSwitcherLabel}>VIEW</Text>
         <View style={styles.mapSegments}>
           <TouchableOpacity
             style={[
@@ -260,7 +260,7 @@ export default function HUD({
             onPress={onShowSite}
             accessibilityRole="button"
             accessibilityState={{ selected: viewMode === 'site' }}
-            accessibilityLabel="Building site overview"
+            accessibilityLabel="Campus map overview"
           >
             <Text
               style={[
@@ -268,7 +268,7 @@ export default function HUD({
                 viewMode === 'site' && styles.mapButtonTextActive,
               ]}
             >
-              SITE
+              MAP
             </Text>
           </TouchableOpacity>
 
@@ -567,22 +567,22 @@ const styles = StyleSheet.create({
   },
   mapButton: {
     minWidth: 48,
-    height: 38,
-    paddingHorizontal: 12,
+    paddingHorizontal: 11,
+    height: 36,
     borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F3F4F6',
+  },
+  siteButtonActive: {
+    backgroundColor: '#0F9D8A',
   },
   floorButtonActive: {
     backgroundColor: '#2563EB',
   },
-  siteButtonActive: {
-    backgroundColor: '#16A34A',
-  },
   mapButtonText: {
     color: '#64748B',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
   },
   mapButtonTextActive: {
