@@ -7,7 +7,7 @@ import {
   Text,
 } from 'react-native';
 import { getMapData } from '../../assets/data/buildingLoader';
-import { findPath } from '../logic/pathfinder';
+import { findAllPaths, findPath } from '../logic/pathfinder';
 import FloorPlan from '../rendering/FloorPlan';
 import BuildingOverview from '../rendering/BuildingOverview';
 import HUD from '../rendering/HUD';
@@ -40,12 +40,18 @@ export default function NavigationScreen() {
       return;
     }
 
-    const path = findPath(locationId, destination, mapData);
-    const paths = path.length > 0 ? [path] : [];
+    const allPaths = findAllPaths(locationId, destination, mapData);
+    const fallback = findPath(locationId, destination, mapData);
+    const paths = allPaths.length > 0
+      ? allPaths
+      : fallback.length > 0
+        ? [fallback]
+        : [];
+
     setRouteOptions(paths);
     setSelectedRouteIndex(0);
 
-    if (path.length === 0) {
+    if (paths.length === 0) {
       setShowDirections(false);
       setRouteMessage(
         'No wheelchair-accessible route was found between these locations.'
@@ -53,13 +59,20 @@ export default function NavigationScreen() {
       return;
     }
 
-    if (path.length === 1) {
+    if (paths[0].length === 1) {
       setShowDirections(false);
       setRouteMessage('You are already at the destination.');
       return;
     }
 
-    setRouteMessage(null);
+    if (paths.length > 1) {
+      setRouteMessage(
+        `${paths.length} wheelchair-accessible routes are available.`
+      );
+    } else {
+      setRouteMessage(null);
+    }
+
     setShowDirections(false);
   }, [locationId, destination, mapData]);
 
