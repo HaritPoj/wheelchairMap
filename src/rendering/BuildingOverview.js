@@ -17,13 +17,24 @@ import Svg, {
 
 const VIEW_WIDTH = 1000;
 const VIEW_HEIGHT = 650;
+
 const MAP_BG = '#F7F8FA';
-const BUILDING_FILL = '#E8ECF1';
-const BUILDING_STROKE = '#D4DAE2';
-const ROAD = '#AEBFD0';
-const PATH_COLOR = '#63BFA3';
-const LABEL = '#657786';
+const BUILDING_FILL = '#E7EBF0';
+const BUILDING_STROKE = '#D0D7DF';
+const ROAD = '#B3C4D5';
+const WALKWAY = '#58B89C';
+const LABEL = '#667786';
 const PIN = '#EA4335';
+
+// Position of LC2 in the campus overview, estimated from the supplied map
+// screenshot. The indoor floor boundary is fitted into this box after a 180°
+// rotation so the long wing and vertical wing match the real map orientation.
+const LC2_TARGET = {
+  x: 175,
+  y: 270,
+  width: 665,
+  height: 220,
+};
 
 function getBounds(points) {
   const xs = points.map(point => Number(point[0]) || 0);
@@ -37,80 +48,81 @@ function getBounds(points) {
   };
 }
 
-function normalizeFootprint(points) {
+function fitIndoorBoundaryToCampus(points) {
   if (!Array.isArray(points) || points.length < 3) {
     return [
-      [265, 290],
-      [760, 290],
-      [760, 385],
-      [655, 385],
-      [655, 415],
-      [390, 415],
-      [390, 470],
-      [265, 470],
+      [185, 275],
+      [835, 275],
+      [835, 345],
+      [255, 345],
+      [255, 485],
+      [185, 485],
     ];
   }
 
   const bounds = getBounds(points);
   const sourceWidth = Math.max(1, bounds.maxX - bounds.minX);
   const sourceHeight = Math.max(1, bounds.maxY - bounds.minY);
-  const targetWidth = 600;
-  const targetHeight = 215;
+
   const scale = Math.min(
-    targetWidth / sourceWidth,
-    targetHeight / sourceHeight
+    LC2_TARGET.width / sourceWidth,
+    LC2_TARGET.height / sourceHeight
   );
 
-  const scaledWidth = sourceWidth * scale;
-  const scaledHeight = sourceHeight * scale;
-  const offsetX = (VIEW_WIDTH - scaledWidth) / 2 + 70;
-  const offsetY = 330 - scaledHeight / 2;
+  const fittedWidth = sourceWidth * scale;
+  const fittedHeight = sourceHeight * scale;
+  const offsetX = LC2_TARGET.x + (LC2_TARGET.width - fittedWidth) / 2;
+  const offsetY = LC2_TARGET.y + (LC2_TARGET.height - fittedHeight) / 2;
 
-  return points.map(([x, y]) => [
-    offsetX + (Number(x) - bounds.minX) * scale,
-    offsetY + (Number(y) - bounds.minY) * scale,
-  ]);
+  return points.map(([x, y]) => {
+    // Rotate the indoor map 180° to match the orientation in the campus map.
+    const rotatedX = bounds.maxX - Number(x);
+    const rotatedY = bounds.maxY - Number(y);
+
+    return [
+      offsetX + rotatedX * scale,
+      offsetY + rotatedY * scale,
+    ];
+  });
 }
 
-function transformedPoints(points, zoom) {
-  const centerX = VIEW_WIDTH / 2;
-  const centerY = VIEW_HEIGHT / 2;
-
+function pointsToString(points, transformX, transformY) {
   return points
-    .map(([x, y]) => {
-      const sx = centerX + (x - centerX) * zoom;
-      const sy = centerY + (y - centerY) * zoom;
-      return `${sx},${sy}`;
-    })
+    .map(([x, y]) => `${transformX(x)},${transformY(y)}`)
     .join(' ');
 }
 
 const CAMPUS_BUILDINGS = [
-  { x: 730, y: 50, width: 120, height: 95 },
-  { x: 850, y: 36, width: 52, height: 120 },
-  { x: 910, y: 40, width: 40, height: 130 },
-  { x: 758, y: 150, width: 72, height: 74 },
-  { x: 848, y: 172, width: 76, height: 58 },
-  { x: 920, y: 165, width: 55, height: 68 },
-  { x: 87, y: 68, width: 90, height: 120 },
-  { x: 190, y: 60, width: 48, height: 136 },
-  { x: 250, y: 48, width: 46, height: 148 },
-  { x: 312, y: 58, width: 45, height: 135 },
-  { x: 795, y: 498, width: 160, height: 92 },
-  { x: 545, y: 515, width: 155, height: 82 },
-  { x: 250, y: 525, width: 205, height: 75 },
-  { x: 72, y: 485, width: 120, height: 95 },
+  // North / roundabout area
+  { x: 555, y: 45, width: 68, height: 62 },
+  { x: 730, y: 35, width: 88, height: 130 },
+  { x: 830, y: 26, width: 58, height: 148 },
+  { x: 900, y: 30, width: 48, height: 160 },
+  { x: 760, y: 170, width: 72, height: 62 },
+  { x: 847, y: 175, width: 68, height: 55 },
+
+  // West / south-west context
+  { x: 74, y: 78, width: 92, height: 112 },
+  { x: 190, y: 58, width: 44, height: 138 },
+  { x: 248, y: 50, width: 45, height: 146 },
+  { x: 307, y: 58, width: 45, height: 136 },
+
+  // South context
+  { x: 70, y: 515, width: 120, height: 80 },
+  { x: 245, y: 522, width: 205, height: 78 },
+  { x: 535, y: 515, width: 162, height: 82 },
+  { x: 780, y: 500, width: 175, height: 92 },
 ];
 
 const FOOTPATHS = [
-  [[330, 150], [480, 150], [480, 225]],
-  [[480, 225], [480, 305]],
-  [[480, 430], [480, 535]],
-  [[460, 535], [640, 535], [690, 585]],
-  [[690, 585], [910, 585]],
-  [[910, 585], [910, 430]],
-  [[800, 430], [910, 430]],
-  [[215, 455], [345, 455], [380, 420]],
+  [[330, 150], [455, 150], [470, 198]],
+  [[475, 215], [475, 270]],
+  [[475, 490], [475, 535]],
+  [[455, 535], [645, 535], [695, 585]],
+  [[695, 585], [915, 585]],
+  [[915, 585], [915, 430]],
+  [[825, 430], [915, 430]],
+  [[210, 462], [340, 462], [385, 420]],
 ];
 
 export default function BuildingOverview({ mapData, onOpenFloor }) {
@@ -118,17 +130,18 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 
   const buildingName = mapData.buildingName || 'LC2';
   const groundFloor = mapData.floors?.[0];
+
   const footprint = useMemo(
-    () => normalizeFootprint(groundFloor?.map?.boundary),
+    () => fitIndoorBoundaryToCampus(groundFloor?.map?.boundary),
     [groundFloor]
   );
 
-  const bounds = getBounds(footprint);
-  const markerX = (bounds.minX + bounds.maxX) / 2;
-  const markerY = (bounds.minY + bounds.maxY) / 2;
+  const footprintBounds = getBounds(footprint);
+  const markerX = (footprintBounds.minX + footprintBounds.maxX) / 2;
+  const markerY = footprintBounds.minY + 55;
+
   const centerX = VIEW_WIDTH / 2;
   const centerY = VIEW_HEIGHT / 2;
-
   const tx = value => centerX + (value - centerX) * zoom;
   const ty = value => centerY + (value - centerY) * zoom;
   const ts = value => value * zoom;
@@ -138,7 +151,7 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
   }
 
   function zoomOut() {
-    setZoom(value => Math.max(0.8, Number((value - 0.12).toFixed(2))));
+    setZoom(value => Math.max(0.78, Number((value - 0.12).toFixed(2))));
   }
 
   function resetZoom() {
@@ -156,32 +169,33 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
       >
         <Rect width={VIEW_WIDTH} height={VIEW_HEIGHT} fill={MAP_BG} />
 
+        {/* Campus roads based on the supplied map screenshot. */}
         <Circle
-          cx={tx(555)}
-          cy={ty(125)}
-          r={ts(88)}
+          cx={tx(575)}
+          cy={ty(130)}
+          r={ts(82)}
           fill="none"
           stroke={ROAD}
-          strokeWidth={ts(24)}
+          strokeWidth={ts(22)}
         />
 
         <Line
-          x1={tx(120)}
-          y1={ty(120)}
-          x2={tx(470)}
-          y2={ty(120)}
+          x1={tx(130)}
+          y1={ty(135)}
+          x2={tx(490)}
+          y2={ty(135)}
           stroke={ROAD}
           strokeWidth={ts(18)}
           strokeLinecap="round"
         />
 
         <Line
-          x1={tx(902)}
+          x1={tx(900)}
           y1={ty(0)}
-          x2={tx(902)}
+          x2={tx(900)}
           y2={ty(650)}
           stroke={ROAD}
-          strokeWidth={ts(18)}
+          strokeWidth={ts(17)}
           strokeLinecap="round"
         />
 
@@ -191,20 +205,20 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
           x2={tx(1000)}
           y2={ty(455)}
           stroke={ROAD}
-          strokeWidth={ts(18)}
+          strokeWidth={ts(17)}
           strokeLinecap="round"
         />
 
         {FOOTPATHS.map((points, index) => (
           <Path
-            key={`path-${index}`}
+            key={`walkway-${index}`}
             d={points
               .map(([x, y], pointIndex) =>
                 `${pointIndex === 0 ? 'M' : 'L'} ${tx(x)} ${ty(y)}`
               )
               .join(' ')}
             fill="none"
-            stroke={PATH_COLOR}
+            stroke={WALKWAY}
             strokeWidth={ts(2)}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -213,55 +227,69 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 
         {CAMPUS_BUILDINGS.map((building, index) => (
           <Rect
-            key={`campus-building-${index}`}
+            key={`context-building-${index}`}
             x={tx(building.x)}
             y={ty(building.y)}
             width={ts(building.width)}
             height={ts(building.height)}
             fill={BUILDING_FILL}
             stroke={BUILDING_STROKE}
-            strokeWidth={ts(1.4)}
+            strokeWidth={ts(1.3)}
           />
         ))}
 
+        {/* LC2 footprint generated from the real indoor building boundary. */}
         <Polygon
-          points={transformedPoints(footprint, zoom)}
-          fill="#E5E7EB"
-          stroke="#D1D5DB"
-          strokeWidth={ts(2.2)}
+          points={pointsToString(footprint, tx, ty)}
+          fill="#E1E5EA"
+          stroke="#C9D0D8"
+          strokeWidth={ts(2.4)}
+          strokeLinejoin="round"
+        />
+
+        {/* Entrance / connector visible in the exterior reference. */}
+        <Rect
+          x={tx(495)}
+          y={ty(330)}
+          width={ts(38)}
+          height={ts(76)}
+          fill="#E1E5EA"
+          stroke="#C9D0D8"
+          strokeWidth={ts(1.6)}
         />
 
         <G>
           <Circle
             cx={tx(markerX)}
-            cy={ty(markerY - 18)}
+            cy={ty(markerY - 12)}
             r={ts(13)}
             fill={PIN}
           />
           <Circle
             cx={tx(markerX)}
-            cy={ty(markerY - 18)}
+            cy={ty(markerY - 12)}
             r={ts(5)}
             fill="#B3261E"
           />
           <Polygon
-            points={transformedPoints(
+            points={pointsToString(
               [
-                [markerX - 7, markerY - 8],
-                [markerX + 7, markerY - 8],
-                [markerX, markerY + 11],
+                [markerX - 7, markerY - 3],
+                [markerX + 7, markerY - 3],
+                [markerX, markerY + 17],
               ],
-              zoom
+              tx,
+              ty
             )}
             fill={PIN}
           />
         </G>
 
         <SvgText
-          x={tx(505)}
-          y={ty(215)}
+          x={tx(565)}
+          y={ty(228)}
           fill={LABEL}
-          fontSize={ts(14)}
+          fontSize={ts(13)}
           fontWeight="600"
           textAnchor="middle"
         >
@@ -270,9 +298,9 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 
         <SvgText
           x={tx(markerX)}
-          y={ty(markerY + 35)}
+          y={ty(365)}
           fill="#4B5563"
-          fontSize={ts(17)}
+          fontSize={ts(16)}
           fontWeight="700"
           textAnchor="middle"
         >
@@ -281,29 +309,29 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 
         <SvgText
           x={tx(markerX)}
-          y={ty(markerY + 57)}
-          fill="#7A8794"
-          fontSize={ts(13)}
+          y={ty(386)}
+          fill="#7B8794"
+          fontSize={ts(12)}
           textAnchor="middle"
         >
           Learning Center 2 · {buildingName}
         </SvgText>
 
         <SvgText
-          x={tx(690)}
-          y={ty(455)}
+          x={tx(700)}
+          y={ty(452)}
           fill="#D97706"
-          fontSize={ts(13)}
+          fontSize={ts(12)}
           fontWeight="600"
         >
           59Degree coffee
         </SvgText>
 
         <SvgText
-          x={tx(725)}
-          y={ty(600)}
+          x={tx(720)}
+          y={ty(608)}
           fill={LABEL}
-          fontSize={ts(13)}
+          fontSize={ts(12)}
           fontWeight="600"
         >
           Environmental Science Building
@@ -312,10 +340,10 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 
       <View style={styles.placeCard}>
         <View style={styles.placeTextBox}>
-          <Text style={styles.placeEyebrow}>CAMPUS MAP</Text>
+          <Text style={styles.placeEyebrow}>THAMMASAT UNIVERSITY</Text>
           <Text style={styles.placeTitle}>อาคารบรรยายเรียนรวม 2</Text>
           <Text style={styles.placeSubtitle}>
-            Learning Center 2 · Thammasat University
+            LC2 · Building footprint aligned to the campus map
           </Text>
         </View>
 
@@ -325,7 +353,7 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
           accessibilityRole="button"
           accessibilityLabel="Open first floor indoor map"
         >
-          <Text style={styles.enterButtonText}>Open 1F</Text>
+          <Text style={styles.enterButtonText}>Indoor map</Text>
         </TouchableOpacity>
       </View>
 
@@ -360,7 +388,7 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 
       <View style={styles.mapBadge}>
         <Text style={styles.mapBadgeIcon}>▧</Text>
-        <Text style={styles.mapBadgeText}>Campus map</Text>
+        <Text style={styles.mapBadgeText}>LC2 campus context</Text>
       </View>
     </View>
   );
@@ -476,7 +504,7 @@ const styles = StyleSheet.create({
   },
   mapBadgeText: {
     color: '#4B5563',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
   },
 });
