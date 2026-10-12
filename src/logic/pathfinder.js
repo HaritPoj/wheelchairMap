@@ -11,6 +11,9 @@ function getEdgeCost(edge, fromId, toId, nodeMap) {
   const to = nodeMap[toId];
 
   if (!from || !to) return Infinity;
+  if (edge.wheelchairAccessible === false) return Infinity;
+  if (from.accessibility?.wheelchairAccessible === false) return Infinity;
+  if (to.accessibility?.wheelchairAccessible === false) return Infinity;
   if (from.type === 'stairs' || to.type === 'stairs') return Infinity;
 
   const width = numeric(edge.width);
