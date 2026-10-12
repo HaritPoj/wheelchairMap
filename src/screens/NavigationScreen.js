@@ -9,6 +9,7 @@ import {
 import { getMapData } from '../../assets/data/buildingLoader';
 import { findPath } from '../logic/pathfinder';
 import FloorPlan from '../rendering/FloorPlan';
+import BuildingOverview from '../rendering/BuildingOverview';
 import HUD from '../rendering/HUD';
 import DirectionsSheet from '../rendering/DirectionsSheet';
 import NextStepBanner from '../rendering/NextStepBanner';
@@ -19,6 +20,7 @@ export default function NavigationScreen() {
   const [currentFloor, setCurrentFloor] = useState(
     () => mapData.floors[0]?.level ?? 1
   );
+  const [viewMode, setViewMode] = useState('floor');
   const [locationId, setLocationId] = useState(null);
   const [destination, setDestination] = useState(null);
   const [routeOptions, setRouteOptions] = useState([]);
@@ -61,12 +63,18 @@ export default function NavigationScreen() {
     setShowDirections(false);
   }, [locationId, destination, mapData]);
 
+  function openFloor(floor) {
+    setCurrentFloor(floor);
+    setViewMode('floor');
+  }
+
   function handleNodeSelect(id) {
     const node = mapData.nodeMap[id];
 
     if (!node) return;
 
     setCurrentFloor(node.floor);
+    setViewMode('floor');
     setRouteMessage(null);
 
     if (mode === 'destination') {
@@ -115,6 +123,7 @@ export default function NavigationScreen() {
 
     setLocationId(roomId);
     setCurrentFloor(room.floor);
+    setViewMode('floor');
     setMode('destination');
     setRouteMessage(null);
     setIsScanning(false);
@@ -132,21 +141,30 @@ export default function NavigationScreen() {
 
   return (
     <View style={styles.container}>
-      <FloorPlan
-        mapData={mapData}
-        currentFloor={currentFloor}
-        route={route}
-        routes={routeOptions}
-        selectedRouteIndex={selectedRouteIndex}
-        onNodeTap={handleNodeSelect}
-        destination={destination}
-        startNode={locationId}
-      />
+      {viewMode === 'site' ? (
+        <BuildingOverview
+          mapData={mapData}
+          onOpenFloor={openFloor}
+        />
+      ) : (
+        <FloorPlan
+          mapData={mapData}
+          currentFloor={currentFloor}
+          route={route}
+          routes={routeOptions}
+          selectedRouteIndex={selectedRouteIndex}
+          onNodeTap={handleNodeSelect}
+          destination={destination}
+          startNode={locationId}
+        />
+      )}
 
       <HUD
         mapData={mapData}
         currentFloor={currentFloor}
-        onFloor={setCurrentFloor}
+        viewMode={viewMode}
+        onShowSite={() => setViewMode('site')}
+        onFloor={openFloor}
         locationId={locationId}
         destination={destination}
         mode={mode}
@@ -158,7 +176,7 @@ export default function NavigationScreen() {
         routeMessage={routeMessage}
       />
 
-      {!showDirections && (
+      {!showDirections && viewMode !== 'site' && (
         <TouchableOpacity
           style={styles.scanButton}
           onPress={() => setIsScanning(true)}
@@ -171,7 +189,7 @@ export default function NavigationScreen() {
         </TouchableOpacity>
       )}
 
-      {!showDirections && route.length > 1 && (
+      {!showDirections && viewMode !== 'site' && route.length > 1 && (
         <NextStepBanner
           route={route}
           nodeMap={mapData.nodeMap}
@@ -180,7 +198,7 @@ export default function NavigationScreen() {
         />
       )}
 
-      {showDirections && (
+      {showDirections && viewMode !== 'site' && (
         <DirectionsSheet
           route={route}
           routes={routeOptions}
