@@ -187,41 +187,10 @@ export default function BuildingOverview({ mapData, onOpenFloor }) {
 
         <Rect width={VIEW_WIDTH} height={VIEW_HEIGHT} fill={MAP_BG} />
 
-        <Circle
-          cx={tx(575)}
-          cy={ty(130)}
-          r={ts(82)}
-          fill="none"
-          stroke={ROAD}
-          strokeWidth={ts(22)}
-        />
-        <Line
-          x1={tx(130)}
-          y1={ty(135)}
-          x2={tx(490)}
-          y2={ty(135)}
-          stroke={ROAD}
-          strokeWidth={ts(18)}
-          strokeLinecap="round"
-        />
-        <Line
-          x1={tx(900)}
-          y1={ty(0)}
-          x2={tx(900)}
-          y2={ty(650)}
-          stroke={ROAD}
-          strokeWidth={ts(17)}
-          strokeLinecap="round"
-        />
-        <Line
-          x1={tx(915)}
-          y1={ty(455)}
-          x2={tx(1000)}
-          y2={ty(455)}
-          stroke={ROAD}
-          strokeWidth={ts(17)}
-          strokeLinecap="round"
-        />
+        <Circle cx={tx(575)} cy={ty(130)} r={ts(82)} fill="none" stroke={ROAD} strokeWidth={ts(22)} />
+        <Line x1={tx(130)} y1={ty(135)} x2={tx(490)} y2={ty(135)} stroke={ROAD} strokeWidth={ts(18)} strokeLinecap="round" />
+        <Line x1={tx(900)} y1={ty(0)} x2={tx(900)} y2={ty(650)} stroke={ROAD} strokeWidth={ts(17)} strokeLinecap="round" />
+        <Line x1={tx(915)} y1={ty(455)} x2={tx(1000)} y2={ty(455)} stroke={ROAD} strokeWidth={ts(17)} strokeLinecap="round" />
 
         {FOOTPATHS.map((points, index) => (
           <Path
