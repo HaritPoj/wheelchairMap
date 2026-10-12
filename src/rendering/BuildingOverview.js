@@ -28,9 +28,6 @@ const WALKWAY = '#58B89C';
 const LABEL = '#667786';
 const PIN = '#EA4335';
 
-// Position of LC2 in the campus overview, estimated from the supplied
-// Google Maps screenshot. The real indoor coordinate system is fitted into
-// this box and rotated 180 degrees to match the exterior orientation.
 const LC2_TARGET = {
   x: 175,
   y: 270,
@@ -80,7 +77,6 @@ function createIndoorToCampusTransform(points) {
   function point(x, y) {
     const px = Number(x) || 0;
     const py = Number(y) || 0;
-
     const rotatedX = bounds.maxX - px;
     const rotatedY = bounds.maxY - py;
 
