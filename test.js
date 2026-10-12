@@ -28,6 +28,10 @@ const migrateBuildingV1ToV2 = loadNamedExport(
   fs.readFileSync('./assets/data/schemaV2.js', 'utf8'),
   'migrateBuildingV1ToV2'
 );
+const applyLC2RouteAlternatives = loadNamedExport(
+  fs.readFileSync('./assets/data/buildings/lc2RoutingExtensions.js', 'utf8'),
+  'applyLC2RouteAlternatives'
+);
 const validateBuildingData = loadNamedExport(
   fs.readFileSync('./assets/data/mapValidator.js', 'utf8'),
   'validateBuildingData'
@@ -45,11 +49,12 @@ const findAllPaths = loadNamedExport(
   'findAllPaths'
 );
 
-const buildingData = migrateBuildingV1ToV2(legacyData, siteGeoJSON, {
+const migratedBuilding = migrateBuildingV1ToV2(legacyData, siteGeoJSON, {
   siteId: 'tu_rangsit',
   siteName: 'Thammasat University Rangsit Campus',
   displayName: 'อาคารบรรยายเรียนรวม 2',
 });
+const buildingData = applyLC2RouteAlternatives(migratedBuilding);
 
 assert.strictEqual(buildingData.schemaVersion, '2.0');
 assert.strictEqual(buildingData.site.id, 'tu_rangsit');
@@ -118,12 +123,13 @@ const roomByCode = code =>
 
 const room124 = roomByCode('124');
 const room120 = roomByCode('120');
+const room109 = roomByCode('109');
 const room211 = roomByCode('211');
 const room230 = roomByCode('230');
 const room2241 = roomByCode('224/1');
 
 assert.ok(
-  room124 && room120 && room211 && room230 && room2241,
+  room124 && room120 && room109 && room211 && room230 && room2241,
   'Expected reference rooms to exist'
 );
 
@@ -155,9 +161,6 @@ assert.ok(
   'Stairs must remain outside the wheelchair route graph'
 );
 
-// LC2 currently has no surveyed entrance unit in the source data. Do not
-// invent an entrance coordinate just to satisfy the test. Routing is verified
-// between the actual mapped rooms/restrooms instead.
 const routeDestinations = mapData.nodes.filter(
   node => node.type === 'room' || node.type === 'restroom'
 );
@@ -194,6 +197,30 @@ assert.strictEqual(
   new Set(routeAlternatives.map(path => path.join('->'))).size,
   routeAlternatives.length,
   'Route alternatives should be unique'
+);
+
+const crossWingAlternatives = findAllPaths(room124.id, room109.id, mapData);
+assert.ok(
+  crossWingAlternatives.length >= 4,
+  'Floor 1 should expose multiple topologically distinct accessible routes'
+);
+assert.ok(
+  crossWingAlternatives.some(path =>
+    path.includes('corridor_f1_center_lower_01')
+  ),
+  'At least one route should use the central lower corridor alternative'
+);
+assert.ok(
+  crossWingAlternatives.some(path =>
+    !path.includes('corridor_f1_center_lower_01')
+  ),
+  'At least one route should stay on the main upper corridor'
+);
+assert.ok(
+  crossWingAlternatives.every(path =>
+    path.every(id => mapData.nodeMap[id].type !== 'stairs')
+  ),
+  'All alternatives must remain wheelchair accessible'
 );
 
 const crossFloor = findPath(room124.id, room211.id, mapData);
