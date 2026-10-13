@@ -13,6 +13,14 @@ function loadNamedExport(source, exportName) {
   return sandbox[exportName];
 }
 
+function sameValues(actual, expected, message) {
+  assert.strictEqual(
+    JSON.stringify(Array.from(actual)),
+    JSON.stringify(Array.from(expected)),
+    message
+  );
+}
+
 const parseIndoorGML = loadNamedExport(
   fs.readFileSync('./assets/data/indoorgml/indoorGMLParser.js', 'utf8'),
   'parseIndoorGML'
@@ -32,7 +40,7 @@ const rooms = floor1.spaces
   .map(space => space.code)
   .sort();
 
-assert.deepStrictEqual(
+sameValues(
   rooms,
   [
     '106', '107', '108', '109', '110', '111', '113', '114', '115',
