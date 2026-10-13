@@ -7,7 +7,7 @@ import {
   Text,
 } from 'react-native';
 import { getMapData } from '../../assets/data/buildingLoader';
-import { findAllPaths, findPath } from '../logic/pathfinder';
+import { findPath } from '../logic/pathfinder';
 import FloorPlan from '../rendering/FloorPlan';
 import BuildingOverview from '../rendering/BuildingOverview';
 import HUD from '../rendering/HUD';
@@ -40,13 +40,10 @@ export default function NavigationScreen() {
       return;
     }
 
-    const allPaths = findAllPaths(locationId, destination, mapData);
-    const fallback = findPath(locationId, destination, mapData);
-    const paths = allPaths.length > 0
-      ? allPaths
-      : fallback.length > 0
-        ? [fallback]
-        : [];
+    // findPath() uses A* and already applies wheelchair accessibility
+    // constraints. Only the best accessible route is shown to the user.
+    const bestPath = findPath(locationId, destination, mapData);
+    const paths = bestPath.length > 0 ? [bestPath] : [];
 
     setRouteOptions(paths);
     setSelectedRouteIndex(0);
@@ -59,20 +56,13 @@ export default function NavigationScreen() {
       return;
     }
 
-    if (paths[0].length === 1) {
+    if (bestPath.length === 1) {
       setShowDirections(false);
       setRouteMessage('You are already at the destination.');
       return;
     }
 
-    if (paths.length > 1) {
-      setRouteMessage(
-        `${paths.length} wheelchair-accessible routes are available.`
-      );
-    } else {
-      setRouteMessage(null);
-    }
-
+    setRouteMessage('Best wheelchair-accessible route selected with A*.');
     setShowDirections(false);
   }, [locationId, destination, mapData]);
 
@@ -111,6 +101,8 @@ export default function NavigationScreen() {
 
   function handleClearLocation() {
     setLocationId(null);
+    setRouteOptions([]);
+    setSelectedRouteIndex(0);
     setShowDirections(false);
     setRouteMessage(null);
     setMode('location');
@@ -118,6 +110,8 @@ export default function NavigationScreen() {
 
   function handleClearDestination() {
     setDestination(null);
+    setRouteOptions([]);
+    setSelectedRouteIndex(0);
     setShowDirections(false);
     setRouteMessage(null);
     setMode('destination');
