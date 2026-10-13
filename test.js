@@ -167,14 +167,46 @@ const floorTwoRoomCodes = buildingData.units
   .sort();
 
 sameValues(floorOneRoomCodes, [
-  '106', '107', '108', '109', '110', '111', '112', '113', '114',
-  '115', '115/1', '116', '119', '120', '121', '122', '123', '124', '125', '126'
-].sort(), 'Floor 1 room codes should be preserved');
+  '106', '107', '108', '109', '110', '111', '113', '114',
+  '115', '116', '119', '120', '121', '122', '123', '124', '125', '126'
+].sort(), 'Floor 1 room codes should match the latest reference image');
+assert.strictEqual(floorOneRoomCodes.length, 18, 'Floor 1 should contain exactly 18 numbered rooms');
+assert.ok(!floorOneRoomCodes.includes('112'), 'Room 112 is not shown in the latest Floor 1 reference');
+assert.ok(!floorOneRoomCodes.includes('115/1'), 'Room 115/1 is not shown in the latest Floor 1 reference');
 
 sameValues(floorTwoRoomCodes, [
   '211', '212', '213', '214', '215', '216', '217', '218', '219', '220',
   '221', '222', '223', '224', '224/1', '225', '226', '227', '228', '229', '230'
 ].sort(), 'Floor 2 room codes should be preserved');
+
+const floor1Restrooms = mapData.nodes.filter(
+  node => node.floor === 1 && node.type === 'restroom'
+);
+assert.strictEqual(floor1Restrooms.length, 3, 'Floor 1 should contain the three WC areas shown in the reference');
+
+const edgesFor = id =>
+  mapData.edges.filter(edge => edge.from === id || edge.to === id);
+
+assert.strictEqual(
+  edgesFor('room_126').filter(edge => edge.id.includes('_top') || edge.id.includes('_bottom')).length,
+  2,
+  'Room 126 should expose both upper and lower corridor access'
+);
+assert.strictEqual(
+  edgesFor('room_125').filter(edge => edge.id.includes('_top')).length,
+  1,
+  'Room 125 should open to the upper corridor'
+);
+assert.strictEqual(
+  edgesFor('room_124').filter(edge => edge.id.includes('_bottom')).length,
+  1,
+  'Room 124 should open to the lower corridor'
+);
+assert.strictEqual(
+  edgesFor('room_106').filter(edge => edge.id.includes('_left')).length,
+  1,
+  'Room 106 should open to the vertical corridor on its left'
+);
 
 const stairs = mapData.nodes.filter(node => node.type === 'stairs');
 assert.ok(stairs.length >= 2);
@@ -218,11 +250,11 @@ assert.strictEqual(sameFloor[sameFloor.length - 1], room120.id);
 const routeAlternatives = findAllPaths(room124.id, room109.id, mapData);
 assert.ok(routeAlternatives.length >= 2, 'Expected upper/lower Floor 1 alternatives');
 assert.ok(
-  routeAlternatives.some(path => path.includes('corridor_f1_l06')),
+  routeAlternatives.some(path => path.includes('corridor_f1_l10')),
   'At least one route should use the lower central corridor'
 );
 assert.ok(
-  routeAlternatives.some(path => !path.includes('corridor_f1_l06')),
+  routeAlternatives.some(path => !path.includes('corridor_f1_l10')),
   'At least one route should use the upper corridor'
 );
 assert.ok(
@@ -258,9 +290,9 @@ const lowerFloorRoute = findPath(room230.id, room2241.id, mapData);
 assert.strictEqual(lowerFloorRoute[0], room230.id);
 assert.strictEqual(lowerFloorRoute[lowerFloorRoute.length - 1], room2241.id);
 
-const restroomRoute = findPath(room124.id, 'restroom_f1_south', mapData);
+const restroomRoute = findPath(room124.id, 'restroom_f1_center', mapData);
 assert.strictEqual(restroomRoute[0], room124.id);
-assert.strictEqual(restroomRoute[restroomRoute.length - 1], 'restroom_f1_south');
+assert.strictEqual(restroomRoute[restroomRoute.length - 1], 'restroom_f1_center');
 
 assert.strictEqual(findPath('does-not-exist', room124.id, mapData).length, 0);
 
@@ -297,4 +329,4 @@ assert.strictEqual(
   'Cross-floor routing must fail when the elevator transition is removed'
 );
 
-console.log('New LC2 Floor 1 layout, schema v2, and wheelchair routing tests passed.');
+console.log('Latest LC2 Floor 1 room count, access topology, schema v2, and routing tests passed.');
