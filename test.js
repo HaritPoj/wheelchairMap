@@ -203,6 +203,11 @@ assert.strictEqual(
   'Room 124 should open to the lower corridor'
 );
 assert.strictEqual(
+  edgesFor('room_114').filter(edge => edge.id.includes('_left')).length,
+  1,
+  'Room 114 should open from its left wall in the latest reference'
+);
+assert.strictEqual(
   edgesFor('room_106').filter(edge => edge.id.includes('_left')).length,
   1,
   'Room 106 should open to the vertical corridor on its left'
