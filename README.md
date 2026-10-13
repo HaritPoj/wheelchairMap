@@ -1,177 +1,45 @@
 # Wheelchair Map
 
-Indoor wheelchair navigation in Expo / React Native.
+Indoor wheelchair-accessible navigation prototype for LC2 (Learning Center 2) at Thammasat University.
 
-## Generic building schema v2
+## Current data architecture
 
-The active data model is `schemaVersion: "2.0"`. It separates the physical indoor map (primal space) from the navigation network (dual graph), so a new building can use the same rendering and routing logic.
+The runtime uses generic schema v2:
 
-```text
-site
-└── facility
-    ├── levels
-    │   ├── units
-    │   ├── openings
-    │   ├── details
-    │   └── pois
-    └── routing
-        ├── states
-        └── transitions
-```
+- `site`
+- `facility`
+- `levels`
+- `units`
+- `openings`
+- `details`
+- `pois`
+- `routing.states`
+- `routing.transitions`
 
-### Spatial hierarchy
+`assets/data/buildings/lc2.json` contains the current Floor 1 source layout. `assets/data/buildings/lc2.legacy.json` preserves the previous dataset used for Floor 2. `assets/data/buildings/lc2.v2.js` merges Floor 1 and Floor 2, migrates them to schema v2, and keeps the rest of the app independent from LC2-specific source data.
 
-- `site`: campus/property containing facilities.
-- `facility`: one building, including its geographic footprint.
-- `levels`: floors and their local drawing coordinate systems.
-- `units`: rooms, corridors, elevators, stairs, restrooms, entrances, etc.
-- `openings`: doors/portals connecting units.
-- `details`: non-routing architecture such as walls, columns, and windows.
-- `pois`: assets or destinations such as AEDs or kiosks.
+## LC2 Floor 1 reference layout
 
-### Primal vs dual model
+The active Floor 1 layout follows the latest supplied floor-plan reference. It contains exactly 18 numbered rooms:
 
-The physical map is represented by `levels`, `units`, `openings`, `details`, and `pois`.
+`106, 107, 108, 109, 110, 111, 113, 114, 115, 116, 119, 120, 121, 122, 123, 124, 125, 126`
 
-Routing is represented independently:
+The plan also contains three WC areas, one elevator, and the central stairs. Room `112` and `115/1` are not present in the latest reference and are therefore not included in the active Floor 1 data.
 
-```json
-{
-  "routing": {
-    "states": [],
-    "transitions": []
-  }
-}
-```
+Room entrances/exits are represented by room-to-corridor routing transitions. On Floor 1 the renderer uses these access transitions to draw a visible gap in the corresponding room wall. For example, rooms with both upper and lower access have door gaps on both sides, while the 106/107/108 wing opens toward the vertical corridor.
 
-Each routing state references a physical `unitId`. Each transition connects two states and contains routing/accessibility metadata. The app's A*/alternative-route logic runs on this graph instead of parsing floor polygons.
+## Wheelchair routing
 
-### Example unit
+Routing runs on the dual graph rather than directly on room polygons. The pathfinder:
 
-```json
-{
-  "id": "room_126",
-  "levelId": "floor_1",
-  "type": "room",
-  "categoryId": "room",
-  "name": "Room 126",
-  "code": "126",
-  "geometry": {
-    "type": "rectangle",
-    "x": 14,
-    "y": 284,
-    "width": 64,
-    "height": 84
-  },
-  "accessibility": {
-    "wheelchairAccessible": true,
-    "doorWidth": null,
-    "threshold": null
-  }
-}
-```
+- avoids stairs for wheelchair routes
+- supports multiple accessible alternatives where the floor graph has real loops
+- uses the elevator for cross-floor travel
+- can use door/edge width, slope, threshold, and accessibility metadata when measurements are available
 
-### Example opening
+Unknown accessibility measurements stay `null` instead of being invented.
 
-```json
-{
-  "id": "opening:connection_082",
-  "levelId": "floor_1",
-  "type": "opening.door",
-  "connects": ["room_126", "corridor_f1_001"],
-  "geometry": null,
-  "accessibility": {
-    "wheelchairAccessible": true,
-    "width": null,
-    "threshold": null
-  }
-}
-```
-
-### Example routing state
-
-```json
-{
-  "id": "state:room_126",
-  "levelId": "floor_1",
-  "unitId": "room_126",
-  "type": "state",
-  "geometry": {
-    "type": "Point",
-    "coordinates": [46, 326]
-  }
-}
-```
-
-### Example transition
-
-```json
-{
-  "id": "connection_082",
-  "from": "state:room_126",
-  "to": "state:corridor_f1_001",
-  "type": "horizontal",
-  "openingId": "opening:connection_082",
-  "routing": {
-    "cost": 5
-  },
-  "accessibility": {
-    "wheelchairAccessible": true,
-    "width": null,
-    "slope": null
-  }
-}
-```
-
-Cross-floor elevator movement uses a semantic vertical transition:
-
-```json
-{
-  "type": "vertical.elevator",
-  "accessibility": {
-    "wheelchairAccessible": true
-  }
-}
-```
-
-Stairs can exist in the physical model while remaining unavailable to wheelchair routing.
-
-## LC2 data
-
-LC2 currently keeps the original surveyed/traced data file as a migration source:
-
-```text
-assets/data/buildings/lc2.json
-assets/data/buildings/lc2.site.json
-```
-
-`assets/data/schemaV2.js` converts that source into the active generic v2 structure when buildings are registered in `assets/data/buildings/index.js`.
-
-The supplied WGS84 GeoJSON polygon is stored as the LC2 facility footprint. For the indoor renderer, the adapter projects that footprint into the local Floor 1 coordinate system and uniformly fits the complete Floor 1 layout into it. Floor 2 keeps its existing traced boundary because the surveyed footprint/directory reference currently applies to Floor 1.
-
-## Runtime architecture
-
-```text
-legacy LC2 survey data + GeoJSON footprint
-                ↓
-        schema v2 migration
-                ↓
- site / facility / levels / units / openings
-                +
-       routing states / transitions
-                ↓
-        schema v2 validator
-                ↓
-        building adapter
-                ↓
-    nodes + edges compatibility graph
-                ↓
- FloorPlan / OCR / A* routing / directions
-```
-
-The compatibility graph is internal only. New application data is consumed through schema v2, while existing UI and routing code can continue using stable `nodes` and `edges` objects.
-
-## Development
+## Run
 
 ```bash
 npm install
@@ -179,4 +47,4 @@ npm test
 npx expo start -c
 ```
 
-The camera scanner uses `@react-native-ml-kit/text-recognition`, so use an Expo development build when testing native OCR.
+The OCR/camera workflow requires the Expo camera setup already configured in `app.json`.
