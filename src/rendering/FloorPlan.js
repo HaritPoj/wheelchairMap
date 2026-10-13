@@ -86,7 +86,6 @@ export default function FloorPlan({
     const scale = baseScale * zoomMultiplier.current;
     const contentWidth = width * scale;
     const contentHeight = height * scale;
-
     currentScale.current = scale;
 
     const centeredOffset = {
@@ -202,14 +201,16 @@ export default function FloorPlan({
   const scale = fitScale * zoomLevel;
   const mapWidth = mapWidthSource * scale;
   const mapHeight = mapHeightSource * scale;
-  const toXY = (x, y) => ({ x: Number(x || 0) * scale, y: Number(y || 0) * scale });
+  const toXY = (x, y) => ({
+    x: Number(x || 0) * scale,
+    y: Number(y || 0) * scale,
+  });
 
   const isWaypoint = node =>
     node.type === 'corridor' &&
     !(Number(node.width) > 0 && Number(node.height) > 0);
 
   const floorNodes = mapData.nodes.filter(node => node.floor === currentFloor);
-
   const routePaths =
     routes.length > 0 ? routes : route && route.length > 0 ? [route] : [];
   const activeRouteIndex =
@@ -263,6 +264,133 @@ export default function FloorPlan({
   const buildingFramePoints = boundary
     .map(([x, y]) => `${x * scale},${y * scale}`)
     .join(' ');
+
+  function getDoorSides(node) {
+    const sides = new Set();
+
+    for (const edge of mapData.edges || []) {
+      if (edge.from !== node.id && edge.to !== node.id) continue;
+
+      const edgeId = String(edge.id || '');
+      const namedSide = ['top', 'bottom', 'left', 'right'].find(side =>
+        edgeId.includes(`_${side}`)
+      );
+
+      if (namedSide) {
+        sides.add(namedSide);
+        continue;
+      }
+
+      const otherId = edge.from === node.id ? edge.to : edge.from;
+      const other = mapData.nodeMap[otherId];
+      if (!other || other.type !== 'corridor') continue;
+
+      const dx = Number(other.x) - Number(node.x);
+      const dy = Number(other.y) - Number(node.y);
+
+      if (Math.abs(dx) > Math.abs(dy)) {
+        sides.add(dx < 0 ? 'left' : 'right');
+      } else {
+        sides.add(dy < 0 ? 'top' : 'bottom');
+      }
+    }
+
+    return sides;
+  }
+
+  function renderRoomWalls(node, x, y, width, height) {
+    const left = x - width / 2;
+    const right = x + width / 2;
+    const top = y - height / 2;
+    const bottom = y + height / 2;
+    const doorSides = getDoorSides(node);
+    const horizontalGap = Math.min(18 * scale, width * 0.42);
+    const verticalGap = Math.min(18 * scale, height * 0.34);
+    const strokeWidth = 2 * scale;
+
+    const horizontalWall = (key, wallY, hasDoor) => {
+      if (!hasDoor) {
+        return (
+          <Line
+            key={key}
+            x1={left}
+            y1={wallY}
+            x2={right}
+            y2={wallY}
+            stroke={WALL_COLOR}
+            strokeWidth={strokeWidth}
+          />
+        );
+      }
+
+      return (
+        <React.Fragment key={key}>
+          <Line
+            x1={left}
+            y1={wallY}
+            x2={x - horizontalGap / 2}
+            y2={wallY}
+            stroke={WALL_COLOR}
+            strokeWidth={strokeWidth}
+          />
+          <Line
+            x1={x + horizontalGap / 2}
+            y1={wallY}
+            x2={right}
+            y2={wallY}
+            stroke={WALL_COLOR}
+            strokeWidth={strokeWidth}
+          />
+        </React.Fragment>
+      );
+    };
+
+    const verticalWall = (key, wallX, hasDoor) => {
+      if (!hasDoor) {
+        return (
+          <Line
+            key={key}
+            x1={wallX}
+            y1={top}
+            x2={wallX}
+            y2={bottom}
+            stroke={WALL_COLOR}
+            strokeWidth={strokeWidth}
+          />
+        );
+      }
+
+      return (
+        <React.Fragment key={key}>
+          <Line
+            x1={wallX}
+            y1={top}
+            x2={wallX}
+            y2={y - verticalGap / 2}
+            stroke={WALL_COLOR}
+            strokeWidth={strokeWidth}
+          />
+          <Line
+            x1={wallX}
+            y1={y + verticalGap / 2}
+            x2={wallX}
+            y2={bottom}
+            stroke={WALL_COLOR}
+            strokeWidth={strokeWidth}
+          />
+        </React.Fragment>
+      );
+    };
+
+    return (
+      <G key={'walls-' + node.id}>
+        {horizontalWall('top', top, doorSides.has('top'))}
+        {horizontalWall('bottom', bottom, doorSides.has('bottom'))}
+        {verticalWall('left', left, doorSides.has('left'))}
+        {verticalWall('right', right, doorSides.has('right'))}
+      </G>
+    );
+  }
 
   function renderStairs(node, x, y, width, height) {
     const left = x - width / 2;
@@ -424,9 +552,24 @@ export default function FloorPlan({
                     ? '#f2f5f6'
                     : '#f8f8f8';
 
+            const smallLabel = Math.min(roomWidth, roomHeight) < 32 * scale;
+            const fontSize = (smallLabel ? 8 : isRestroom ? 10 : 14) * scale;
+
             return (
               <React.Fragment key={'structure-' + node.id}>
-                {Array.isArray(node.geometryParts) && node.geometryParts.length > 0 ? (
+                {isFloorOne ? (
+                  <>
+                    <Rect
+                      x={x - roomWidth / 2}
+                      y={y - roomHeight / 2}
+                      width={roomWidth}
+                      height={roomHeight}
+                      fill={structureFill}
+                      stroke="none"
+                    />
+                    {renderRoomWalls(node, x, y, roomWidth, roomHeight)}
+                  </>
+                ) : Array.isArray(node.geometryParts) && node.geometryParts.length > 0 ? (
                   <>
                     {node.geometryParts.map((part, index) => (
                       <Rect
@@ -466,7 +609,7 @@ export default function FloorPlan({
                 <SvgText
                   x={x}
                   y={y + 5 * scale}
-                  fontSize={(isRestroom ? 10 : 14) * scale}
+                  fontSize={fontSize}
                   fill="#111111"
                   textAnchor="middle"
                   fontWeight={isFloorOne ? 'normal' : 'bold'}
