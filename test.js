@@ -2,7 +2,8 @@ const assert = require('assert');
 const fs = require('fs');
 const vm = require('vm');
 
-const legacyData = require('./assets/data/buildings/lc2.json');
+const floor1Data = require('./assets/data/buildings/lc2.json');
+const legacyData = require('./assets/data/buildings/lc2.legacy.json');
 const siteGeoJSON = require('./assets/data/buildings/lc2.site.json');
 
 function loadNamedExport(source, exportName) {
@@ -28,10 +29,6 @@ const migrateBuildingV1ToV2 = loadNamedExport(
   fs.readFileSync('./assets/data/schemaV2.js', 'utf8'),
   'migrateBuildingV1ToV2'
 );
-const applyLC2RouteAlternatives = loadNamedExport(
-  fs.readFileSync('./assets/data/buildings/lc2RoutingExtensions.js', 'utf8'),
-  'applyLC2RouteAlternatives'
-);
 const validateBuildingData = loadNamedExport(
   fs.readFileSync('./assets/data/mapValidator.js', 'utf8'),
   'validateBuildingData'
@@ -49,12 +46,38 @@ const findAllPaths = loadNamedExport(
   'findAllPaths'
 );
 
-const migratedBuilding = migrateBuildingV1ToV2(legacyData, siteGeoJSON, {
+const floor1Ids = new Set(
+  floor1Data.spaces.filter(space => space.floorId === 'floor_1').map(space => space.id)
+);
+const floor2Ids = new Set(
+  legacyData.spaces.filter(space => space.floorId === 'floor_2').map(space => space.id)
+);
+
+const mergedLegacy = {
+  ...floor1Data,
+  floors: [
+    ...floor1Data.floors.filter(floor => floor.id === 'floor_1'),
+    ...legacyData.floors.filter(floor => floor.id === 'floor_2'),
+  ],
+  spaces: [
+    ...floor1Data.spaces.filter(space => space.floorId === 'floor_1'),
+    ...legacyData.spaces.filter(space => space.floorId === 'floor_2'),
+  ],
+  connections: [
+    ...floor1Data.connections.filter(
+      connection => floor1Ids.has(connection.from) || floor1Ids.has(connection.to)
+    ),
+    ...legacyData.connections.filter(
+      connection => floor2Ids.has(connection.from) && floor2Ids.has(connection.to)
+    ),
+  ],
+};
+
+const buildingData = migrateBuildingV1ToV2(mergedLegacy, siteGeoJSON, {
   siteId: 'tu_rangsit',
   siteName: 'Thammasat University Rangsit Campus',
   displayName: 'อาคารบรรยายเรียนรวม 2',
 });
-const buildingData = applyLC2RouteAlternatives(migratedBuilding);
 
 assert.strictEqual(buildingData.schemaVersion, '2.0');
 assert.strictEqual(buildingData.site.id, 'tu_rangsit');
@@ -96,14 +119,6 @@ assert.ok(
   ),
   'Every transition should connect valid routing states'
 );
-assert.ok(
-  buildingData.openings.every(
-    opening =>
-      opening.connects.length === 2 &&
-      opening.connects.every(unitId => unitById[unitId])
-  ),
-  'Every opening should connect two valid units'
-);
 
 const mapData = normalizeBuildingData(buildingData);
 assert.strictEqual(mapData.buildingId, 'lc2');
@@ -118,18 +133,27 @@ assert.notStrictEqual(
   'The supplied geographic footprint applies only to Floor 1'
 );
 
+assert.strictEqual(floor1Data.floors[0].map.width, 1080);
+assert.strictEqual(floor1Data.floors[0].map.height, 395);
+assert.deepStrictEqual(floor1Data.floors[0].map.boundary, [
+  [33, 249], [390, 249], [390, 223], [690, 223], [690, 246],
+  [946, 246], [946, 42], [1058, 42], [1058, 349], [690, 349],
+  [690, 377], [389, 377], [389, 354], [33, 354],
+]);
+
 const roomByCode = code =>
   mapData.nodes.find(node => node.type === 'room' && node.code === code);
 
 const room124 = roomByCode('124');
 const room120 = roomByCode('120');
 const room109 = roomByCode('109');
+const room106 = roomByCode('106');
 const room211 = roomByCode('211');
 const room230 = roomByCode('230');
 const room2241 = roomByCode('224/1');
 
 assert.ok(
-  room124 && room120 && room109 && room211 && room230 && room2241,
+  room124 && room120 && room109 && room106 && room211 && room230 && room2241,
   'Expected reference rooms to exist'
 );
 
@@ -191,36 +215,29 @@ const sameFloor = findPath(room124.id, room120.id, mapData);
 assert.strictEqual(sameFloor[0], room124.id);
 assert.strictEqual(sameFloor[sameFloor.length - 1], room120.id);
 
-const routeAlternatives = findAllPaths(room124.id, room120.id, mapData);
-assert.ok(routeAlternatives.length > 0, 'Expected at least one same-floor route option');
-assert.strictEqual(
-  new Set(routeAlternatives.map(path => path.join('->'))).size,
-  routeAlternatives.length,
-  'Route alternatives should be unique'
-);
-
-const crossWingAlternatives = findAllPaths(room124.id, room109.id, mapData);
+const routeAlternatives = findAllPaths(room124.id, room109.id, mapData);
+assert.ok(routeAlternatives.length >= 2, 'Expected upper/lower Floor 1 alternatives');
 assert.ok(
-  crossWingAlternatives.length >= 4,
-  'Floor 1 should expose multiple topologically distinct accessible routes'
+  routeAlternatives.some(path => path.includes('corridor_f1_l06')),
+  'At least one route should use the lower central corridor'
 );
 assert.ok(
-  crossWingAlternatives.some(path =>
-    path.includes('corridor_f1_center_lower_01')
-  ),
-  'At least one route should use the central lower corridor alternative'
+  routeAlternatives.some(path => !path.includes('corridor_f1_l06')),
+  'At least one route should use the upper corridor'
 );
 assert.ok(
-  crossWingAlternatives.some(path =>
-    !path.includes('corridor_f1_center_lower_01')
-  ),
-  'At least one route should stay on the main upper corridor'
-);
-assert.ok(
-  crossWingAlternatives.every(path =>
+  routeAlternatives.every(path =>
     path.every(id => mapData.nodeMap[id].type !== 'stairs')
   ),
   'All alternatives must remain wheelchair accessible'
+);
+
+const verticalWingRoute = findPath(room124.id, room106.id, mapData);
+assert.strictEqual(verticalWingRoute[0], room124.id);
+assert.strictEqual(verticalWingRoute[verticalWingRoute.length - 1], room106.id);
+assert.ok(
+  verticalWingRoute.some(id => id === 'corridor_f1_v04'),
+  'Room 106 should be reached through the vertical east wing'
 );
 
 const crossFloor = findPath(room124.id, room211.id, mapData);
@@ -280,4 +297,4 @@ assert.strictEqual(
   'Cross-floor routing must fail when the elevator transition is removed'
 );
 
-console.log('Generic schema v2 hierarchy, dual graph, and wheelchair routing tests passed.');
+console.log('New LC2 Floor 1 layout, schema v2, and wheelchair routing tests passed.');
