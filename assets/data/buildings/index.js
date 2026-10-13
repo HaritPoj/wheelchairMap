@@ -1,4 +1,4 @@
-import lc2Building from "./lc2.json";
+import lc2Building from "./lc2.v2";
 
 const BUILDINGS = {
   lc2: lc2Building,
@@ -19,8 +19,9 @@ export function getBuilding(buildingId = "lc2") {
 
 export function getAvailableBuildings() {
   return Object.values(BUILDINGS).map(building => ({
-    id: building.building.id,
-    name: building.building.name,
-    floors: building.floors.length,
+    id: building.facility.id,
+    name: building.facility.name,
+    levels: building.levels.length,
+    floors: building.levels.length,
   }));
 }

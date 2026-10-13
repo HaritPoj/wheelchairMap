@@ -1,95 +1,45 @@
 # Wheelchair Map
 
-Indoor wheelchair navigation in Expo / React Native.
+Indoor wheelchair-accessible navigation prototype for LC2 (Learning Center 2) at Thammasat University.
 
-## Building-independent map schema
+## Current data architecture
 
-The app uses a generic building-data format so the same routing and UI code can work with another building.
+The runtime uses generic schema v2:
 
-Each building file contains:
+- `site`
+- `facility`
+- `levels`
+- `units`
+- `openings`
+- `details`
+- `pois`
+- `routing.states`
+- `routing.transitions`
 
-- `building`: metadata and a building ID.
-- `floors`: floor IDs, levels, map size, and optional boundary geometry.
-- `spaces`: rooms, corridors, elevators, entrances, toilets, ramps, stairs, and other mapped spaces.
-- `connections`: graph connections with routing cost, accessibility measurements, and optional transitions.
+`assets/data/buildings/lc2.json` contains the current Floor 1 source layout. `assets/data/buildings/lc2.legacy.json` preserves the previous dataset used for Floor 2. `assets/data/buildings/lc2.v2.js` merges Floor 1 and Floor 2, migrates them to schema v2, and keeps the rest of the app independent from LC2-specific source data.
 
-The current example is:
+## LC2 Floor 1 reference layout
 
-```
-assets/data/buildings/lc2.json
-```
+The active Floor 1 layout follows the latest supplied floor-plan reference. It contains exactly 18 numbered rooms:
 
-To add another building, create another JSON file with the same schema and register it in:
+`106, 107, 108, 109, 110, 111, 113, 114, 115, 116, 119, 120, 121, 122, 123, 124, 125, 126`
 
-```
-assets/data/buildings/index.js
-```
+The plan also contains three WC areas, one elevator, and the central stairs. Room `112` and `115/1` are not present in the latest reference and are therefore not included in the active Floor 1 data.
 
-The routing engine does not depend on room-number formats or building-specific IDs.
+Room entrances/exits are represented by room-to-corridor routing transitions. On Floor 1 the renderer uses these access transitions to draw a visible gap in the corresponding room wall. For example, rooms with both upper and lower access have door gaps on both sides, while the 106/107/108 wing opens toward the vertical corridor.
 
-## Example space
+## Wheelchair routing
 
-```json
-{
-  "id": "room_example_01",
-  "type": "room",
-  "floorId": "floor_1",
-  "name": "Room 101",
-  "code": "101",
-  "geometry": {
-    "type": "rectangle",
-    "x": 100,
-    "y": 200,
-    "width": 80,
-    "height": 60
-  },
-  "accessibility": {
-    "doorWidth": 1.0,
-    "threshold": null
-  }
-}
-```
+Routing runs on the dual graph rather than directly on room polygons. The pathfinder:
 
-## Example connection
+- avoids stairs for wheelchair routes
+- supports multiple accessible alternatives where the floor graph has real loops
+- uses the elevator for cross-floor travel
+- can use door/edge width, slope, threshold, and accessibility metadata when measurements are available
 
-```json
-{
-  "id": "connection_001",
-  "from": "room_example_01",
-  "to": "corridor_f1_001",
-  "routing": {
-    "cost": 5
-  },
-  "accessibility": {
-    "width": null,
-    "slope": null
-  }
-}
-```
+Unknown accessibility measurements stay `null` instead of being invented.
 
-Cross-floor transitions can declare `elevator`, `ramp`, or `stairs`. The wheelchair router allows elevators and ramps and rejects stairs.
-
-Unknown accessibility measurements are stored as `null`; the data model does not invent measurements.
-
-## Architecture
-
-```
-building JSON
-    ↓
-buildingLoader
-    ↓
-validateBuildingData
-    ↓
-normalizeBuildingData
-    ↓
-internal routing graph
-    ↓
-UI / Dijkstra routing / directions / OCR
-```
-
-The adapter is intentional: the generic JSON schema stays clean while the UI can keep a simple graph representation internally.
-
-## Development
+## Run
 
 ```bash
 npm install
@@ -97,4 +47,4 @@ npm test
 npx expo start -c
 ```
 
-The camera scanner uses `@react-native-ml-kit/text-recognition`, so use an Expo development build when testing native OCR.
+The OCR/camera workflow requires the Expo camera setup already configured in `app.json`.

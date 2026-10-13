@@ -11,6 +11,9 @@ function getEdgeCost(edge, fromId, toId, nodeMap) {
   const to = nodeMap[toId];
 
   if (!from || !to) return Infinity;
+  if (edge.wheelchairAccessible === false) return Infinity;
+  if (from.accessibility?.wheelchairAccessible === false) return Infinity;
+  if (to.accessibility?.wheelchairAccessible === false) return Infinity;
   if (from.type === 'stairs' || to.type === 'stairs') return Infinity;
 
   const width = numeric(edge.width);
@@ -85,7 +88,7 @@ class MinHeap {
       let index = 0;
       while (true) {
         const left = index * 2 + 1;
-        const right = left + 1;
+        const right = index * 2 + 2;
         if (left >= items.length) break;
 
         let child = left;
@@ -265,6 +268,7 @@ export function findAllPaths(startId, goalId, mapData) {
   const heuristic = createHeuristic(mapData);
   const open = new MinHeap(compareQueueItems);
   const routes = [];
+  const seenRoutes = new Set();
 
   open.push({
     id: startId,
@@ -278,7 +282,11 @@ export function findAllPaths(startId, goalId, mapData) {
     const current = open.pop();
 
     if (current.id === goalId) {
-      routes.push(current.path);
+      const routeKey = current.path.join('->');
+      if (!seenRoutes.has(routeKey)) {
+        seenRoutes.add(routeKey);
+        routes.push(current.path);
+      }
       continue;
     }
 
