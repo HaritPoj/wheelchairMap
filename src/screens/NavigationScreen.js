@@ -62,7 +62,7 @@ export default function NavigationScreen() {
       return;
     }
 
-    setRouteMessage('Best wheelchair-accessible route selected with A*.');
+    setRouteMessage(null);
     setShowDirections(false);
   }, [locationId, destination, mapData]);
 
