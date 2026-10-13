@@ -12,11 +12,11 @@
       "level": 1,
       "name": "Floor 1",
       "map": {
-        "width": 1080,
+        "width": 1104,
         "height": 395,
         "boundary": [
           [33, 249], [390, 249], [390, 223], [690, 223], [690, 246],
-          [946, 246], [946, 42], [1058, 42], [1058, 349], [690, 349],
+          [946, 246], [946, 42], [1082, 42], [1082, 349], [690, 349],
           [690, 377], [389, 377], [389, 354], [33, 354]
         ]
       }
@@ -42,10 +42,10 @@
     { "id": "room_110", "type": "room", "floorId": "floor_1", "name": "Room 110", "code": "110", "geometry": { "type": "rectangle", "x": 895, "y": 278, "width": 39, "height": 70 }, "accessibility": { "doorWidth": null, "threshold": null } },
     { "id": "room_109", "type": "room", "floorId": "floor_1", "name": "Room 109", "code": "109", "geometry": { "type": "rectangle", "x": 934, "y": 278, "width": 38, "height": 70 }, "accessibility": { "doorWidth": null, "threshold": null } },
 
-    { "id": "room_108", "type": "room", "floorId": "floor_1", "name": "Room 108", "code": "108", "geometry": { "type": "rectangle", "x": 989, "y": 300, "width": 69, "height": 49 }, "accessibility": { "doorWidth": null, "threshold": null } },
-    { "id": "room_107", "type": "room", "floorId": "floor_1", "name": "Room 107", "code": "107", "geometry": { "type": "rectangle", "x": 989, "y": 203, "width": 69, "height": 96 }, "accessibility": { "doorWidth": null, "threshold": null } },
-    { "id": "restroom_f1_east", "type": "restroom", "floorId": "floor_1", "name": "East restroom", "code": "WC", "geometry": { "type": "rectangle", "x": 1028, "y": 145, "width": 30, "height": 57 }, "accessibility": { "doorWidth": null, "threshold": null } },
-    { "id": "room_106", "type": "room", "floorId": "floor_1", "name": "Room 106", "code": "106", "geometry": { "type": "rectangle", "x": 989, "y": 43, "width": 69, "height": 101 }, "accessibility": { "doorWidth": null, "threshold": null } },
+    { "id": "room_108", "type": "room", "floorId": "floor_1", "name": "Room 108", "code": "108", "geometry": { "type": "rectangle", "x": 1013, "y": 300, "width": 69, "height": 49 }, "accessibility": { "doorWidth": null, "threshold": null } },
+    { "id": "room_107", "type": "room", "floorId": "floor_1", "name": "Room 107", "code": "107", "geometry": { "type": "rectangle", "x": 1013, "y": 203, "width": 69, "height": 96 }, "accessibility": { "doorWidth": null, "threshold": null } },
+    { "id": "restroom_f1_east", "type": "restroom", "floorId": "floor_1", "name": "East restroom", "code": "WC", "geometry": { "type": "rectangle", "x": 1052, "y": 145, "width": 30, "height": 57 }, "accessibility": { "doorWidth": null, "threshold": null } },
+    { "id": "room_106", "type": "room", "floorId": "floor_1", "name": "Room 106", "code": "106", "geometry": { "type": "rectangle", "x": 1013, "y": 43, "width": 69, "height": 101 }, "accessibility": { "doorWidth": null, "threshold": null } },
 
     { "id": "elevator_01_f1", "type": "elevator", "floorId": "floor_1", "name": "Elevator Floor 1", "geometry": { "type": "rectangle", "x": 392, "y": 230, "width": 28, "height": 30 }, "accessibility": { "doorWidth": null, "threshold": null } },
     { "id": "stairs_f1_central", "type": "stairs", "floorId": "floor_1", "name": "Central stairs", "code": "STAIRS", "geometry": { "type": "rectangle", "x": 505, "y": 230, "width": 36, "height": 30 } },
@@ -53,7 +53,7 @@
     { "id": "corridor_f1_west_area", "type": "corridor", "floorId": "floor_1", "name": "West corridor area", "geometry": { "type": "rectangle", "x": 33, "y": 249, "width": 408, "height": 105 } },
     { "id": "corridor_f1_center_area", "type": "corridor", "floorId": "floor_1", "name": "Central corridor area", "geometry": { "type": "rectangle", "x": 441, "y": 223, "width": 249, "height": 154 } },
     { "id": "corridor_f1_east_area", "type": "corridor", "floorId": "floor_1", "name": "East corridor area", "geometry": { "type": "rectangle", "x": 690, "y": 246, "width": 256, "height": 103 } },
-    { "id": "corridor_f1_vertical_area", "type": "corridor", "floorId": "floor_1", "name": "Vertical corridor area", "geometry": { "type": "rectangle", "x": 946, "y": 42, "width": 43, "height": 307 } },
+    { "id": "corridor_f1_vertical_area", "type": "corridor", "floorId": "floor_1", "name": "Vertical corridor area", "geometry": { "type": "rectangle", "x": 946, "y": 42, "width": 67, "height": 307 } },
 
     { "id": "corridor_f1_u01", "type": "corridor", "floorId": "floor_1", "name": "Upper corridor 01", "geometry": { "type": "point", "x": 79, "y": 264 } },
     { "id": "corridor_f1_u02", "type": "corridor", "floorId": "floor_1", "name": "Upper corridor 02", "geometry": { "type": "point", "x": 127, "y": 264 } },
@@ -69,7 +69,7 @@
     { "id": "corridor_f1_u12", "type": "corridor", "floorId": "floor_1", "name": "East corridor 01", "geometry": { "type": "point", "x": 700, "y": 264 } },
     { "id": "corridor_f1_u13", "type": "corridor", "floorId": "floor_1", "name": "East corridor 02", "geometry": { "type": "point", "x": 790, "y": 264 } },
     { "id": "corridor_f1_u14", "type": "corridor", "floorId": "floor_1", "name": "East corridor 03", "geometry": { "type": "point", "x": 870, "y": 264 } },
-    { "id": "corridor_f1_u15", "type": "corridor", "floorId": "floor_1", "name": "Vertical wing junction", "geometry": { "type": "point", "x": 968, "y": 264 } },
+    { "id": "corridor_f1_u15", "type": "corridor", "floorId": "floor_1", "name": "Vertical wing junction", "geometry": { "type": "point", "x": 980, "y": 264 } },
 
     { "id": "corridor_f1_l01", "type": "corridor", "floorId": "floor_1", "name": "Lower corridor 01", "geometry": { "type": "point", "x": 79, "y": 344 } },
     { "id": "corridor_f1_l02", "type": "corridor", "floorId": "floor_1", "name": "Lower corridor 02", "geometry": { "type": "point", "x": 127, "y": 344 } },
@@ -83,10 +83,10 @@
     { "id": "corridor_f1_l10", "type": "corridor", "floorId": "floor_1", "name": "Central lower west", "geometry": { "type": "point", "x": 500, "y": 360 } },
     { "id": "corridor_f1_l11", "type": "corridor", "floorId": "floor_1", "name": "Central lower east", "geometry": { "type": "point", "x": 610, "y": 360 } },
 
-    { "id": "corridor_f1_v01", "type": "corridor", "floorId": "floor_1", "name": "Vertical corridor lower", "geometry": { "type": "point", "x": 968, "y": 325 } },
-    { "id": "corridor_f1_v02", "type": "corridor", "floorId": "floor_1", "name": "Vertical corridor room 107", "geometry": { "type": "point", "x": 968, "y": 245 } },
-    { "id": "corridor_f1_v03", "type": "corridor", "floorId": "floor_1", "name": "Vertical corridor restroom", "geometry": { "type": "point", "x": 968, "y": 174 } },
-    { "id": "corridor_f1_v04", "type": "corridor", "floorId": "floor_1", "name": "Vertical corridor room 106", "geometry": { "type": "point", "x": 968, "y": 95 } }
+    { "id": "corridor_f1_v01", "type": "corridor", "floorId": "floor_1", "name": "Vertical corridor lower", "geometry": { "type": "point", "x": 980, "y": 325 } },
+    { "id": "corridor_f1_v02", "type": "corridor", "floorId": "floor_1", "name": "Vertical corridor room 107", "geometry": { "type": "point", "x": 980, "y": 245 } },
+    { "id": "corridor_f1_v03", "type": "corridor", "floorId": "floor_1", "name": "Vertical corridor restroom", "geometry": { "type": "point", "x": 980, "y": 174 } },
+    { "id": "corridor_f1_v04", "type": "corridor", "floorId": "floor_1", "name": "Vertical corridor room 106", "geometry": { "type": "point", "x": 980, "y": 95 } }
   ],
   "connections": [
     { "id": "f1_u01_u02", "from": "corridor_f1_u01", "to": "corridor_f1_u02", "routing": { "cost": 2 }, "accessibility": { "width": null, "slope": null } },
