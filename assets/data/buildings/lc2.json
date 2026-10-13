@@ -143,7 +143,7 @@
     { "id": "f1_room115_top", "from": "room_115", "to": "corridor_f1_u09", "routing": { "cost": 1 }, "accessibility": { "width": null, "slope": null } },
     { "id": "f1_room115_bottom", "from": "room_115", "to": "corridor_f1_l09", "routing": { "cost": 1 }, "accessibility": { "width": null, "slope": null } },
 
-    { "id": "f1_room114_top", "from": "room_114", "to": "corridor_f1_u12", "routing": { "cost": 1 }, "accessibility": { "width": null, "slope": null } },
+    { "id": "f1_room114_left", "from": "room_114", "to": "corridor_f1_u11", "routing": { "cost": 1 }, "accessibility": { "width": null, "slope": null } },
     { "id": "f1_room113_top", "from": "room_113", "to": "corridor_f1_u12", "routing": { "cost": 1 }, "accessibility": { "width": null, "slope": null } },
     { "id": "f1_wc_center_top", "from": "restroom_f1_center", "to": "corridor_f1_u13", "routing": { "cost": 1 }, "accessibility": { "width": null, "slope": null } },
     { "id": "f1_room111_top", "from": "room_111", "to": "corridor_f1_u13", "routing": { "cost": 1 }, "accessibility": { "width": null, "slope": null } },
