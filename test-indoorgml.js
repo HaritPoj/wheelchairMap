@@ -60,6 +60,32 @@ assert.ok(
   'IndoorGML should materialize dual-graph states as corridor routing points'
 );
 
+const room109 = floor1.spaces.find(space => space.id === 'room_109');
+const room108 = floor1.spaces.find(space => space.id === 'room_108');
+const verticalCorridor = floor1.spaces.find(
+  space => space.id === 'corridor_f1_vertical_area'
+);
+const verticalRouteNode = floor1.spaces.find(
+  space => space.id === 'corridor_f1_v02'
+);
+
+assert.ok(room109 && room108 && verticalCorridor && verticalRouteNode);
+assert.strictEqual(
+  room108.geometry.x - (room109.geometry.x + room109.geometry.width),
+  41,
+  'East vertical corridor gap should match the wider reference spacing'
+);
+assert.strictEqual(
+  verticalCorridor.geometry.width,
+  67,
+  'East vertical corridor area should expand when the east wing is shifted outward'
+);
+assert.strictEqual(
+  verticalRouteNode.geometry.x,
+  980,
+  'East vertical routing nodes should stay centered inside the widened corridor'
+);
+
 assert.ok(
   floor1.connections.some(
     edge =>
