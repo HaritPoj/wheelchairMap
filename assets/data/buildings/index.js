@@ -1,4 +1,4 @@
-import lc2Building from "./lc2.v2";
+import lc2Building from "./lc2.indoorgml";
 
 const BUILDINGS = {
   lc2: lc2Building,
@@ -23,5 +23,6 @@ export function getAvailableBuildings() {
     name: building.facility.name,
     levels: building.levels.length,
     floors: building.levels.length,
+    sourceFormat: building.sourceFormat || "unknown",
   }));
 }
