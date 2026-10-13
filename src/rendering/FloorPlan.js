@@ -16,10 +16,14 @@ import Svg, {
 } from 'react-native-svg';
 import { getRouteColor } from './routeColors';
 
+const FLOOR_ONE_FILL = '#B2B1CA';
+const FLOOR_ONE_STROKE = '#312E81';
+const WALL_COLOR = '#111111';
+
 export default function FloorPlan({
   mapData,
   currentFloor,
-  route,
+  route = [],
   routes = [],
   selectedRouteIndex = 0,
   onNodeTap,
@@ -36,7 +40,6 @@ export default function FloorPlan({
   const gestureStartOffset = useRef({ x: 0, y: 0 });
   const gestureStartDistance = useRef(null);
   const gestureStartScale = useRef(1);
-  const gestureStartPoint = useRef(null);
 
   const currentFloorData =
     mapData.floors.find(floor => floor.level === currentFloor) ||
@@ -45,6 +48,8 @@ export default function FloorPlan({
 
   const mapWidthSource = Number(currentFloorData.map?.width) || 1200;
   const mapHeightSource = Number(currentFloorData.map?.height) || 450;
+  const isFloorOne = Number(currentFloor) === 1;
+
   const fitScale =
     viewport.width > 0 && viewport.height > 0
       ? Math.min(
@@ -60,6 +65,7 @@ export default function FloorPlan({
     mapHeightSource,
     fitScale,
   });
+
   latestMapState.current = {
     viewport,
     mapWidthSource,
@@ -74,6 +80,7 @@ export default function FloorPlan({
       mapHeightSource: height,
       fitScale: baseScale,
     } = latestMapState.current;
+
     if (!currentViewport.width || !currentViewport.height) return;
 
     const scale = baseScale * zoomMultiplier.current;
@@ -81,6 +88,7 @@ export default function FloorPlan({
     const contentHeight = height * scale;
 
     currentScale.current = scale;
+
     const centeredOffset = {
       x: (currentViewport.width - contentWidth) / 2,
       y: (currentViewport.height - contentHeight) / 2,
@@ -103,26 +111,21 @@ export default function FloorPlan({
       mapWidthSource: width,
       mapHeightSource: height,
     } = latestMapState.current;
+
     const contentWidth = width * scale;
     const contentHeight = height * scale;
-
-    // When the map is larger than the viewport, its top-left position
-    // can move from (viewport - content) to 0.
-    //
-    // When the map is smaller than the viewport, it can move from 0 to
-    // (viewport - content), so the user can scroll it all the way down/right.
     const xDifference = currentViewport.width - contentWidth;
     const yDifference = currentViewport.height - contentHeight;
 
-    const minX = Math.min(0, xDifference);
-    const maxX = Math.max(0, xDifference);
-
-    const minY = Math.min(0, yDifference);
-    const maxY = Math.max(0, yDifference);
-
     return {
-      x: Math.max(minX, Math.min(offset.x, maxX)),
-      y: Math.max(minY, Math.min(offset.y, maxY)),
+      x: Math.max(
+        Math.min(0, xDifference),
+        Math.min(offset.x, Math.max(0, xDifference))
+      ),
+      y: Math.max(
+        Math.min(0, yDifference),
+        Math.min(offset.y, Math.max(0, yDifference))
+      ),
     };
   };
 
@@ -135,29 +138,13 @@ export default function FloorPlan({
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => false,
-
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        if (Math.abs(gestureState.dx) > 4 || Math.abs(gestureState.dy) > 4) {
-          return true;
-        }
-
-        return false;
-      },
+      onMoveShouldSetPanResponder: (_, gestureState) =>
+        Math.abs(gestureState.dx) > 4 || Math.abs(gestureState.dy) > 4,
 
       onPanResponderGrant: event => {
         const touches = event.nativeEvent.touches;
-
         gestureStartOffset.current = { ...currentOffset.current };
         gestureStartScale.current = zoomMultiplier.current;
-
-        if (touches.length === 1) {
-          gestureStartPoint.current = {
-            x: touches[0].pageX,
-            y: touches[0].pageY,
-          };
-        } else {
-          gestureStartPoint.current = null;
-        }
 
         if (touches.length >= 2) {
           const [first, second] = touches;
@@ -177,15 +164,14 @@ export default function FloorPlan({
           const dx = first.pageX - second.pageX;
           const dy = first.pageY - second.pageY;
           const distance = Math.sqrt(dx * dx + dy * dy);
-
-          const scaleFactor =
+          const factor =
             gestureStartDistance.current > 0
               ? distance / gestureStartDistance.current
               : 1;
 
           const nextZoom = Math.max(
             0.6,
-            Math.min(3.5, gestureStartScale.current * scaleFactor)
+            Math.min(3.5, gestureStartScale.current * factor)
           );
           const nextScale = latestMapState.current.fitScale * nextZoom;
 
@@ -206,12 +192,9 @@ export default function FloorPlan({
 
       onPanResponderRelease: () => {
         gestureStartDistance.current = null;
-        gestureStartPoint.current = null;
       },
-
       onPanResponderTerminate: () => {
         gestureStartDistance.current = null;
-        gestureStartPoint.current = null;
       },
     })
   ).current;
@@ -219,17 +202,14 @@ export default function FloorPlan({
   const scale = fitScale * zoomLevel;
   const mapWidth = mapWidthSource * scale;
   const mapHeight = mapHeightSource * scale;
-
-  const toXY = (x, y) => ({
-    x: x * scale,
-    y: y * scale,
-  });
+  const toXY = (x, y) => ({ x: Number(x || 0) * scale, y: Number(y || 0) * scale });
 
   const isWaypoint = node =>
     node.type === 'corridor' &&
     !(Number(node.width) > 0 && Number(node.height) > 0);
 
   const floorNodes = mapData.nodes.filter(node => node.floor === currentFloor);
+
   const routePaths =
     routes.length > 0 ? routes : route && route.length > 0 ? [route] : [];
   const activeRouteIndex =
@@ -249,16 +229,13 @@ export default function FloorPlan({
     const dx = b.x - a.x;
     const dy = b.y - a.y;
 
-    const hasBounds = node =>
-      Number(node.width) > 0 && Number(node.height) > 0;
+    const hasBounds = node => Number(node.width) > 0 && Number(node.height) > 0;
     const boundaryFraction = node => {
       const halfWidth = (Number(node.width) * scale) / 2;
       const halfHeight = (Number(node.height) * scale) / 2;
-      const fractionX =
-        Math.abs(dx) > 0 ? halfWidth / Math.abs(dx) : Infinity;
-      const fractionY =
-        Math.abs(dy) > 0 ? halfHeight / Math.abs(dy) : Infinity;
-      return Math.min(fractionX, fractionY);
+      const fx = Math.abs(dx) > 0 ? halfWidth / Math.abs(dx) : Infinity;
+      const fy = Math.abs(dy) > 0 ? halfHeight / Math.abs(dy) : Infinity;
+      return Math.min(fx, fy);
     };
 
     const startFraction = hasBounds(nodeA) ? boundaryFraction(nodeA) : 0;
@@ -284,8 +261,73 @@ export default function FloorPlan({
         ];
 
   const buildingFramePoints = boundary
-    .map(([x, y]) => x * scale + ',' + y * scale)
+    .map(([x, y]) => `${x * scale},${y * scale}`)
     .join(' ');
+
+  function renderStairs(node, x, y, width, height) {
+    const left = x - width / 2;
+    const top = y - height / 2;
+    const stepCount = 6;
+
+    return (
+      <G key={'stairs-' + node.id}>
+        <Rect
+          x={left}
+          y={top}
+          width={width}
+          height={height}
+          fill="none"
+          stroke={WALL_COLOR}
+          strokeWidth={2 * scale}
+        />
+        {Array.from({ length: stepCount }).map((_, index) => {
+          const stepY = top + ((index + 1) * height) / (stepCount + 1);
+          return (
+            <Line
+              key={'stair-step-' + index}
+              x1={left}
+              y1={stepY}
+              x2={left + width}
+              y2={stepY}
+              stroke={WALL_COLOR}
+              strokeWidth={1.4 * scale}
+            />
+          );
+        })}
+      </G>
+    );
+  }
+
+  function renderElevator(node, x, y, width, height) {
+    const size = Math.max(18 * scale, Math.min(width, height));
+    const left = x - size / 2;
+    const top = y - size / 2;
+
+    return (
+      <G key={'elevator-' + node.id}>
+        <Rect
+          x={left}
+          y={top}
+          width={size}
+          height={size}
+          rx={1.5 * scale}
+          fill="#ffffff"
+          stroke={WALL_COLOR}
+          strokeWidth={2 * scale}
+        />
+        <SvgText
+          x={x}
+          y={y + 4 * scale}
+          fontSize={12 * scale}
+          fill={WALL_COLOR}
+          textAnchor="middle"
+          fontWeight="bold"
+        >
+          ⇅
+        </SvgText>
+      </G>
+    );
+  }
 
   return (
     <View
@@ -320,52 +362,67 @@ export default function FloorPlan({
         >
           <Polygon
             points={buildingFramePoints}
-            fill="#ffffff"
-            stroke="#888888"
-            strokeWidth={4 * scale}
+            fill={isFloorOne ? FLOOR_ONE_FILL : '#ffffff'}
+            stroke={isFloorOne ? FLOOR_ONE_STROKE : '#888888'}
+            strokeWidth={(isFloorOne ? 2.5 : 4) * scale}
             strokeLinejoin="round"
           />
 
-          {floorNodes.map(node => {
-            if (
-              node.type !== 'corridor' ||
-              !(Number(node.width) > 0) ||
-              !(Number(node.height) > 0)
-            ) {
-              return null;
-            }
+          {!isFloorOne &&
+            floorNodes.map(node => {
+              if (
+                node.type !== 'corridor' ||
+                !(Number(node.width) > 0) ||
+                !(Number(node.height) > 0)
+              ) {
+                return null;
+              }
 
-            const { x, y } = toXY(node.x, node.y);
-            const corridorWidth = node.width * scale;
-            const corridorHeight = node.height * scale;
+              const { x, y } = toXY(node.x, node.y);
+              const corridorWidth = node.width * scale;
+              const corridorHeight = node.height * scale;
 
-            return (
-              <Rect
-                key={'corridor-area-' + node.id}
-                x={x - corridorWidth / 2}
-                y={y - corridorHeight / 2}
-                width={corridorWidth}
-                height={corridorHeight}
-                fill="#eef2f3"
-                stroke="#000000"
-                strokeWidth={2 * scale}
-              />
-            );
-          })}
+              return (
+                <Rect
+                  key={'corridor-area-' + node.id}
+                  x={x - corridorWidth / 2}
+                  y={y - corridorHeight / 2}
+                  width={corridorWidth}
+                  height={corridorHeight}
+                  fill="#eef2f3"
+                  stroke="#000000"
+                  strokeWidth={2 * scale}
+                />
+              );
+            })}
 
           {floorNodes.map(node => {
             if (isWaypoint(node) || node.type === 'corridor') return null;
 
             const { x, y } = toXY(node.x, node.y);
-            const roomWidth =
-              Math.max(1, Number(node.width) || 50) * scale;
-            const roomHeight =
-              Math.max(1, Number(node.height) || 50) * scale;
+            const roomWidth = Math.max(1, Number(node.width) || 50) * scale;
+            const roomHeight = Math.max(1, Number(node.height) || 50) * scale;
             const isElevator = node.type === 'elevator';
             const isStairs = node.type === 'stairs';
-            const isRestroom =
-              node.type === 'restroom' || node.type === 'toilet';
-            const isSmallFacility = isStairs || isRestroom;
+            const isRestroom = node.type === 'restroom' || node.type === 'toilet';
+
+            if (isFloorOne && isStairs) {
+              return renderStairs(node, x, y, roomWidth, roomHeight);
+            }
+
+            if (isFloorOne && isElevator) {
+              return renderElevator(node, x, y, roomWidth, roomHeight);
+            }
+
+            const structureFill = isFloorOne
+              ? FLOOR_ONE_FILL
+              : isElevator
+                ? '#d0d0d0'
+                : isStairs
+                  ? '#e4e4e4'
+                  : isRestroom
+                    ? '#f2f5f6'
+                    : '#f8f8f8';
 
             return (
               <React.Fragment key={'structure-' + node.id}>
@@ -378,26 +435,18 @@ export default function FloorPlan({
                         y={part.y * scale}
                         width={part.width * scale}
                         height={part.height * scale}
-                        fill={
-                          isElevator
-                            ? '#d0d0d0'
-                            : isStairs
-                              ? '#e4e4e4'
-                              : isRestroom
-                                ? '#f2f5f6'
-                                : '#f8f8f8'
-                        }
+                        fill={structureFill}
                         stroke="none"
                       />
                     ))}
                     {Array.isArray(node.geometryOutline) && node.geometryOutline.length >= 3 ? (
                       <Polygon
                         points={node.geometryOutline
-                          .map(([pointX, pointY]) => pointX * scale + ',' + pointY * scale)
+                          .map(([pointX, pointY]) => `${pointX * scale},${pointY * scale}`)
                           .join(' ')}
                         fill="none"
-                        stroke="#000000"
-                        strokeWidth={2}
+                        stroke={WALL_COLOR}
+                        strokeWidth={2 * scale}
                         strokeLinejoin="miter"
                       />
                     ) : null}
@@ -408,35 +457,21 @@ export default function FloorPlan({
                     y={y - roomHeight / 2}
                     width={roomWidth}
                     height={roomHeight}
-                    fill={
-                      isElevator
-                        ? '#d0d0d0'
-                        : isStairs
-                          ? '#e4e4e4'
-                          : isRestroom
-                            ? '#f2f5f6'
-                            : '#f8f8f8'
-                    }
-                    stroke="#000000"
-                    strokeWidth={2}
+                    fill={structureFill}
+                    stroke={WALL_COLOR}
+                    strokeWidth={2 * scale}
                   />
                 )}
 
                 <SvgText
                   x={x}
-                  y={y + (isElevator ? 4 : 5)}
-                  fontSize={isElevator ? 11 * scale : isSmallFacility ? 9 * scale : 14 * scale}
-                  fill="#333333"
+                  y={y + 5 * scale}
+                  fontSize={(isRestroom ? 10 : 14) * scale}
+                  fill="#111111"
                   textAnchor="middle"
-                  fontWeight="bold"
+                  fontWeight={isFloorOne ? 'normal' : 'bold'}
                 >
-                  {isElevator
-                    ? 'Elevator'
-                    : isStairs
-                      ? 'Stairs'
-                      : isRestroom
-                        ? (node.code || 'WC')
-                        : (node.code || node.label || node.id)}
+                  {isRestroom ? node.code || 'WC' : node.code || node.label || node.id}
                 </SvgText>
               </React.Fragment>
             );
@@ -451,17 +486,14 @@ export default function FloorPlan({
               const current = mapData.nodeMap[nodeId];
 
               if (!previous || !current) return null;
-
-              if (
-                previous.floor !== currentFloor ||
-                current.floor !== currentFloor
-              ) {
+              if (previous.floor !== currentFloor || current.floor !== currentFloor) {
                 return null;
               }
 
               const segment = getSegment(previous, current);
+              if (!segment) return null;
 
-              return segment ? (
+              return (
                 <Line
                   key={'route-' + routeIndex + '-' + index}
                   x1={segment.startX}
@@ -469,13 +501,11 @@ export default function FloorPlan({
                   x2={segment.endX}
                   y2={segment.endY}
                   stroke={getRouteColor(routeIndex)}
-                  strokeWidth={
-                    (routeIndex === activeRouteIndex ? 6 : 4) * scale
-                  }
-                  strokeOpacity={routeIndex === activeRouteIndex ? 1 : 0.75}
+                  strokeWidth={(routeIndex === activeRouteIndex ? 6 : 4) * scale}
+                  strokeOpacity={routeIndex === activeRouteIndex ? 1 : 0.72}
                   strokeLinecap="round"
                 />
-              ) : null;
+              );
             })
           )}
 
@@ -484,67 +514,48 @@ export default function FloorPlan({
 
             const previous = mapData.nodeMap[route[index - 1]];
             const current = mapData.nodeMap[nodeId];
+            if (!previous || !current || previous.floor === current.floor) return null;
 
-            if (!previous || !current) return null;
+            const liftNode =
+              previous.type === 'elevator'
+                ? previous
+                : current.type === 'elevator'
+                  ? current
+                  : null;
 
-            if (previous.floor !== current.floor) {
-              const liftNode =
-                previous.type === 'elevator'
-                  ? previous
-                  : current.type === 'elevator'
-                    ? current
-                    : null;
+            if (!liftNode || liftNode.floor !== currentFloor) return null;
 
-              if (!liftNode || liftNode.floor !== currentFloor) {
-                return null;
-              }
-
-              const xy = toXY(liftNode.x, liftNode.y);
-
-              return (
-                <G
-                  key={'transition-' + index}
-                  x={xy.x}
-                  y={xy.y}
+            const xy = toXY(liftNode.x, liftNode.y);
+            return (
+              <G key={'transition-' + index} x={xy.x} y={xy.y}>
+                <Circle
+                  r={15 * scale}
+                  fill={getRouteColor(activeRouteIndex)}
+                  stroke="#ffffff"
+                  strokeWidth={3 * scale}
+                />
+                <SvgText
+                  y={5 * scale}
+                  fontSize={12 * scale}
+                  fill="#ffffff"
+                  textAnchor="middle"
+                  fontWeight="bold"
                 >
-                  <Circle
-                    r={15 * scale}
-                    fill={getRouteColor(activeRouteIndex)}
-                    stroke="#ffffff"
-                    strokeWidth={3 * scale}
-                  />
-                  <SvgText
-                    y={5 * scale}
-                    fontSize={12 * scale}
-                    fill="#ffffff"
-                    textAnchor="middle"
-                    fontWeight="bold"
-                  >
-                    E
-                  </SvgText>
-                </G>
-              );
-            }
-
-            return null;
+                  E
+                </SvgText>
+              </G>
+            );
           })}
         </Svg>
 
         {floorNodes.map(node => {
-          if (isWaypoint(node) || node.type === 'corridor' || node.type === 'stairs') return null;
+          if (isWaypoint(node) || node.type === 'corridor' || node.type === 'stairs') {
+            return null;
+          }
 
           const { x, y } = toXY(node.x, node.y);
-          const isElevator = node.type === 'elevator';
-
-          const touchWidth = Math.max(
-            48,
-            (Number(node.width) || 48) * scale
-          );
-          const touchHeight = Math.max(
-            48,
-            (Number(node.height) || 48) * scale
-          );
-
+          const touchWidth = Math.max(48, (Number(node.width) || 48) * scale);
+          const touchHeight = Math.max(48, (Number(node.height) || 48) * scale);
           const isStart = startNode === node.id;
           const isDest = destination === node.id;
 
@@ -567,11 +578,7 @@ export default function FloorPlan({
               key={'touch-' + node.id}
               onPress={() => onNodeTap(node.id)}
               accessibilityRole="button"
-              accessibilityLabel={
-                (node.name || node.label || node.id) +
-                ', Floor ' +
-                node.floor
-              }
+              accessibilityLabel={(node.name || node.label || node.id) + ', Floor ' + node.floor}
               style={[
                 styles.nodeTouchArea,
                 {
@@ -579,7 +586,7 @@ export default function FloorPlan({
                   height: touchHeight,
                   left: x - touchWidth / 2,
                   top: y - touchHeight / 2,
-                  borderRadius: isElevator ? 8 : 10,
+                  borderRadius: 6,
                   backgroundColor,
                   borderColor,
                 },
@@ -588,6 +595,7 @@ export default function FloorPlan({
           );
         })}
       </View>
+
       <TouchableOpacity
         style={styles.fitButton}
         onPress={() => {
@@ -608,7 +616,7 @@ export default function FloorPlan({
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: '#d8e3e8',
+    backgroundColor: '#F7F7F7',
     overflow: 'hidden',
   },
   mapLayer: {
@@ -633,7 +641,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   fitButtonText: {
-    color: '#185FA5',
+    color: FLOOR_ONE_STROKE,
     fontSize: 14,
     fontWeight: '600',
   },
