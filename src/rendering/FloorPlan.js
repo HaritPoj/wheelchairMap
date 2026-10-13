@@ -265,8 +265,8 @@ export default function FloorPlan({
     .map(([x, y]) => `${x * scale},${y * scale}`)
     .join(' ');
 
-  function getDoorSides(node) {
-    const sides = new Set();
+  function getDoorSpecs(node) {
+    const specs = new Map();
 
     for (const edge of mapData.edges || []) {
       if (edge.from !== node.id && edge.to !== node.id) continue;
@@ -277,7 +277,31 @@ export default function FloorPlan({
       );
 
       if (namedSide) {
-        sides.add(namedSide);
+        let position = 0.5;
+
+        if (
+          (namedSide === 'top' || namedSide === 'bottom') &&
+          edgeId.includes(`_${namedSide}_left`)
+        ) {
+          position = 0.22;
+        } else if (
+          (namedSide === 'top' || namedSide === 'bottom') &&
+          edgeId.includes(`_${namedSide}_right`)
+        ) {
+          position = 0.78;
+        } else if (
+          (namedSide === 'left' || namedSide === 'right') &&
+          edgeId.includes(`_${namedSide}_top`)
+        ) {
+          position = 0.22;
+        } else if (
+          (namedSide === 'left' || namedSide === 'right') &&
+          edgeId.includes(`_${namedSide}_bottom`)
+        ) {
+          position = 0.78;
+        }
+
+        specs.set(namedSide, position);
         continue;
       }
 
@@ -287,15 +311,21 @@ export default function FloorPlan({
 
       const dx = Number(other.x) - Number(node.x);
       const dy = Number(other.y) - Number(node.y);
+      const side =
+        Math.abs(dx) > Math.abs(dy)
+          ? dx < 0
+            ? 'left'
+            : 'right'
+          : dy < 0
+            ? 'top'
+            : 'bottom';
 
-      if (Math.abs(dx) > Math.abs(dy)) {
-        sides.add(dx < 0 ? 'left' : 'right');
-      } else {
-        sides.add(dy < 0 ? 'top' : 'bottom');
+      if (!specs.has(side)) {
+        specs.set(side, 0.5);
       }
     }
 
-    return sides;
+    return specs;
   }
 
   function renderRoomWalls(node, x, y, width, height) {
@@ -303,13 +333,13 @@ export default function FloorPlan({
     const right = x + width / 2;
     const top = y - height / 2;
     const bottom = y + height / 2;
-    const doorSides = getDoorSides(node);
+    const doorSpecs = getDoorSpecs(node);
     const horizontalGap = Math.min(18 * scale, width * 0.42);
     const verticalGap = Math.min(18 * scale, height * 0.34);
     const strokeWidth = 2 * scale;
 
-    const horizontalWall = (key, wallY, hasDoor) => {
-      if (!hasDoor) {
+    const horizontalWall = (key, wallY, doorPosition) => {
+      if (doorPosition === undefined) {
         return (
           <Line
             key={key}
@@ -323,18 +353,20 @@ export default function FloorPlan({
         );
       }
 
+      const gapCenter = left + width * doorPosition;
+
       return (
         <React.Fragment key={key}>
           <Line
             x1={left}
             y1={wallY}
-            x2={x - horizontalGap / 2}
+            x2={gapCenter - horizontalGap / 2}
             y2={wallY}
             stroke={WALL_COLOR}
             strokeWidth={strokeWidth}
           />
           <Line
-            x1={x + horizontalGap / 2}
+            x1={gapCenter + horizontalGap / 2}
             y1={wallY}
             x2={right}
             y2={wallY}
@@ -345,8 +377,8 @@ export default function FloorPlan({
       );
     };
 
-    const verticalWall = (key, wallX, hasDoor) => {
-      if (!hasDoor) {
+    const verticalWall = (key, wallX, doorPosition) => {
+      if (doorPosition === undefined) {
         return (
           <Line
             key={key}
@@ -360,19 +392,21 @@ export default function FloorPlan({
         );
       }
 
+      const gapCenter = top + height * doorPosition;
+
       return (
         <React.Fragment key={key}>
           <Line
             x1={wallX}
             y1={top}
             x2={wallX}
-            y2={y - verticalGap / 2}
+            y2={gapCenter - verticalGap / 2}
             stroke={WALL_COLOR}
             strokeWidth={strokeWidth}
           />
           <Line
             x1={wallX}
-            y1={y + verticalGap / 2}
+            y1={gapCenter + verticalGap / 2}
             x2={wallX}
             y2={bottom}
             stroke={WALL_COLOR}
@@ -384,10 +418,10 @@ export default function FloorPlan({
 
     return (
       <G key={'walls-' + node.id}>
-        {horizontalWall('top', top, doorSides.has('top'))}
-        {horizontalWall('bottom', bottom, doorSides.has('bottom'))}
-        {verticalWall('left', left, doorSides.has('left'))}
-        {verticalWall('right', right, doorSides.has('right'))}
+        {horizontalWall('top', top, doorSpecs.get('top'))}
+        {horizontalWall('bottom', bottom, doorSpecs.get('bottom'))}
+        {verticalWall('left', left, doorSpecs.get('left'))}
+        {verticalWall('right', right, doorSpecs.get('right'))}
       </G>
     );
   }
