@@ -49,7 +49,7 @@ export default function FloorPlan({
 
   const mapWidthSource = Number(currentFloorData.map?.width) || 1200;
   const mapHeightSource = Number(currentFloorData.map?.height) || 450;
-  const isFloorOne = Number(currentFloor) === 1;
+  const isFloorOne = Number(currentFloor) === 1 || Number(currentFloor) === 2;
 
   const fitScale =
     viewport.width > 0 && viewport.height > 0
@@ -369,16 +369,12 @@ export default function FloorPlan({
     let bend;
 
     if (start.side === 'top' || start.side === 'bottom') {
-      // Leave a room vertically first, then follow the corridor horizontally.
       bend = { x: start.x, y: end.y };
     } else if (start.side === 'left' || start.side === 'right') {
-      // Leave a room horizontally first, then follow the corridor vertically.
       bend = { x: end.x, y: start.y };
     } else if (end.side === 'top' || end.side === 'bottom') {
-      // Approach a top/bottom door horizontally, then enter vertically.
       bend = { x: end.x, y: start.y };
     } else if (end.side === 'left' || end.side === 'right') {
-      // Approach a left/right door vertically, then enter horizontally.
       bend = { x: start.x, y: end.y };
     } else if (Math.abs(end.x - start.x) >= Math.abs(end.y - start.y)) {
       bend = { x: end.x, y: start.y };
