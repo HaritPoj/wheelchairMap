@@ -158,6 +158,25 @@ assert.deepStrictEqual(
   'Room 211 geometry should match the east wing in the reference'
 );
 
+const room213 = floor2RoomByCode('213');
+const corridor213 = floor2.spaces.find(space => space.id === 'corridor_f2_v01');
+assert.ok(room213 && corridor213, 'Room 213 and its corridor waypoint must exist');
+assert.strictEqual(corridor213.geometry.x, 1134);
+assert.strictEqual(corridor213.geometry.y, 324);
+assert.ok(
+  corridor213.geometry.x < room213.geometry.x,
+  'Room 213 corridor waypoint must remain outside the room, to its left'
+);
+assert.ok(
+  floor2.connections.some(
+    edge =>
+      edge.id === 'f2_room213_left_top' &&
+      edge.from === 'room_213' &&
+      edge.to === 'corridor_f2_v01'
+  ),
+  'Room 213 must open on the upper part of its left wall'
+);
+
 assert.strictEqual(
   floor2.spaces.filter(space => space.type === 'restroom').length,
   1,
