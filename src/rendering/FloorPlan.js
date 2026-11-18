@@ -709,15 +709,17 @@ export default function FloorPlan({
                     ) : null}
                   </>
                 ) : (
-                  <Rect
-                    x={x - roomWidth / 2}
-                    y={y - roomHeight / 2}
-                    width={roomWidth}
-                    height={roomHeight}
-                    fill={structureFill}
-                    stroke={WALL_COLOR}
-                    strokeWidth={2 * scale}
-                  />
+                  <>
+                    <Rect
+                      x={x - roomWidth / 2}
+                      y={y - roomHeight / 2}
+                      width={roomWidth}
+                      height={roomHeight}
+                      fill={structureFill}
+                      stroke="none"
+                    />
+                    {renderRoomWalls(node, x, y, roomWidth, roomHeight)}
+                  </>
                 )}
 
                 <SvgText
