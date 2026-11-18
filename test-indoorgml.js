@@ -159,22 +159,34 @@ assert.deepStrictEqual(
 );
 
 const room213 = floor2RoomByCode('213');
-const corridor213 = floor2.spaces.find(space => space.id === 'corridor_f2_v01');
-assert.ok(room213 && corridor213, 'Room 213 and its corridor waypoint must exist');
-assert.strictEqual(corridor213.geometry.x, 1134);
-assert.strictEqual(corridor213.geometry.y, 324);
+const corridor213 = floor2.spaces.find(space => space.id === 'corridor_f2_c17');
+assert.ok(room213 && corridor213, 'Room 213 and the upper corridor waypoint must exist');
+assert.strictEqual(room213.geometry.x, 1156);
+assert.strictEqual(room213.geometry.y, 302);
+assert.strictEqual(room213.geometry.width, 132);
+assert.strictEqual(corridor213.geometry.x, 1178);
+assert.strictEqual(corridor213.geometry.y, 286);
 assert.ok(
-  corridor213.geometry.x < room213.geometry.x,
-  'Room 213 corridor waypoint must remain outside the room, to its left'
+  corridor213.geometry.y < room213.geometry.y,
+  'Room 213 must open toward the corridor above its top wall'
 );
 assert.ok(
   floor2.connections.some(
     edge =>
-      edge.id === 'f2_room213_left_top' &&
+      edge.id === 'f2_room213_top_left' &&
       edge.from === 'room_213' &&
-      edge.to === 'corridor_f2_v01'
+      edge.to === 'corridor_f2_c17'
   ),
-  'Room 213 must open on the upper part of its left wall'
+  'Room 213 doorway must be on the top wall near its left corner'
+);
+const door213X = room213.geometry.x + room213.geometry.width * 0.22;
+assert.ok(
+  door213X > 1170 && door213X < 1200,
+  'Room 213 door gap should align with the reference opening'
+);
+assert.ok(
+  !floor2.connections.some(edge => edge.id === 'f2_room213_left_top'),
+  'The old left-wall doorway must not remain active'
 );
 
 assert.strictEqual(
