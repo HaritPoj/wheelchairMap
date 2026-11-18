@@ -69,7 +69,7 @@
                   <core:stateMember><core:State gml:id="corridor_f2_c15" wc:levelId="floor_2" wc:name="East corridor 217" wc:x="1034" wc:y="286" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f2_c16" wc:levelId="floor_2" wc:name="East corridor open area" wc:x="1100" wc:y="286" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f2_c17" wc:levelId="floor_2" wc:name="East wing junction" wc:x="1178" wc:y="286" /></core:stateMember>
-                  <core:stateMember><core:State gml:id="corridor_f2_v01" wc:levelId="floor_2" wc:name="Room 213 corridor" wc:x="1178" wc:y="351" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_v01" wc:levelId="floor_2" wc:name="Room 213 corridor" wc:x="1134" wc:y="324" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f2_v02" wc:levelId="floor_2" wc:name="Room 212 corridor" wc:x="1178" wc:y="267" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f2_v03" wc:levelId="floor_2" wc:name="Restroom corridor" wc:x="1178" wc:y="190" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f2_v04" wc:levelId="floor_2" wc:name="Room 211 corridor" wc:x="1178" wc:y="130" /></core:stateMember>
@@ -117,7 +117,7 @@
                   <core:transitionMember><core:Transition gml:id="f2_room218_top" wc:from="room_218" wc:to="corridor_f2_c14" wc:cost="1" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f2_room217_top" wc:from="room_217" wc:to="corridor_f2_c15" wc:cost="1" /></core:transitionMember>
 
-                  <core:transitionMember><core:Transition gml:id="f2_room213_left" wc:from="room_213" wc:to="corridor_f2_v01" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room213_left_top" wc:from="room_213" wc:to="corridor_f2_v01" wc:cost="1" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f2_room212_left" wc:from="room_212" wc:to="corridor_f2_v02" wc:cost="1" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f2_wc_east_left" wc:from="restroom_f2_east" wc:to="corridor_f2_v03" wc:cost="1" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f2_room211_bottom" wc:from="room_211" wc:to="corridor_f2_v04" wc:cost="1" /></core:transitionMember>
