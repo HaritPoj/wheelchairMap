@@ -200,10 +200,26 @@ assert.strictEqual(
   'Floor 2 should contain the central and east stair areas shown in the reference'
 );
 
+const room211 = floor2RoomByCode('211');
+const corridor211 = floor2.spaces.find(space => space.id === 'corridor_f2_v04');
+assert.ok(room211 && corridor211, 'Room 211 and its entrance waypoint must exist');
+assert.ok(
+  corridor211.geometry.y > room211.geometry.y + room211.geometry.height,
+  'Room 211 waypoint must be outside the lower wall, not inside the room'
+);
+assert.strictEqual(corridor211.geometry.x, 1178);
+assert.strictEqual(corridor211.geometry.y, 168);
+
+const floorPlanSource = fs.readFileSync('./src/rendering/FloorPlan.js', 'utf8');
+assert.ok(
+  floorPlanSource.includes('stroke="none"\n                    />\n                    {renderRoomWalls(node, x, y, roomWidth, roomHeight)}'),
+  'Standard Floor 2 rooms must render door gaps rather than fully closed rectangles'
+);
+
 assert.ok(
   floor2.connections.some(
     edge =>
-      edge.id === 'f2_room211_bottom' &&
+      edge.id === 'f2_room211_bottom_left' &&
       edge.from === 'room_211' &&
       edge.to === 'corridor_f2_v04'
   ),
