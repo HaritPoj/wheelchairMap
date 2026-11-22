@@ -42,26 +42,12 @@ const {
 
 function readMap() {
   const gmlDir = path.join(ROOT, 'assets', 'data', 'indoorgml');
-  const floor1 = parseIndoorGML(fs.readFileSync(path.join(gmlDir, 'lc2.gml'), 'utf8'));
-  const floor2 = parseIndoorGML(fs.readFileSync(path.join(gmlDir, 'lc2.floor2.gml'), 'utf8'));
-  const ids1 = new Set(floor1.spaces.filter(s => s.floorId === 'floor_1').map(s => s.id));
-  const ids2 = new Set(floor2.spaces.filter(s => s.floorId === 'floor_2').map(s => s.id));
-  const merged = {
-    ...floor1,
-    building: { ...floor1.building, id: 'lc2', name: 'LC2' },
-    floors: [
-      ...floor1.floors.filter(f => f.id === 'floor_1'),
-      ...floor2.floors.filter(f => f.id === 'floor_2'),
-    ],
-    spaces: [
-      ...floor1.spaces.filter(s => s.floorId === 'floor_1'),
-      ...floor2.spaces.filter(s => s.floorId === 'floor_2'),
-    ],
-    connections: [
-      ...floor1.connections.filter(e => ids1.has(e.from) || ids1.has(e.to)),
-      ...floor2.connections.filter(e => ids2.has(e.from) && ids2.has(e.to)),
-    ],
-  };
+  const merged = parseIndoorGML(
+    fs.readFileSync(path.join(gmlDir, 'lc2.gml'), 'utf8')
+  );
+  if (merged.floors.length !== 2) {
+    throw new Error('Unified LC2 GML must contain both building levels.');
+  }
   const site = JSON.parse(fs.readFileSync(
     path.join(ROOT, 'assets/data/buildings/lc2.site.json'), 'utf8'
   ));
@@ -496,8 +482,7 @@ function main() {
       generated_at: new Date().toISOString(),
       runtime: { node: process.version, platform: process.platform,
         arch: process.arch, cpu: os.cpus()[0]?.model },
-      input: ['assets/data/indoorgml/lc2.gml',
-        'assets/data/indoorgml/lc2.floor2.gml'],
+      input: ['assets/data/indoorgml/lc2.gml'],
       config, nodes: mapData.nodes.length, edges: mapData.edges.length,
       scenarios,
     }, null, 2) + '\n');
@@ -518,7 +503,7 @@ function main() {
     table,
     '',
     '## Experimental method',
-    '- The graph comes from the current two LC2 IndoorGML GML source files via the project parser and adapter.',
+    '- The graph comes from the current unified LC2 IndoorGML GML source file via the project parser and adapter.',
     '- Identical wheelchair eligibility and directed transition costs come from the production pathfinder getEdgeCost().',
     '- A* is the actual app findPath(); Dijkstra is the optimal-cost reference for nonnegative weights.',
     '- Greedy means Greedy Best-First Search using the production heuristic (not Greedy Nearest Neighbor).',
