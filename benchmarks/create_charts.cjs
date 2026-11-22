@@ -30,7 +30,7 @@ function plot(file, heading, data, opts = {}) {
   const gap = 67;
   const baseline = 324;
   const usableHeight = baseline - top;
-  const maximum = Math.max(1, opts.fixedMax || ...data.map(item => item.value));
+  const maximum = Math.max(1, opts.fixedMax || 0, ...data.map(item => item.value));
   const scale = value => opts.logarithmic
     ? Math.log1p(Math.max(0, value)) / Math.log1p(maximum)
     : Math.max(0, value) / maximum;
