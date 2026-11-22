@@ -26,10 +26,29 @@ const parseIndoorGML = loadNamedExport(
   'parseIndoorGML'
 );
 
-const floor1Xml = fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8');
-const floor2Xml = fs.readFileSync('./assets/data/indoorgml/lc2.floor2.gml', 'utf8');
-const floor1 = parseIndoorGML(floor1Xml);
-const floor2 = parseIndoorGML(floor2Xml);
+const xml = fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8');
+assert.strictEqual((xml.match(/<core:IndoorFeatures\\b/g) || []).length, 1);
+assert.strictEqual((xml.match(/<core:MultiLayeredGraph\\b/g) || []).length, 1);
+const gmlIds = Array.from(xml.matchAll(/gml:id="([^"]+)"/g), match => match[1]);
+assert.strictEqual(new Set(gmlIds).size, gmlIds.length, 'All GML identifiers must be unique');
+const building = parseIndoorGML(xml);
+assert.strictEqual(building.floors.length, 2, 'A single GML must contain both floors');
+assert.strictEqual(
+  building.connections.filter(edge => edge.transition?.type === 'elevator').length,
+  1,
+  'Single GML must preserve one elevator transition between floors'
+);
+const filterFloor = floorId => ({
+  ...building,
+  floors: building.floors.filter(floor => floor.id === floorId),
+  spaces: building.spaces.filter(space => space.floorId === floorId),
+  connections: building.connections.filter(edge =>
+    building.spaces.some(space => space.id === edge.from && space.floorId === floorId) ||
+    building.spaces.some(space => space.id === edge.to && space.floorId === floorId)
+  ),
+});
+const floor1 = filterFloor('floor_1');
+const floor2 = filterFloor('floor_2');
 
 assert.strictEqual(floor1.sourceFormat, 'IndoorGML-GML');
 assert.strictEqual(floor1.building.id, 'lc2');
