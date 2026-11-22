@@ -1,0 +1,57 @@
+# LC2 routing algorithm benchmark (standalone)
+
+This experiment is **outside the React Native/Expo app**. It reads the current LC2 Floor 1 and Floor 2 IndoorGML sources, uses the existing parser and adapter, and compares four methods on the **same accessibility-aware weighted graph**.
+
+| Algorithm | Definition | Qualification |
+|---|---|---|
+| A* | Production `findPath()` from `src/logic/pathfinder.js` | Uses the existing app heuristic |
+| Dijkstra | Uniform-cost search | Optimal-cost reference for nonnegative weights |
+| Greedy | Greedy Best-First Search (sorts frontier by heuristic) | May be nonoptimal |
+| ABC | Artificial Bee Colony discrete-route adaptation | Stochastic, fixed search budget |
+
+The ABC adaptation uses employed bees, onlooker bees, scout restarts, and randomized DFS to generate and repair valid candidate paths; it does not call Dijkstra or A* internally. It is an experimental ABC route-search adaptation, not a claim of implementing any specific published ABC variant.
+
+## Quick start (PowerShell, from repository root)
+
+```powershell
+git checkout feature/indoorgml-gml
+git pull origin feature/indoorgml-gml
+node benchmarks/compare_routes.cjs --smoke
+node benchmarks/compare_routes.cjs --pairs 20 --runs 10 --seed 42
+```
+
+No Expo, Android emulator, new npm package, or app build is required. The existing `npm test` is unchanged.
+
+Run the benchmarking harness smoke test:
+
+```powershell
+node benchmarks/test_benchmark.cjs
+```
+
+For longer ABC runs:
+
+```powershell
+node benchmarks/compare_routes.cjs --pairs 30 --runs 10 --seed 42 --abc-sources 20 --abc-cycles 100 --abc-limit 20
+```
+
+Options: `--pairs`, `--runs`, `--seed`, `--abc-sources`, `--abc-cycles`, `--abc-limit`, `--output DIR`, `--smoke`, and `--help`.
+
+## Output (under benchmarks/results/, not committed)
+
+- `runs.csv`: each pair, algorithm, run, elapsed time, path, weighted cost, Dijkstra optimum, optimality gap, and success.
+- `summary.csv`: success %, mean/median/p95 runtime, mean weighted cost, mean gap %, optimal-answer %, and algorithm-specific expansions/evaluations.
+- `report.md`: formatted comparison and experiment settings.
+- `scenarios.json`: exact pairs, seeds, Node version and CPU information.
+
+**Cost is the existing graph routing weight**, not meters, walking time, or surveyed accessibility. Some door widths/slopes remain unknown in the map data.
+
+## Methodology and limits
+
+1. All algorithms use the same current two GML sources and production `getEdgeCost()` rules. Wheelchair-inaccessible transitions, forbidden stairs, applicable width/slope/threshold constraints, and elevator-only cross-floor movement are treated identically.
+2. Scenarios include same-floor and cross-floor room pairs. Extra pairs use deterministic seeded sampling.
+3. Warm-up runs are excluded. Timed order rotates between methods to reduce systematic ordering effects. The graph is prepared for each timed query.
+4. Repeat each query; ABC uses a reproducible random seed and a configurable number of food sources/cycles.
+5. Dijkstra cost is computed separately as the ground truth for nonnegative weighted edges. Report gap as 100 × (route cost − Dijkstra cost) / Dijkstra cost, as well as success rate.
+6. Run multiple seeds on the same hardware/Node version to estimate variability; do not infer statistical significance from one short run.
+
+**Important:** The production A* heuristic has not been formally proven admissible for every inter-floor transition and geometry. Any positive optimality gap compared to Dijkstra must be reported, not ignored. ABC is a tunable-budget heuristic and should not be presented as an equal-computation-cost comparison without further controls.
