@@ -34,13 +34,13 @@
       <core:cellSpaceMember><core:CellSpace gml:id="room_217" wc:levelId="floor_2" wc:category="room" wc:code="217" wc:wheelchairAccessible="true"><gml:name>Room 217</gml:name><wc:Rectangle x="1015" y="302" width="37" height="98" /></core:CellSpace></core:cellSpaceMember>
 
       <core:cellSpaceMember><core:CellSpace gml:id="room_211" wc:levelId="floor_2" wc:category="room" wc:code="211" wc:wheelchairAccessible="true"><gml:name>Room 211</gml:name><wc:Rectangle x="1156" y="31" width="132" height="114" /></core:CellSpace></core:cellSpaceMember>
-      <core:cellSpaceMember><core:CellSpace gml:id="stairs_f2_east" wc:levelId="floor_2" wc:category="stairs" wc:code="STAIRS" wc:wheelchairAccessible="false"><gml:name>East stairs</gml:name><wc:Rectangle x="1200" y="145" width="51" height="88" /></core:CellSpace></core:cellSpaceMember>
+
       <core:cellSpaceMember><core:CellSpace gml:id="restroom_f2_east" wc:levelId="floor_2" wc:category="restroom" wc:code="WC" wc:wheelchairAccessible="true"><gml:name>East restroom</gml:name><wc:Rectangle x="1251" y="145" width="37" height="88" /></core:CellSpace></core:cellSpaceMember>
       <core:cellSpaceMember><core:CellSpace gml:id="room_212" wc:levelId="floor_2" wc:category="room" wc:code="212" wc:wheelchairAccessible="true"><gml:name>Room 212</gml:name><wc:Rectangle x="1200" y="233" width="88" height="69" /></core:CellSpace></core:cellSpaceMember>
       <core:cellSpaceMember><core:CellSpace gml:id="room_213" wc:levelId="floor_2" wc:category="room" wc:code="213" wc:wheelchairAccessible="true"><gml:name>Room 213</gml:name><wc:Rectangle x="1156" y="302" width="132" height="98" /></core:CellSpace></core:cellSpaceMember>
 
       <core:cellSpaceMember><core:CellSpace gml:id="elevator_01_f2" wc:levelId="floor_2" wc:category="elevator" wc:wheelchairAccessible="true"><gml:name>Elevator Floor 2</gml:name><wc:Rectangle x="487" y="249" width="30" height="30" /></core:CellSpace></core:cellSpaceMember>
-      <core:cellSpaceMember><core:CellSpace gml:id="stairs_f2_central" wc:levelId="floor_2" wc:category="stairs" wc:code="STAIRS" wc:wheelchairAccessible="false"><gml:name>Central stairs</gml:name><wc:Rectangle x="638" y="249" width="38" height="54" /></core:CellSpace></core:cellSpaceMember>
+
     </core:PrimalSpaceFeatures>
   </core:primalSpaceFeatures>
 
