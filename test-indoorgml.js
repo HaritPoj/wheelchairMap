@@ -196,8 +196,14 @@ assert.strictEqual(
 );
 assert.strictEqual(
   floor2.spaces.filter(space => space.type === 'stairs').length,
-  2,
-  'Floor 2 should contain the central and east stair areas shown in the reference'
+  0,
+  'Floor 2 should not contain any stair spaces'
+);
+assert.ok(
+  !floor2.spaces.some(space =>
+    space.id === 'stairs_f2_central' || space.id === 'stairs_f2_east'
+  ),
+  'Central and east staircase elements must be removed from Floor 2'
 );
 
 const room211 = floor2RoomByCode('211');
