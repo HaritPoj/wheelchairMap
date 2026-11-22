@@ -2,8 +2,6 @@ const assert = require('assert');
 const fs = require('fs');
 const vm = require('vm');
 
-const floor1Data = require('./assets/data/buildings/lc2.json');
-const legacyData = require('./assets/data/buildings/lc2.legacy.json');
 const siteGeoJSON = require('./assets/data/buildings/lc2.site.json');
 
 function loadNamedExport(source, exportName) {
@@ -46,32 +44,17 @@ const findAllPaths = loadNamedExport(
   'findAllPaths'
 );
 
-const floor1Ids = new Set(
-  floor1Data.spaces.filter(space => space.floorId === 'floor_1').map(space => space.id)
+const parseIndoorGML = loadNamedExport(
+  fs.readFileSync('./assets/data/indoorgml/indoorGMLParser.js', 'utf8'),
+  'parseIndoorGML'
 );
-const floor2Ids = new Set(
-  legacyData.spaces.filter(space => space.floorId === 'floor_2').map(space => space.id)
+const mergedLegacy = parseIndoorGML(
+  fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8')
 );
-
-const mergedLegacy = {
-  ...floor1Data,
-  floors: [
-    ...floor1Data.floors.filter(floor => floor.id === 'floor_1'),
-    ...legacyData.floors.filter(floor => floor.id === 'floor_2'),
-  ],
-  spaces: [
-    ...floor1Data.spaces.filter(space => space.floorId === 'floor_1'),
-    ...legacyData.spaces.filter(space => space.floorId === 'floor_2'),
-  ],
-  connections: [
-    ...floor1Data.connections.filter(
-      connection => floor1Ids.has(connection.from) || floor1Ids.has(connection.to)
-    ),
-    ...legacyData.connections.filter(
-      connection => floor2Ids.has(connection.from) && floor2Ids.has(connection.to)
-    ),
-  ],
+const floor1Data = {
+  floors: mergedLegacy.floors.filter(floor => floor.id === 'floor_1'),
 };
+assert.strictEqual(mergedLegacy.floors.length, 2);
 
 const buildingData = migrateBuildingV1ToV2(mergedLegacy, siteGeoJSON, {
   siteId: 'tu_rangsit',
@@ -133,11 +116,11 @@ assert.notStrictEqual(
   'The supplied geographic footprint applies only to Floor 1'
 );
 
-assert.strictEqual(floor1Data.floors[0].map.width, 1080);
+assert.strictEqual(floor1Data.floors[0].map.width, 1104);
 assert.strictEqual(floor1Data.floors[0].map.height, 395);
-assert.deepStrictEqual(floor1Data.floors[0].map.boundary, [
+assert.deepStrictEqual(JSON.parse(JSON.stringify(floor1Data.floors[0].map.boundary)), [
   [33, 249], [390, 249], [390, 223], [690, 223], [690, 246],
-  [946, 246], [946, 42], [1058, 42], [1058, 349], [690, 349],
+  [946, 246], [946, 42], [1082, 42], [1082, 349], [690, 349],
   [690, 377], [389, 377], [389, 354], [33, 354],
 ]);
 
@@ -150,10 +133,10 @@ const room109 = roomByCode('109');
 const room106 = roomByCode('106');
 const room211 = roomByCode('211');
 const room230 = roomByCode('230');
-const room2241 = roomByCode('224/1');
+const room224 = roomByCode('224');
 
 assert.ok(
-  room124 && room120 && room109 && room106 && room211 && room230 && room2241,
+  room124 && room120 && room109 && room106 && room211 && room230 && room224,
   'Expected reference rooms to exist'
 );
 
@@ -175,9 +158,9 @@ assert.ok(!floorOneRoomCodes.includes('112'), 'Room 112 is not shown in the late
 assert.ok(!floorOneRoomCodes.includes('115/1'), 'Room 115/1 is not shown in the latest Floor 1 reference');
 
 sameValues(floorTwoRoomCodes, [
-  '211', '212', '213', '214', '215', '216', '217', '218', '219', '220',
-  '221', '222', '223', '224', '224/1', '225', '226', '227', '228', '229', '230'
-].sort(), 'Floor 2 room codes should be preserved');
+  '211', '212', '213', '217', '218', '219', '220',
+  '221', '222', '223', '224', '225', '226', '227', '228', '229', '230'
+].sort(), 'Floor 2 rooms should match the active GML reference');
 
 const floor1Restrooms = mapData.nodes.filter(
   node => node.floor === 1 && node.type === 'restroom'
@@ -214,7 +197,7 @@ assert.strictEqual(
 );
 
 const stairs = mapData.nodes.filter(node => node.type === 'stairs');
-assert.ok(stairs.length >= 2);
+assert.strictEqual(stairs.length, 1, 'Only the Floor 1 stairs remain in the current map');
 assert.ok(
   stairs.every(
     stair => !mapData.edges.some(edge => edge.from === stair.id || edge.to === stair.id)
@@ -291,9 +274,9 @@ const elevatorTransition = buildingData.routing.transitions.find(
 assert.ok(elevatorTransition, 'Schema v2 should contain a vertical elevator transition');
 assert.strictEqual(elevatorTransition.accessibility.wheelchairAccessible, true);
 
-const lowerFloorRoute = findPath(room230.id, room2241.id, mapData);
+const lowerFloorRoute = findPath(room230.id, room224.id, mapData);
 assert.strictEqual(lowerFloorRoute[0], room230.id);
-assert.strictEqual(lowerFloorRoute[lowerFloorRoute.length - 1], room2241.id);
+assert.strictEqual(lowerFloorRoute[lowerFloorRoute.length - 1], room224.id);
 
 const restroomRoute = findPath(room124.id, 'restroom_f1_center', mapData);
 assert.strictEqual(restroomRoute[0], room124.id);
@@ -334,4 +317,4 @@ assert.strictEqual(
   'Cross-floor routing must fail when the elevator transition is removed'
 );
 
-console.log('Latest LC2 Floor 1 room count, access topology, schema v2, and routing tests passed.');
+console.log('Unified LC2 GML, both-floor room sets, schema v2, and A* routing tests passed.');
