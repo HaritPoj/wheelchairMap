@@ -27,8 +27,8 @@ const parseIndoorGML = loadNamedExport(
 );
 
 const xml = fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8');
-assert.strictEqual((xml.match(/<core:IndoorFeatures\\b/g) || []).length, 1);
-assert.strictEqual((xml.match(/<core:MultiLayeredGraph\\b/g) || []).length, 1);
+assert.strictEqual((xml.match(/<core:IndoorFeatures/g) || []).length, 1);
+assert.strictEqual((xml.match(/<core:MultiLayeredGraph/g) || []).length, 1);
 const gmlIds = Array.from(xml.matchAll(/gml:id="([^"]+)"/g), match => match[1]);
 assert.strictEqual(new Set(gmlIds).size, gmlIds.length, 'All GML identifiers must be unique');
 const building = parseIndoorGML(xml);
