@@ -9,8 +9,17 @@
 
   <wc:Level id="floor_1" number="1" name="Floor 1" width="1104" height="395" boundary="33,249 390,249 390,223 690,223 690,246 946,246 946,42 1082,42 1082,349 690,349 690,377 389,377 389,354 33,354" />
 
+  <!-- Floor 2 shares the same IndoorFeatures, primal, and routing graph. -->
+  <wc:Level
+    id="floor_2"
+    number="2"
+    name="Floor 2"
+    width="1331"
+    height="452"
+    boundary="56,279 486,279 486,249 847,249 847,273 1156,273 1156,31 1288,31 1288,400 843,400 843,432 483,432 483,408 56,408" />
+
   <core:primalSpaceFeatures>
-    <core:PrimalSpaceFeatures gml:id="lc2_primal_f1">
+    <core:PrimalSpaceFeatures gml:id="lc2_primal">
       <core:cellSpaceMember><core:CellSpace gml:id="room_126" wc:levelId="floor_1" wc:category="room" wc:code="126" wc:wheelchairAccessible="true"><gml:name>Room 126</gml:name><wc:Rectangle x="50" y="278" width="58" height="56" /></core:CellSpace></core:cellSpaceMember>
       <core:cellSpaceMember><core:CellSpace gml:id="room_125" wc:levelId="floor_1" wc:category="room" wc:code="125" wc:wheelchairAccessible="true"><gml:name>Room 125</gml:name><wc:Rectangle x="108" y="278" width="38" height="28" /></core:CellSpace></core:cellSpaceMember>
       <core:cellSpaceMember><core:CellSpace gml:id="room_124" wc:levelId="floor_1" wc:category="room" wc:code="124" wc:wheelchairAccessible="true"><gml:name>Room 124</gml:name><wc:Rectangle x="108" y="306" width="38" height="28" /></core:CellSpace></core:cellSpaceMember>
@@ -38,17 +47,38 @@
       <core:cellSpaceMember><core:CellSpace gml:id="corridor_f1_center_area" wc:levelId="floor_1" wc:category="corridor" wc:wheelchairAccessible="true"><gml:name>Central corridor area</gml:name><wc:Rectangle x="441" y="223" width="249" height="154" /></core:CellSpace></core:cellSpaceMember>
       <core:cellSpaceMember><core:CellSpace gml:id="corridor_f1_east_area" wc:levelId="floor_1" wc:category="corridor" wc:wheelchairAccessible="true"><gml:name>East corridor area</gml:name><wc:Rectangle x="690" y="246" width="256" height="103" /></core:CellSpace></core:cellSpaceMember>
       <core:cellSpaceMember><core:CellSpace gml:id="corridor_f1_vertical_area" wc:levelId="floor_1" wc:category="corridor" wc:wheelchairAccessible="true"><gml:name>Vertical corridor area</gml:name><wc:Rectangle x="946" y="42" width="67" height="307" /></core:CellSpace></core:cellSpaceMember>
+
+      <!-- Floor 2 physical spaces -->
+      <core:cellSpaceMember><core:CellSpace gml:id="room_230" wc:levelId="floor_2" wc:category="room" wc:code="230" wc:wheelchairAccessible="true"><gml:name>Room 230</gml:name><wc:Rectangle x="57" y="303" width="47" height="105" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_229" wc:levelId="floor_2" wc:category="room" wc:code="229" wc:wheelchairAccessible="true"><gml:name>Room 229</gml:name><wc:Rectangle x="104" y="303" width="105" height="105" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_228" wc:levelId="floor_2" wc:category="room" wc:code="228" wc:wheelchairAccessible="true"><gml:name>Room 228</gml:name><wc:Rectangle x="209" y="303" width="47" height="105" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_227" wc:levelId="floor_2" wc:category="room" wc:code="227" wc:wheelchairAccessible="true"><gml:name>Room 227</gml:name><wc:Rectangle x="256" y="303" width="47" height="105" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_226" wc:levelId="floor_2" wc:category="room" wc:code="226" wc:wheelchairAccessible="true"><gml:name>Room 226</gml:name><wc:Rectangle x="303" y="303" width="105" height="105" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_225" wc:levelId="floor_2" wc:category="room" wc:code="225" wc:wheelchairAccessible="true"><gml:name>Room 225</gml:name><wc:Rectangle x="408" y="303" width="49" height="105" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_224" wc:levelId="floor_2" wc:category="room" wc:code="224" wc:wheelchairAccessible="true"><gml:name>Room 224</gml:name><wc:Rectangle x="457" y="303" width="86" height="105" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_223" wc:levelId="floor_2" wc:category="room" wc:code="223" wc:wheelchairAccessible="true"><gml:name>Room 223</gml:name><wc:Rectangle x="792" y="302" width="38" height="98" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_222" wc:levelId="floor_2" wc:category="room" wc:code="222" wc:wheelchairAccessible="true"><gml:name>Room 222</gml:name><wc:Rectangle x="830" y="302" width="37" height="98" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_221" wc:levelId="floor_2" wc:category="room" wc:code="221" wc:wheelchairAccessible="true"><gml:name>Room 221</gml:name><wc:Rectangle x="867" y="302" width="37" height="98" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_220" wc:levelId="floor_2" wc:category="room" wc:code="220" wc:wheelchairAccessible="true"><gml:name>Room 220</gml:name><wc:Rectangle x="904" y="302" width="37" height="98" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_219" wc:levelId="floor_2" wc:category="room" wc:code="219" wc:wheelchairAccessible="true"><gml:name>Room 219</gml:name><wc:Rectangle x="941" y="302" width="37" height="98" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_218" wc:levelId="floor_2" wc:category="room" wc:code="218" wc:wheelchairAccessible="true"><gml:name>Room 218</gml:name><wc:Rectangle x="978" y="302" width="37" height="98" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_217" wc:levelId="floor_2" wc:category="room" wc:code="217" wc:wheelchairAccessible="true"><gml:name>Room 217</gml:name><wc:Rectangle x="1015" y="302" width="37" height="98" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_211" wc:levelId="floor_2" wc:category="room" wc:code="211" wc:wheelchairAccessible="true"><gml:name>Room 211</gml:name><wc:Rectangle x="1156" y="31" width="132" height="114" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="restroom_f2_east" wc:levelId="floor_2" wc:category="restroom" wc:code="WC" wc:wheelchairAccessible="true"><gml:name>East restroom</gml:name><wc:Rectangle x="1251" y="145" width="37" height="88" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_212" wc:levelId="floor_2" wc:category="room" wc:code="212" wc:wheelchairAccessible="true"><gml:name>Room 212</gml:name><wc:Rectangle x="1200" y="233" width="88" height="69" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="room_213" wc:levelId="floor_2" wc:category="room" wc:code="213" wc:wheelchairAccessible="true"><gml:name>Room 213</gml:name><wc:Rectangle x="1156" y="302" width="132" height="98" /></core:CellSpace></core:cellSpaceMember>
+      <core:cellSpaceMember><core:CellSpace gml:id="elevator_01_f2" wc:levelId="floor_2" wc:category="elevator" wc:wheelchairAccessible="true"><gml:name>Elevator Floor 2</gml:name><wc:Rectangle x="487" y="249" width="30" height="30" /></core:CellSpace></core:cellSpaceMember>
     </core:PrimalSpaceFeatures>
   </core:primalSpaceFeatures>
 
   <core:multiLayeredGraph>
-    <core:MultiLayeredGraph gml:id="lc2_dual_f1">
+    <core:MultiLayeredGraph gml:id="lc2_dual">
       <core:spaceLayers>
-        <core:SpaceLayers gml:id="lc2_space_layers_f1">
+        <core:SpaceLayers gml:id="lc2_space_layers">
           <core:spaceLayerMember>
-            <core:SpaceLayer gml:id="lc2_wheelchair_layer_f1">
+            <core:SpaceLayer gml:id="lc2_wheelchair_layer">
               <core:nodes>
-                <core:Nodes gml:id="lc2_states_f1">
+                <core:Nodes gml:id="lc2_states">
                   <core:stateMember><core:State gml:id="corridor_f1_u01" wc:levelId="floor_1" wc:name="Upper corridor 01" wc:x="79" wc:y="264" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f1_u02" wc:levelId="floor_1" wc:name="Upper corridor 02" wc:x="127" wc:y="264" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f1_u03" wc:levelId="floor_1" wc:name="Upper corridor 03" wc:x="165" wc:y="264" /></core:stateMember>
@@ -79,11 +109,33 @@
                   <core:stateMember><core:State gml:id="corridor_f1_v02" wc:levelId="floor_1" wc:name="Vertical corridor room 107" wc:x="980" wc:y="245" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f1_v03" wc:levelId="floor_1" wc:name="Vertical corridor restroom" wc:x="980" wc:y="174" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f1_v04" wc:levelId="floor_1" wc:name="Vertical corridor room 106" wc:x="980" wc:y="95" /></core:stateMember>
+
+                  <!-- Floor 2 routing states -->
+                  <core:stateMember><core:State gml:id="corridor_f2_c01" wc:levelId="floor_2" wc:name="West corridor 01" wc:x="80" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c02" wc:levelId="floor_2" wc:name="West corridor 02" wc:x="156" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c03" wc:levelId="floor_2" wc:name="West corridor 03" wc:x="232" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c04" wc:levelId="floor_2" wc:name="West corridor 04" wc:x="280" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c05" wc:levelId="floor_2" wc:name="West corridor 05" wc:x="355" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c06" wc:levelId="floor_2" wc:name="West corridor 06" wc:x="432" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c07" wc:levelId="floor_2" wc:name="Elevator junction" wc:x="500" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c08" wc:levelId="floor_2" wc:name="Central corridor" wc:x="650" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c09" wc:levelId="floor_2" wc:name="East corridor 223" wc:x="811" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c10" wc:levelId="floor_2" wc:name="East corridor 222" wc:x="849" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c11" wc:levelId="floor_2" wc:name="East corridor 221" wc:x="886" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c12" wc:levelId="floor_2" wc:name="East corridor 220" wc:x="923" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c13" wc:levelId="floor_2" wc:name="East corridor 219" wc:x="960" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c14" wc:levelId="floor_2" wc:name="East corridor 218" wc:x="997" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c15" wc:levelId="floor_2" wc:name="East corridor 217" wc:x="1034" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c16" wc:levelId="floor_2" wc:name="East corridor open area" wc:x="1100" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_c17" wc:levelId="floor_2" wc:name="East wing junction" wc:x="1178" wc:y="286" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_v02" wc:levelId="floor_2" wc:name="Room 212 corridor" wc:x="1178" wc:y="267" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_v03" wc:levelId="floor_2" wc:name="Restroom corridor" wc:x="1178" wc:y="190" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f2_v04" wc:levelId="floor_2" wc:name="Room 211 corridor" wc:x="1178" wc:y="168" /></core:stateMember>
                 </core:Nodes>
               </core:nodes>
 
               <core:edges>
-                <core:Edges gml:id="lc2_transitions_f1">
+                <core:Edges gml:id="lc2_transitions">
                   <core:transitionMember><core:Transition gml:id="f1_u01_u02" wc:from="corridor_f1_u01" wc:to="corridor_f1_u02" wc:cost="2" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_u02_u03" wc:from="corridor_f1_u02" wc:to="corridor_f1_u03" wc:cost="2" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_u03_u04" wc:from="corridor_f1_u03" wc:to="corridor_f1_u04" wc:cost="2" /></core:transitionMember>
@@ -144,6 +196,46 @@
                   <core:transitionMember><core:Transition gml:id="f1_wc_east_left" wc:from="restroom_f1_east" wc:to="corridor_f1_v03" wc:cost="1" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_room106_left" wc:from="room_106" wc:to="corridor_f1_v04" wc:cost="1" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="connection_elevator_f1_f2" wc:from="elevator_01_f1" wc:to="elevator_01_f2" wc:cost="10" wc:transitionType="elevator" /></core:transitionMember>
+
+                  <!-- Floor 2 routing transitions -->
+                  <core:transitionMember><core:Transition gml:id="f2_c01_c02" wc:from="corridor_f2_c01" wc:to="corridor_f2_c02" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c02_c03" wc:from="corridor_f2_c02" wc:to="corridor_f2_c03" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c03_c04" wc:from="corridor_f2_c03" wc:to="corridor_f2_c04" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c04_c05" wc:from="corridor_f2_c04" wc:to="corridor_f2_c05" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c05_c06" wc:from="corridor_f2_c05" wc:to="corridor_f2_c06" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c06_c07" wc:from="corridor_f2_c06" wc:to="corridor_f2_c07" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c07_c08" wc:from="corridor_f2_c07" wc:to="corridor_f2_c08" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c08_c09" wc:from="corridor_f2_c08" wc:to="corridor_f2_c09" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c09_c10" wc:from="corridor_f2_c09" wc:to="corridor_f2_c10" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c10_c11" wc:from="corridor_f2_c10" wc:to="corridor_f2_c11" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c11_c12" wc:from="corridor_f2_c11" wc:to="corridor_f2_c12" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c12_c13" wc:from="corridor_f2_c12" wc:to="corridor_f2_c13" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c13_c14" wc:from="corridor_f2_c13" wc:to="corridor_f2_c14" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c14_c15" wc:from="corridor_f2_c14" wc:to="corridor_f2_c15" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c15_c16" wc:from="corridor_f2_c15" wc:to="corridor_f2_c16" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c16_c17" wc:from="corridor_f2_c16" wc:to="corridor_f2_c17" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_c17_v02" wc:from="corridor_f2_c17" wc:to="corridor_f2_v02" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_v02_v03" wc:from="corridor_f2_v02" wc:to="corridor_f2_v03" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_v03_v04" wc:from="corridor_f2_v03" wc:to="corridor_f2_v04" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room230_top" wc:from="room_230" wc:to="corridor_f2_c01" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room229_top" wc:from="room_229" wc:to="corridor_f2_c02" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room228_top" wc:from="room_228" wc:to="corridor_f2_c03" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room227_top" wc:from="room_227" wc:to="corridor_f2_c04" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room226_top" wc:from="room_226" wc:to="corridor_f2_c05" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room225_top" wc:from="room_225" wc:to="corridor_f2_c06" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room224_top" wc:from="room_224" wc:to="corridor_f2_c07" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_elevator_bottom" wc:from="elevator_01_f2" wc:to="corridor_f2_c07" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room223_top" wc:from="room_223" wc:to="corridor_f2_c09" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room222_top" wc:from="room_222" wc:to="corridor_f2_c10" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room221_top" wc:from="room_221" wc:to="corridor_f2_c11" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room220_top" wc:from="room_220" wc:to="corridor_f2_c12" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room219_top" wc:from="room_219" wc:to="corridor_f2_c13" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room218_top" wc:from="room_218" wc:to="corridor_f2_c14" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room217_top" wc:from="room_217" wc:to="corridor_f2_c15" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room213_top_left" wc:from="room_213" wc:to="corridor_f2_c17" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room212_left" wc:from="room_212" wc:to="corridor_f2_v02" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_wc_east_left" wc:from="restroom_f2_east" wc:to="corridor_f2_v03" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room211_bottom_left" wc:from="room_211" wc:to="corridor_f2_v04" wc:cost="1" /></core:transitionMember>
                 </core:Edges>
               </core:edges>
             </core:SpaceLayer>
