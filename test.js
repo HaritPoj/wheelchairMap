@@ -47,6 +47,10 @@ const solveConstrainedRoute = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
   'solveConstrainedRoute'
 );
+const getRouteDoorReport = loadNamedExport(
+  fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
+  'getRouteDoorReport'
+);
 const findAllPaths = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
   'findAllPaths'
@@ -605,4 +609,94 @@ assert.ok(floorPlanSourceLatest.includes("backgroundColor: 'transparent'"));
 assert.ok(floorPlanSourceLatest.includes("width={roomWidth}"));
 assert.ok(floorPlanSourceLatest.includes("getRouteSegmentPoints(previous, current, edge)"));
 
-console.log('Unified LC2 GML, constrained A*, six screenshot route regressions, and visual selection tests passed.');
+
+// Simulate survey data without inventing physical measurements in lc2.gml.
+const rawGmlForDoorTests = fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8');
+function insertDoorMeasurement(xml, transitionId, doorWidth, threshold) {
+  const pattern = new RegExp('(<core:Transition gml:id="' + transitionId + '"[^>]*?)(\\s*/>)');
+  assert.ok(pattern.test(xml), 'Expected doorway transition ' + transitionId);
+  return xml.replace(
+    pattern,
+    '$1 wc:doorWidth="' + doorWidth + '" wc:threshold="' + threshold + '"$2'
+  );
+}
+function surveyedMap(gml) {
+  const legacy = parseIndoorGML(gml);
+  const schema = migrateBuildingV1ToV2(legacy, siteGeoJSON, {
+    siteId: 'tu_rangsit',
+  });
+  return { legacy, schema, map: normalizeBuildingData(schema) };
+}
+const oneDoorSurvey = surveyedMap(insertDoorMeasurement(
+  rawGmlForDoorTests, 'f1_room109_top', '0.95', '0.015'
+));
+assert.strictEqual(
+  oneDoorSurvey.legacy.connections.find(edge => edge.id === 'f1_room109_top')
+    .accessibility.doorWidth, 0.95
+);
+assert.strictEqual(validateBuildingData(oneDoorSurvey.schema).length, 0);
+const oneDoorEdge = oneDoorSurvey.map.edges.find(edge => edge.id === 'f1_room109_top');
+assert.strictEqual(oneDoorEdge.door_width, 0.95);
+assert.strictEqual(oneDoorEdge.threshold, 0.015);
+const surveyedRoute = solveConstrainedRoute(
+  'room_109', 'room_110', oneDoorSurvey.map
+);
+assert.strictEqual(surveyedRoute.feasible, true);
+assert.ok(surveyedRoute.cost >= 50, 'Measured 1.5 cm threshold should increase route cost');
+const oneReport = getRouteDoorReport(
+  surveyedRoute.path, oneDoorSurvey.map.nodeMap, oneDoorSurvey.map.edges
+);
+assert.strictEqual(oneReport.doors.length, 2);
+assert.strictEqual(oneReport.doors[0].name, 'Room 109');
+assert.strictEqual(oneReport.doors[0].doorWidth, 0.95);
+assert.strictEqual(oneReport.doors[0].threshold, 0.015);
+assert.strictEqual(oneReport.unknownCount, 1, 'Other doorway must remain unsurveyed');
+assert.strictEqual(oneReport.warningCount, 1);
+
+const measuredBoth = surveyedMap(insertDoorMeasurement(
+  insertDoorMeasurement(
+    rawGmlForDoorTests, 'f1_room109_top', '0.95', '0.015'
+  ),
+  'f1_room110_top', '1.05', '0'
+));
+const measuredRoute = solveConstrainedRoute(
+  'room_109', 'room_110', measuredBoth.map
+);
+const measuredReport = getRouteDoorReport(
+  measuredRoute.path, measuredBoth.map.nodeMap, measuredBoth.map.edges
+);
+assert.strictEqual(measuredReport.unknownCount, 0);
+assert.strictEqual(measuredReport.doors[1].threshold, 0,
+  'Measured flush threshold (0 meters) must not be classified as unknown');
+
+const blockedNarrowDoor = surveyedMap(insertDoorMeasurement(
+  rawGmlForDoorTests, 'f1_room109_top', '0.8', '0'
+));
+assert.strictEqual(
+  solveConstrainedRoute('room_109', 'room_110', blockedNarrowDoor.map).feasible,
+  false,
+  'Recorded clear width below 0.9 m must block the doorway in both directions'
+);
+assert.strictEqual(
+  solveConstrainedRoute('room_110', 'room_109', blockedNarrowDoor.map).feasible,
+  false,
+  'Door width restriction must also apply when entering the room'
+);
+const invalidSurvey = surveyedMap(insertDoorMeasurement(
+  rawGmlForDoorTests, 'f1_room109_top', '0.9', '-0.01'
+));
+assert.ok(
+  validateBuildingData(invalidSurvey.schema).some(
+    error => error.includes('threshold must be a nonnegative number')
+  ),
+  'Negative threshold measurements must fail data validation'
+);
+const bannerSource = fs.readFileSync('./src/rendering/NextStepBanner.js', 'utf8');
+const directionsSource = fs.readFileSync('./src/rendering/DirectionsSheet.js', 'utf8');
+assert.ok(bannerSource.includes('getRouteDoorReport'));
+assert.ok(bannerSource.includes('Door measurements missing'));
+assert.ok(directionsSource.includes('Clear width:'));
+assert.ok(directionsSource.includes('Threshold height:'));
+assert.ok(directionsSource.includes('Not measured'));
+
+console.log('Unified LC2 GML, constrained A*, doorway measurement warnings, and screenshot regressions passed.');
