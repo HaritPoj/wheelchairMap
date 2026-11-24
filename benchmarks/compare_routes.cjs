@@ -505,7 +505,7 @@ function main() {
     '## Experimental method',
     '- The graph comes from the current unified LC2 IndoorGML GML source file via the project parser and adapter.',
     '- Identical wheelchair eligibility and directed transition costs come from the production pathfinder getEdgeCost().',
-    '- A* is the preserved baseline findAStarPath(); the live app now uses the constraint-optimization solver. Dijkstra is the optimal-cost reference for nonnegative weights.',
+    '- A* is the preserved baseline findAStarPath(); the live app now uses Resource-Constrained A* with COP constraints. Dijkstra is the optimal-cost reference for nonnegative weights.',
     '- Greedy means Greedy Best-First Search using the production heuristic (not Greedy Nearest Neighbor).',
     '- ABC is a stochastic, fixed-budget Artificial Bee Colony **route-search adaptation** with employed/onlooker/scout phases and randomized feasible-path repair; it does not call Dijkstra/A* internally.',
     '- All algorithms are warmed up; timed runs include their per-query graph/heuristic preparation.',
