@@ -176,6 +176,10 @@ export function parseIndoorGML(xmlText) {
     const transitionType = localAttr(attrs, 'transitionType');
     const width = numberOrNull(localAttr(attrs, 'width'));
     const slope = numberOrNull(localAttr(attrs, 'slope'));
+    // Optional surveyed measurements in meters, specific to this
+    // physical doorway rather than every door of the room.
+    const doorWidth = numberOrNull(localAttr(attrs, 'doorWidth'));
+    const threshold = numberOrNull(localAttr(attrs, 'threshold'));
 
     return {
       id: localAttr(attrs, 'id'),
@@ -188,6 +192,8 @@ export function parseIndoorGML(xmlText) {
         wheelchairAccessible: booleanValue(localAttr(attrs, 'wheelchairAccessible'), true),
         width,
         slope,
+        doorWidth,
+        threshold,
       },
       ...(transitionType ? { transition: { type: transitionType } } : {}),
     };
