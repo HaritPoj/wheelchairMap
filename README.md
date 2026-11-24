@@ -113,6 +113,50 @@ can be required using `requireMeasuredWidths`,
 current LC2 source has incomplete measurements, so enabling these will
 likely reject many/all routes.
 
+## Recording doorway measurements and informing users
+
+Doorway measurements are **optional, per physical doorway**. Add surveyed values
+to the corresponding `core:Transition` in the **single source**
+`assets/data/indoorgml/lc2.gml`. Keep attributes **absent** when not measured;
+do not estimate meters from map pixels.
+
+Example syntax only (these numbers are **illustrative, not LC2 survey data**):
+
+```xml
+<core:Transition
+  gml:id="f1_room109_top"
+  wc:from="room_109"
+  wc:to="corridor_f1_d109"
+  wc:cost="1"
+  wc:doorWidth="0.95"
+  wc:threshold="0.015" />
+```
+
+- `wc:doorWidth`: **clear usable doorway width**, in meters. `0.95` means 95 cm.
+- `wc:threshold`: **vertical threshold height**, in meters. `0.015` means 1.5 cm.
+  Record an observed flush threshold as `0`; an unknown threshold is **not** zero.
+- `wc:width` is the **corridor/edge passage width**, which is a different quantity.
+- For rooms with multiple doors, measure each door separately using its own
+  transition ID. Older `CellSpace` `wc:doorWidth` / `wc:threshold` metadata is
+  supported as a fallback, but transition-specific measurements take priority.
+- Invalid negative heights or nonpositive doorway widths fail schema-v2 data
+  validation; measurements are not treated as certified accessibility.
+
+The app reads these measurements through the XML parser, schema-v2 migration
+and building adapter. Resource-Constrained A* enforces the existing **project
+rule** against recorded doorway widths below **0.9 m**, and adds route costs
+for a recorded threshold from **1 cm** (50) and **2 cm** (200). These are
+prototype routing parameters, **not legal accessibility standards**. The
+same doorway rules apply in both travel directions.
+
+When a route is selected, **Next Step** reports missing measurements or raised
+thresholds. **Directions → Doorway Conditions** lists the clear width and
+threshold height for each doorway crossed, including the exit from the
+starting room. Each missing measurement is shown as **Not measured**; routes
+with unknown measurements are labelled **Data incomplete**, not guaranteed
+accessible. Physical access still requires on-site verification of the
+building and individual wheelchair user's needs.
+
 ## Build and test
 
 ```bash
