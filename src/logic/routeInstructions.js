@@ -49,11 +49,13 @@ export function generateRouteSteps(route, nodeMap, edges) {
 
   if (!start) return [];
 
+  const firstNode = nodeMap[route[1]];
+  const firstDoorEdge = firstNode ? getEdge(edges, start.id, firstNode.id) : null;
   steps.push({
     key: 'start',
     icon: start.type,
     instruction: 'Start at ' + start.name,
-    warning: '',
+    warning: firstNode ? getEdgeWarning(firstDoorEdge, firstNode, start) : '',
     node: start,
   });
 
