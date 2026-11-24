@@ -22,7 +22,7 @@ assets/data/indoorgml/lc2.gml
              |
     nodes / edges / floors
              |
-   FloorPlan / A* pathfinder
+   Resource-Constrained A* + COP → FloorPlan
 ```
 
 The app converts the XML/GML into the existing generic schema v2 with
@@ -47,19 +47,27 @@ Door-gap positions are driven by room-to-corridor transition metadata.
 Cross-floor routing uses the elevator, and A* applies wheelchair routing
 restrictions. Unmeasured accessibility attributes are not fabricated.
 
+The route overlay shares the same door-gap geometry as the wall renderer,
+snaps onto corridor centerlines when they pass within the visible door
+opening, and draws route segments in the original floor coordinate system
+before scaling. The Room 109 connection now targets its nearby east-wing
+junction rather than the west waypoint, removing an incorrect detour.
+
 ## Live route optimization (COP)
 
 The user-facing navigation screen now calls `solveConstrainedRoute()` in
 `src/logic/pathfinder.js` directly. It solves a **Constraint Optimization
 Problem** on the wheelchair-accessible weighted indoor graph using an
-**exact resource-constrained shortest-path label-setting algorithm**.
+**Resource-Constrained A*** (A* priority `f = g + h` with non-dominated
+resource labels). It searches for a minimum-cost feasible route using an
+admissible distance-based lower bound and nonnegative edge costs.
 This is an on-device, pure-JavaScript solver; it does **not** require
 OR-Tools, CP-SAT, a backend, or an internet connection.
 
 ```text
 Unified lc2.gml → validated/normalized graph
     → COP hard constraints (stairs, known width/slope, elevator)
-    → resource-constrained minimum-cost search
+    → Resource-Constrained A* (g + h, resource-label dominance)
     → feasible, lowest-cost path or "no feasible route"
     → FloorPlan and directions
 ```
@@ -85,9 +93,10 @@ const result = solveConstrainedRoute('room_124', 'room_211', mapData, {
 // result = { path, cost, feasible, resources }
 ```
 
-`findPath(startId, goalId, mapData, optionalConstraints)` remains available
-as a compatibility wrapper around COP. The former A* implementation is still
-available as `findAStarPath()` for a valid baseline in independent benchmarks.
+\`findPath(startId, goalId, mapData, optionalConstraints)\` remains available
+as a compatibility wrapper around constrained A*. The original unconstrained
+A* (with existing per-edge accessibility filtering) remains available as
+\`findAStarPath()\` for a separate baseline in the standalone benchmark.
 
 **Data quality:** Unmeasured widths/slopes/thresholds remain *unknown*;
 the default solver does not falsely mark them as measured. A feasible path
