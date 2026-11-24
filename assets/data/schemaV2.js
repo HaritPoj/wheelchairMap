@@ -125,10 +125,11 @@ export function migrateBuildingV1ToV2(
         wheelchairAccessible:
           fromUnit.type !== "stairs" && toUnit.type !== "stairs",
         width:
-          connection.accessibility?.width === undefined
-            ? primary.accessibility?.doorWidth ?? null
-            : connection.accessibility.width,
-        threshold: primary.accessibility?.threshold ?? null,
+          connection.accessibility?.doorWidth ??
+          primary.accessibility?.doorWidth ?? null,
+        threshold:
+          connection.accessibility?.threshold ??
+          primary.accessibility?.threshold ?? null,
       },
     });
   }
@@ -174,6 +175,16 @@ export function migrateBuildingV1ToV2(
           connection.accessibility?.slope === undefined
             ? null
             : connection.accessibility.slope,
+        // Door measurements belong to this transition; do not confuse
+        // corridor width with clear doorway opening width.
+        doorWidth:
+          connection.accessibility?.doorWidth === undefined
+            ? null
+            : connection.accessibility.doorWidth,
+        threshold:
+          connection.accessibility?.threshold === undefined
+            ? null
+            : connection.accessibility.threshold,
       },
     };
   });
