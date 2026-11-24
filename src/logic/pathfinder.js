@@ -261,8 +261,9 @@ export function findAStarPath(startId, goalId, mapData) {
 
 
 // Constraint Optimization Problem (COP): minimum-cost accessible path
-// with optional *route-wide* resource limits. This is an exact,
-// nonnegative-cost label-setting solver, not an external CP-SAT dependency.
+// with optional *route-wide* resource limits. Resource-Constrained A*
+// keeps non-dominated labels and orders the frontier by g + admissible h.
+// It is an exact search for nonnegative edge costs, not a CP-SAT solver.
 //
 // Inputs are the same graph used by the app's A*. Unmeasured width,
 // slope, and door size are unknown, not assumed certified accessible.
@@ -290,12 +291,17 @@ function makeRouteConstraints(options = {}) {
   };
 }
 
-function dominatesRoute(a, b) {
+function dominatesRoute(a, b, rules) {
+  // Only bounded resources affect future feasibility. Unbounded counters
+  // remain useful for reporting, but must not create extra search labels.
   return (
     a.cost <= b.cost &&
-    a.elevatorTransfers <= b.elevatorTransfers &&
-    a.steepSegments <= b.steepSegments &&
-    a.thresholdSegments <= b.thresholdSegments
+    (Number.isFinite(rules.maxElevatorTransfers)
+      ? a.elevatorTransfers <= b.elevatorTransfers : true) &&
+    (Number.isFinite(rules.maxSteepSegments)
+      ? a.steepSegments <= b.steepSegments : true) &&
+    (Number.isFinite(rules.maxThresholdSegments)
+      ? a.thresholdSegments <= b.thresholdSegments : true)
   );
 }
 
@@ -339,13 +345,17 @@ export function solveConstrainedRoute(startId, goalId, mapData, options = {}) {
   }
 
   const adjacency = createAdjacency(nodes, edges);
+  // A* lower bound remains admissible after imposing extra constraints:
+  // restricting feasible paths cannot decrease the true remaining cost.
+  const heuristic = createHeuristic(mapData);
   const frontier = new MinHeap((a, b) =>
-    a.cost - b.cost || a.id.localeCompare(b.id)
+    a.f - b.f || a.cost - b.cost || a.id.localeCompare(b.id)
   );
   const labels = new Map();
   const initial = {
     id: startId,
     cost: 0,
+    f: heuristic(startId, goalId),
     elevatorTransfers: 0,
     steepSegments: 0,
     thresholdSegments: 0,
@@ -397,11 +407,9 @@ export function solveConstrainedRoute(startId, goalId, mapData, options = {}) {
         edge.transition === 'elevator' ? 1 : 0
       );
       const steepSegments = current.steepSegments + (
-        Number.isFinite(rules.maxSteepSegments) &&
         numeric(edge.slope) !== null && numeric(edge.slope) >= 3 ? 1 : 0
       );
       const thresholdSegments = current.thresholdSegments + (
-        Number.isFinite(rules.maxThresholdSegments) &&
         numeric(destination.threshold) !== null &&
         numeric(destination.threshold) >= 0.01 ? 1 : 0
       );
@@ -415,6 +423,7 @@ export function solveConstrainedRoute(startId, goalId, mapData, options = {}) {
       const candidate = {
         id: next,
         cost,
+        f: cost + heuristic(next, goalId),
         elevatorTransfers,
         steepSegments,
         thresholdSegments,
@@ -422,11 +431,11 @@ export function solveConstrainedRoute(startId, goalId, mapData, options = {}) {
         active: true,
       };
       const currentLabels = labels.get(next) || [];
-      if (currentLabels.some(label => label.active && dominatesRoute(label, candidate))) {
+      if (currentLabels.some(label => label.active && dominatesRoute(label, candidate, rules))) {
         continue;
       }
       const nonDominated = currentLabels.filter(label => {
-        if (label.active && dominatesRoute(candidate, label)) {
+        if (label.active && dominatesRoute(candidate, label, rules)) {
           label.active = false;
           return false;
         }
@@ -441,7 +450,8 @@ export function solveConstrainedRoute(startId, goalId, mapData, options = {}) {
   return emptyConstrainedResult();
 }
 
-// App entry point: COP is applied *during search*, never as a post-filter.
+// App entry point: Resource-Constrained A* applies COP during search,
+// never as a post-filter.
 export function findPath(startId, goalId, mapData, constraints = {}) {
   return solveConstrainedRoute(startId, goalId, mapData, constraints).path;
 }
