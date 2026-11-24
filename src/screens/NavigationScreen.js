@@ -7,7 +7,13 @@ import {
   Text,
 } from 'react-native';
 import { getMapData } from '../../assets/data/buildingLoader';
-import { findPath } from '../logic/pathfinder';
+import { solveConstrainedRoute } from '../logic/pathfinder';
+
+// Constraints apply during optimization, including the entire route,
+// not just one edge at a time. LC2 has two connected levels.
+const WHEELCHAIR_ROUTE_CONSTRAINTS = Object.freeze({
+  maxElevatorTransfers: 1,
+});
 import FloorPlan from '../rendering/FloorPlan';
 import BuildingOverview from '../rendering/BuildingOverview';
 import HUD from '../rendering/HUD';
@@ -40,10 +46,13 @@ export default function NavigationScreen() {
       return;
     }
 
-    // findPath() uses A* and already applies wheelchair accessibility
-    // constraints. Only the best accessible route is shown to the user.
-    const bestPath = findPath(locationId, destination, mapData);
-    const paths = bestPath.length > 0 ? [bestPath] : [];
+    // COP: solve the minimum-cost route subject to accessibility
+    // and route-wide hard constraints before showing navigation.
+    const optimized = solveConstrainedRoute(
+      locationId, destination, mapData, WHEELCHAIR_ROUTE_CONSTRAINTS
+    );
+    const bestPath = optimized.path;
+    const paths = optimized.feasible ? [bestPath] : [];
 
     setRouteOptions(paths);
     setSelectedRouteIndex(0);
