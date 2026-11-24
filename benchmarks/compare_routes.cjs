@@ -35,9 +35,9 @@ const { normalizeBuildingData } = loadFunctions(
 // Reuse the production A*, its edge accessibility/weight rules, heuristic
 // and priority queue without importing any React Native/Expo code.
 const {
-  findPath, getEdgeCost, createHeuristic, createAdjacency, MinHeap,
+  findAStarPath, getEdgeCost, createHeuristic, createAdjacency, MinHeap,
 } = loadFunctions('src/logic/pathfinder.js', [
-  'findPath', 'getEdgeCost', 'createHeuristic', 'createAdjacency', 'MinHeap',
+  'findAStarPath', 'getEdgeCost', 'createHeuristic', 'createAdjacency', 'MinHeap',
 ]);
 
 function readMap() {
@@ -391,7 +391,7 @@ function main() {
   const rawAdjacency = adjacencyFor(mapData);
   const scenarios = getPairs(mapData, config.pairs, config.seed);
   const algorithms = {
-    'A*': (a, b) => ({ path: findPath(a, b, mapData) }),
+    'A*': (a, b) => ({ path: findAStarPath(a, b, mapData) }),
     Dijkstra: (a, b) => dijkstra(a, b, mapData),
     Greedy: (a, b) => greedyBestFirst(a, b, mapData),
     ABC: (a, b, random) => artificialBeeColony(a, b, mapData, config, random),
@@ -505,7 +505,7 @@ function main() {
     '## Experimental method',
     '- The graph comes from the current unified LC2 IndoorGML GML source file via the project parser and adapter.',
     '- Identical wheelchair eligibility and directed transition costs come from the production pathfinder getEdgeCost().',
-    '- A* is the actual app findPath(); Dijkstra is the optimal-cost reference for nonnegative weights.',
+    '- A* is the preserved baseline findAStarPath(); the live app now uses the constraint-optimization solver. Dijkstra is the optimal-cost reference for nonnegative weights.',
     '- Greedy means Greedy Best-First Search using the production heuristic (not Greedy Nearest Neighbor).',
     '- ABC is a stochastic, fixed-budget Artificial Bee Colony **route-search adaptation** with employed/onlooker/scout phases and randomized feasible-path repair; it does not call Dijkstra/A* internally.',
     '- All algorithms are warmed up; timed runs include their per-query graph/heuristic preparation.',
