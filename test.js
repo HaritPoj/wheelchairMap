@@ -512,4 +512,97 @@ sameValues(
   'Constrained A* must keep the non-dominated higher-cost label'
 );
 
-console.log('Unified LC2 GML, constrained A*, and door-aligned route geometry tests passed.');
+
+// Regression tests for the six newly reported Android screenshots.
+// A route should enter/leave rooms at their actual door center and never
+// backtrack past an intermediate room's doorway waypoint.
+const screenshotCases = [
+  ['room_107', 'room_111'],
+  ['room_109', 'room_111'],
+  ['room_109', 'room_110'],
+  ['room_114', 'room_109'],
+  ['restroom_f1_center', 'room_113'],
+  ['room_111', 'room_113'],
+];
+const approx = (a, b) => Math.abs(a - b) < 0.0001;
+function screenshotRoutePoints(from, to) {
+  const path = solveConstrainedRoute(from, to, mapData, {
+    maxElevatorTransfers: 1,
+  }).path;
+  assert.ok(path.length >= 3, from + ' -> ' + to + ': route must exist');
+  const points = [];
+  for (let i = 1; i < path.length; i += 1) {
+    const a = mapData.nodeMap[path[i - 1]];
+    const b = mapData.nodeMap[path[i]];
+    const edge = mapData.edges.find(item =>
+      (item.from === a.id && item.to === b.id) ||
+      (item.to === a.id && item.from === b.id)
+    );
+    assert.ok(edge);
+    const segment = getRouteSegmentPoints(a, b, edge);
+    assert.ok(segment.length >= 2);
+    for (let j = 1; j < segment.length; j += 1) {
+      const before = segment[j - 1];
+      const after = segment[j];
+      assert.ok(
+        approx(before.x, after.x) || approx(before.y, after.y),
+        'Every displayed segment must be orthogonal'
+      );
+    }
+    if (points.length) {
+      const prior = points[points.length - 1];
+      assert.ok(
+        approx(prior.x, segment[0].x) && approx(prior.y, segment[0].y),
+        'Polyline must not jump between unrelated points'
+      );
+    }
+    points.push(...segment.slice(points.length ? 1 : 0));
+  }
+  return { path, points };
+}
+
+for (const [from, to] of screenshotCases) {
+  const result = screenshotRoutePoints(from, to);
+  assert.strictEqual(result.path[0], from);
+  assert.strictEqual(result.path[result.path.length - 1], to);
+}
+
+const route109to110 = screenshotRoutePoints('room_109', 'room_110');
+sameValues(route109to110.path, [
+  'room_109', 'corridor_f1_d109', 'corridor_f1_d110', 'room_110',
+]);
+const door109 = mapData.nodeMap.corridor_f1_d109.x;
+const door110 = mapData.nodeMap.corridor_f1_d110.x;
+assert.ok(route109to110.points.every(p =>
+  p.x >= door110 - 0.001 && p.x <= door109 + 0.001
+), 'Neighboring Rooms 109 and 110 must not have a route extension beyond their doors');
+
+for (const from of ['room_107', 'room_109']) {
+  const { path, points } = screenshotRoutePoints(from, 'room_111');
+  assert.ok(path.includes('corridor_f1_d111'));
+  assert.ok(!path.includes('corridor_f1_u13'), 'Do not overshoot Room 111 to the west');
+  assert.ok(points.every(p => p.x >= mapData.nodeMap.corridor_f1_d111.x - 0.001));
+}
+for (const from of ['room_111', 'restroom_f1_center']) {
+  const { path, points } = screenshotRoutePoints(from, 'room_113');
+  assert.ok(path.includes('corridor_f1_d113'));
+  assert.ok(!path.includes('corridor_f1_u12'), 'Do not overshoot Room 113 to the west');
+  assert.ok(points.every(p => p.x >= mapData.nodeMap.corridor_f1_d113.x - 0.001));
+}
+const route114to109 = screenshotRoutePoints('room_114', 'room_109');
+const room114Left = mapData.nodeMap.room_114.x - mapData.nodeMap.room_114.width / 2;
+const route114Left = Math.min(...route114to109.points.map(p => p.x));
+assert.ok(
+  room114Left - route114Left <= 20,
+  'Room 114 must preserve its left-side door without an exaggerated U-shaped detour'
+);
+
+// Selection paint must never expand into adjacent rooms or WC/Room 113.
+// The touch target remains independent of the exact-width SVG highlight.
+const floorPlanSourceLatest = fs.readFileSync('./src/rendering/FloorPlan.js', 'utf8');
+assert.ok(floorPlanSourceLatest.includes("key={'selection-' + node.id}"));
+assert.ok(floorPlanSourceLatest.includes("backgroundColor: 'transparent'"));
+assert.ok(floorPlanSourceLatest.includes("width={roomWidth}"));
+assert.ok(floorPlanSourceLatest.includes("getRouteSegmentPoints(previous, current, edge)"));
+
+console.log('Unified LC2 GML, constrained A*, six screenshot route regressions, and visual selection tests passed.');
