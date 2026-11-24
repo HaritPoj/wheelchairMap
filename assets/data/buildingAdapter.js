@@ -279,6 +279,14 @@ export function normalizeBuildingData(buildingData) {
           transition.accessibility?.slope === undefined
             ? null
             : transition.accessibility.slope,
+        door_width:
+          transition.accessibility?.doorWidth === undefined
+            ? null
+            : transition.accessibility.doorWidth,
+        threshold:
+          transition.accessibility?.threshold === undefined
+            ? null
+            : transition.accessibility.threshold,
         wheelchairAccessible:
           transition.accessibility?.wheelchairAccessible !== false,
         openingId: transition.openingId || null,
