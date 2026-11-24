@@ -579,6 +579,39 @@ export default function FloorPlan({
             );
           })}
 
+          {/* Match the colored selection to the real room footprint.
+              Hit targets may be larger, but must never paint into
+              adjacent rooms (especially narrow Rooms 109/110/113). */}
+          {floorNodes
+            .filter(node => node.id === startNode || node.id === destination)
+            .filter(node => node.type !== 'corridor' && node.type !== 'stairs')
+            .map(node => {
+              const center = toXY(node.x, node.y);
+              const roomWidth = Math.max(1, Number(node.width) || 50) * scale;
+              const roomHeight = Math.max(1, Number(node.height) || 50) * scale;
+              const both = node.id === startNode && node.id === destination;
+              const isStart = node.id === startNode;
+              return (
+                <Rect
+                  key={'selection-' + node.id}
+                  x={center.x - roomWidth / 2}
+                  y={center.y - roomHeight / 2}
+                  width={roomWidth}
+                  height={roomHeight}
+                  rx={5 * scale}
+                  ry={5 * scale}
+                  fill={both
+                    ? 'rgba(24,95,165,0.25)'
+                    : isStart
+                      ? 'rgba(0,160,80,0.22)'
+                      : 'rgba(200,60,60,0.22)'}
+                  stroke={both ? '#185FA5' : isStart ? '#00834A' : '#C63C3C'}
+                  strokeWidth={2 * scale}
+                  pointerEvents="none"
+                />
+              );
+            })}
+
           {routeDrawOrder.map(routeIndex =>
             routePaths[routeIndex].map((nodeId, index) => {
               if (index === 0) return null;
@@ -656,24 +689,10 @@ export default function FloorPlan({
           }
 
           const { x, y } = toXY(node.x, node.y);
-          const touchWidth = Math.max(48, (Number(node.width) || 48) * scale);
-          const touchHeight = Math.max(48, (Number(node.height) || 48) * scale);
-          const isStart = startNode === node.id;
-          const isDest = destination === node.id;
-
-          let backgroundColor = 'transparent';
-          let borderColor = 'transparent';
-
-          if (isStart && isDest) {
-            backgroundColor = 'rgba(24,95,165,0.25)';
-            borderColor = '#185FA5';
-          } else if (isStart) {
-            backgroundColor = 'rgba(0,160,80,0.22)';
-            borderColor = '#00834A';
-          } else if (isDest) {
-            backgroundColor = 'rgba(200,60,60,0.22)';
-            borderColor = '#C63C3C';
-          }
+          // Keep touch targets usable without stealing neighboring narrow rooms.
+          // Selection highlighting is handled by SVG at exact room geometry.
+          const touchWidth = Math.max(32, (Number(node.width) || 32) * scale);
+          const touchHeight = Math.max(44, (Number(node.height) || 44) * scale);
 
           return (
             <TouchableOpacity
@@ -689,8 +708,8 @@ export default function FloorPlan({
                   left: x - touchWidth / 2,
                   top: y - touchHeight / 2,
                   borderRadius: 6,
-                  backgroundColor,
-                  borderColor,
+                  backgroundColor: 'transparent',
+                  borderColor: 'transparent',
                 },
               ]}
             />
