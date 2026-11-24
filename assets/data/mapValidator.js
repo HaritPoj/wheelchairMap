@@ -20,6 +20,22 @@ function nullableNumber(value) {
   return value === null || value === undefined || finite(value);
 }
 
+function validateDoorNumbers(accessibility, label, errors) {
+  const { doorWidth, width, threshold } = accessibility || {};
+  if (doorWidth !== null && doorWidth !== undefined &&
+      (!finite(doorWidth) || doorWidth <= 0)) {
+    errors.push(label + ': doorWidth must be a positive number of meters or null.');
+  }
+  if (width !== null && width !== undefined &&
+      (!finite(width) || width <= 0)) {
+    errors.push(label + ': width must be a positive number of meters or null.');
+  }
+  if (threshold !== null && threshold !== undefined &&
+      (!finite(threshold) || threshold < 0)) {
+    errors.push(label + ': threshold must be a nonnegative number of meters or null.');
+  }
+}
+
 function validateLocalGeometry(geometry, id, errors) {
   if (!geometry || (geometry.type !== "point" && geometry.type !== "rectangle")) {
     errors.push(id + ": geometry must be point or rectangle.");
@@ -169,6 +185,7 @@ export function validateBuildingData(data) {
         errors.push(unit.id + ": invalid accessibility." + field);
       }
     }
+    validateDoorNumbers(accessibility, unit.id, errors);
   }
 
   if (!Array.isArray(data?.openings)) errors.push("openings must be an array.");
@@ -186,6 +203,7 @@ export function validateBuildingData(data) {
     if (!levelIds.has(opening.levelId)) {
       errors.push(opening.id + ": references missing level " + opening.levelId);
     }
+    validateDoorNumbers(opening.accessibility, opening.id, errors);
     if (!Array.isArray(opening.connects) || opening.connects.length !== 2) {
       errors.push(opening.id + ": connects must contain exactly two unit ids.");
     } else {
@@ -265,7 +283,8 @@ export function validateBuildingData(data) {
     ) {
       errors.push(transition.id + ": wheelchairAccessible must be boolean.");
     }
-    for (const field of ["width", "slope"]) {
+    validateDoorNumbers(accessibility, transition.id, errors);
+    for (const field of ["width", "slope", "doorWidth", "threshold"]) {
       if (field in accessibility && !nullableNumber(accessibility[field])) {
         errors.push(transition.id + ": invalid accessibility." + field);
       }
