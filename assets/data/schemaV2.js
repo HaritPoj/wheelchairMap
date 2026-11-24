@@ -88,7 +88,9 @@ export function migrateBuildingV1ToV2(
     code: space.code || null,
     geometry: space.geometry,
     accessibility: {
-      wheelchairAccessible: space.type !== "stairs",
+      wheelchairAccessible:
+        space.type !== "stairs" &&
+        space.accessibility?.wheelchairAccessible !== false,
       doorWidth:
         space.accessibility?.doorWidth === undefined
           ? null
@@ -123,7 +125,10 @@ export function migrateBuildingV1ToV2(
       geometry: null,
       accessibility: {
         wheelchairAccessible:
-          fromUnit.type !== "stairs" && toUnit.type !== "stairs",
+          fromUnit.type !== "stairs" && toUnit.type !== "stairs" &&
+          connection.accessibility?.wheelchairAccessible !== false &&
+          fromUnit.accessibility?.wheelchairAccessible !== false &&
+          toUnit.accessibility?.wheelchairAccessible !== false,
         width:
           connection.accessibility?.doorWidth ??
           primary.accessibility?.doorWidth ?? null,
@@ -166,7 +171,10 @@ export function migrateBuildingV1ToV2(
         wheelchairAccessible:
           type !== "vertical.stairs" &&
           fromUnit?.type !== "stairs" &&
-          toUnit?.type !== "stairs",
+          toUnit?.type !== "stairs" &&
+          connection.accessibility?.wheelchairAccessible !== false &&
+          fromUnit?.accessibility?.wheelchairAccessible !== false &&
+          toUnit?.accessibility?.wheelchairAccessible !== false,
         width:
           connection.accessibility?.width === undefined
             ? null
