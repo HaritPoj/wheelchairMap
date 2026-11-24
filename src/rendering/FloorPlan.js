@@ -16,6 +16,7 @@ import Svg, {
   G,
 } from 'react-native-svg';
 import { getRouteColor } from './routeColors';
+import { getDoorSpecs, getRouteSegmentPoints } from './routeGeometry';
 
 const FLOOR_ONE_FILL = '#B2B1CA';
 const FLOOR_ONE_STROKE = '#312E81';
@@ -235,164 +236,6 @@ export default function FloorPlan({
     );
   }
 
-  function parseDoorSpec(edge, node, other) {
-    if (!node || !other) return null;
-
-    const edgeId = String(edge?.id || '');
-    const namedSide = ['top', 'bottom', 'left', 'right'].find(side =>
-      edgeId.includes(`_${side}`)
-    );
-
-    if (namedSide) {
-      let position = 0.5;
-
-      if (
-        (namedSide === 'top' || namedSide === 'bottom') &&
-        edgeId.includes(`_${namedSide}_left`)
-      ) {
-        position = 0.22;
-      } else if (
-        (namedSide === 'top' || namedSide === 'bottom') &&
-        edgeId.includes(`_${namedSide}_right`)
-      ) {
-        position = 0.78;
-      } else if (
-        (namedSide === 'left' || namedSide === 'right') &&
-        edgeId.includes(`_${namedSide}_top`)
-      ) {
-        position = 0.22;
-      } else if (
-        (namedSide === 'left' || namedSide === 'right') &&
-        edgeId.includes(`_${namedSide}_bottom`)
-      ) {
-        position = 0.78;
-      }
-
-      return { side: namedSide, position };
-    }
-
-    const dx = Number(other.x) - Number(node.x);
-    const dy = Number(other.y) - Number(node.y);
-    const side =
-      Math.abs(dx) > Math.abs(dy)
-        ? dx < 0
-          ? 'left'
-          : 'right'
-        : dy < 0
-          ? 'top'
-          : 'bottom';
-
-    return { side, position: 0.5 };
-  }
-
-  function getDoorSpecs(node) {
-    const specs = new Map();
-
-    for (const edge of mapData.edges || []) {
-      if (edge.from !== node.id && edge.to !== node.id) continue;
-
-      const otherId = edge.from === node.id ? edge.to : edge.from;
-      const other = mapData.nodeMap[otherId];
-      if (!other || other.type !== 'corridor') continue;
-
-      const spec = parseDoorSpec(edge, node, other);
-      if (spec && !specs.has(spec.side)) {
-        specs.set(spec.side, spec.position);
-      }
-    }
-
-    return specs;
-  }
-
-  function routeAnchor(node, other) {
-    const center = toXY(node.x, node.y);
-    const width = Number(node.width) * scale;
-    const height = Number(node.height) * scale;
-
-    if (!(width > 0) || !(height > 0)) {
-      return { ...center, side: null };
-    }
-
-    const edge = getEdgeBetween(node, other);
-    const spec = parseDoorSpec(edge, node, other);
-    if (!spec) return { ...center, side: null };
-
-    const left = center.x - width / 2;
-    const right = center.x + width / 2;
-    const top = center.y - height / 2;
-    const bottom = center.y + height / 2;
-
-    if (spec.side === 'top') {
-      return {
-        x: left + width * spec.position,
-        y: top,
-        side: 'top',
-      };
-    }
-
-    if (spec.side === 'bottom') {
-      return {
-        x: left + width * spec.position,
-        y: bottom,
-        side: 'bottom',
-      };
-    }
-
-    if (spec.side === 'left') {
-      return {
-        x: left,
-        y: top + height * spec.position,
-        side: 'left',
-      };
-    }
-
-    return {
-      x: right,
-      y: top + height * spec.position,
-      side: 'right',
-    };
-  }
-
-  function getOrthogonalRoutePoints(nodeA, nodeB) {
-    if (!nodeA || !nodeB) return [];
-
-    const start = routeAnchor(nodeA, nodeB);
-    const end = routeAnchor(nodeB, nodeA);
-
-    if (
-      Math.abs(start.x - end.x) < 0.5 ||
-      Math.abs(start.y - end.y) < 0.5
-    ) {
-      return [start, end];
-    }
-
-    let bend;
-
-    if (start.side === 'top' || start.side === 'bottom') {
-      bend = { x: start.x, y: end.y };
-    } else if (start.side === 'left' || start.side === 'right') {
-      bend = { x: end.x, y: start.y };
-    } else if (end.side === 'top' || end.side === 'bottom') {
-      bend = { x: end.x, y: start.y };
-    } else if (end.side === 'left' || end.side === 'right') {
-      bend = { x: start.x, y: end.y };
-    } else if (Math.abs(end.x - start.x) >= Math.abs(end.y - start.y)) {
-      bend = { x: end.x, y: start.y };
-    } else {
-      bend = { x: start.x, y: end.y };
-    }
-
-    const points = [start, bend, end];
-    return points.filter((point, index) => {
-      if (index === 0) return true;
-      const previous = points[index - 1];
-      return (
-        Math.abs(point.x - previous.x) > 0.5 ||
-        Math.abs(point.y - previous.y) > 0.5
-      );
-    });
-  }
-
   const boundary =
     Array.isArray(currentFloorData.map?.boundary) &&
     currentFloorData.map.boundary.length >= 3
@@ -413,7 +256,7 @@ export default function FloorPlan({
     const right = x + width / 2;
     const top = y - height / 2;
     const bottom = y + height / 2;
-    const doorSpecs = getDoorSpecs(node);
+    const doorSpecs = getDoorSpecs(node, mapData.edges, mapData.nodeMap);
     const horizontalGap = Math.min(18 * scale, width * 0.42);
     const verticalGap = Math.min(18 * scale, height * 0.34);
     const strokeWidth = 2 * scale;
@@ -749,13 +592,14 @@ export default function FloorPlan({
                 return null;
               }
 
-              const points = getOrthogonalRoutePoints(previous, current);
+              const edge = getEdgeBetween(previous, current);
+              const points = getRouteSegmentPoints(previous, current, edge);
               if (points.length < 2) return null;
 
               return (
                 <Polyline
                   key={'route-' + routeIndex + '-' + index}
-                  points={points.map(point => `${point.x},${point.y}`).join(' ')}
+                  points={points.map(point => `${point.x * scale},${point.y * scale}`).join(' ')}
                   fill="none"
                   stroke={getRouteColor(routeIndex)}
                   strokeWidth={(routeIndex === activeRouteIndex ? 6 : 4) * scale}
