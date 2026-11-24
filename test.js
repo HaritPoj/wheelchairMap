@@ -51,6 +51,10 @@ const findAllPaths = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
   'findAllPaths'
 );
+const getRouteSegmentPoints = loadNamedExport(
+  fs.readFileSync('./src/rendering/routeGeometry.js', 'utf8'),
+  'getRouteSegmentPoints'
+);
 
 const parseIndoorGML = loadNamedExport(
   fs.readFileSync('./assets/data/indoorgml/indoorGMLParser.js', 'utf8'),
@@ -428,4 +432,84 @@ const noThreshold = solveConstrainedRoute('start', 'goal', thresholdMap, {
 assert.strictEqual(noThreshold.cost, 110);
 sameValues(noThreshold.path, ['start', 'wide', 'goal']);
 
-console.log('Unified LC2 GML, COP accessibility/optimization, and baseline A* routing tests passed.');
+// Regression: the screenshot route from Room 109 to 106 must no longer
+// turn west before travelling east to the vertical wing.
+const room109To106 = solveConstrainedRoute('room_109', 'room_106', mapData, {
+  maxElevatorTransfers: 1,
+});
+assert.strictEqual(room109To106.feasible, true);
+sameValues(room109To106.path.slice(0, 2), ['room_109', 'corridor_f1_u15']);
+assert.ok(
+  !room109To106.path.includes('corridor_f1_u14'),
+  'Room 109 must not backtrack through the west corridor waypoint'
+);
+
+function routeSegment(fromId, toId) {
+  const a = mapData.nodeMap[fromId];
+  const b = mapData.nodeMap[toId];
+  const edge = mapData.edges.find(item =>
+    (item.from === fromId && item.to === toId) ||
+    (item.to === fromId && item.from === toId)
+  );
+  assert.ok(a && b && edge, 'Expected connected geometry for ' + fromId + '/' + toId);
+  return getRouteSegmentPoints(a, b, edge);
+}
+
+const first109Segment = routeSegment('room_109', 'corridor_f1_u15');
+assert.ok(
+  first109Segment.every(point => point.x >= mapData.nodeMap.room_109.x - 0.001),
+  'Route from Room 109 should initially head east instead of west'
+);
+
+// Regressions from screenshots: Room 213 -> Room 211 needs a single
+// vertical line through two doorway gaps, rather than two short zigzags.
+const room213Door = routeSegment('room_213', 'corridor_f2_c17');
+const room211Door = routeSegment('corridor_f2_v04', 'room_211');
+assert.strictEqual(room213Door.length, 2);
+assert.strictEqual(room211Door.length, 2);
+for (const point of [...room213Door, ...room211Door]) {
+  assert.strictEqual(point.x, 1178, 'Floor 2 route must follow corridor centerline');
+}
+assert.strictEqual(room213Door[0].y, 302);
+assert.strictEqual(room211Door[room211Door.length - 1].y, 145);
+
+// Central WC -> Room 106 follows a straight horizontal corridor and
+// turns into the vertical wing without unnecessary lateral moves.
+const wcTo106 = solveConstrainedRoute('restroom_f1_center', 'room_106', mapData);
+assert.ok(wcTo106.feasible);
+assert.ok(wcTo106.path.includes('corridor_f1_u15'));
+
+// A* must retain higher-cost labels when their resource budget is better.
+const resourceNodes = [
+  { id: 's', type: 'corridor', floor: 1, x: 0, y: 0 },
+  { id: 'limited', type: 'corridor', floor: 1, x: 1, y: 0, threshold: 0.01 },
+  { id: 'junction', type: 'corridor', floor: 1, x: 2, y: 0 },
+  { id: 'g', type: 'corridor', floor: 1, x: 3, y: 0, threshold: 0.01 },
+];
+const resourceMap = {
+  nodes: resourceNodes,
+  nodeMap: Object.fromEntries(resourceNodes.map(node => [node.id, node])),
+  edges: [
+    { id: 's_limited', from: 's', to: 'limited', weight: 1 },
+    { id: 'limited_junction', from: 'limited', to: 'junction', weight: 1 },
+    { id: 'direct_junction', from: 's', to: 'junction', weight: 60 },
+    { id: 'junction_goal', from: 'junction', to: 'g', weight: 1 },
+  ],
+};
+sameValues(
+  solveConstrainedRoute('s', 'g', resourceMap).path,
+  ['s', 'limited', 'junction', 'g'],
+  'Unrestricted optimizer must prefer cheaper route'
+);
+const restrictedRoute = solveConstrainedRoute('s', 'g', resourceMap, {
+  maxThresholdSegments: 1,
+});
+assert.strictEqual(restrictedRoute.feasible, true);
+assert.strictEqual(restrictedRoute.cost, 111);
+sameValues(
+  restrictedRoute.path,
+  ['s', 'junction', 'g'],
+  'Constrained A* must keep the non-dominated higher-cost label'
+);
+
+console.log('Unified LC2 GML, constrained A*, and door-aligned route geometry tests passed.');
