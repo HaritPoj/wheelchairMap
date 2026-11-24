@@ -9,17 +9,20 @@ import {
 import { getMapData } from '../../assets/data/buildingLoader';
 import { solveConstrainedRoute } from '../logic/pathfinder';
 
-// Constraints apply during optimization, including the entire route,
-// not just one edge at a time. LC2 has two connected levels.
-const WHEELCHAIR_ROUTE_CONSTRAINTS = Object.freeze({
-  maxElevatorTransfers: 1,
-});
 import FloorPlan from '../rendering/FloorPlan';
 import BuildingOverview from '../rendering/BuildingOverview';
 import HUD from '../rendering/HUD';
 import DirectionsSheet from '../rendering/DirectionsSheet';
 import NextStepBanner from '../rendering/NextStepBanner';
 import CameraScanner from '../rendering/CameraScanner';
+
+// Resource-Constrained A* optimizes under COP hard constraints during
+// the search. LC2's two levels need at most one elevator transfer.
+// Constraints apply during optimization, including the entire route,
+// not just one edge at a time. LC2 has two connected levels.
+const WHEELCHAIR_ROUTE_CONSTRAINTS = Object.freeze({
+  maxElevatorTransfers: 1,
+});
 
 export default function NavigationScreen() {
   const mapData = useMemo(() => getMapData(), []);
@@ -46,8 +49,8 @@ export default function NavigationScreen() {
       return;
     }
 
-    // COP: solve the minimum-cost route subject to accessibility
-    // and route-wide hard constraints before showing navigation.
+    // Resource-Constrained A*: minimize route cost while checking all
+    // edge-accessibility and route-wide COP constraints during search.
     const optimized = solveConstrainedRoute(
       locationId, destination, mapData, WHEELCHAIR_ROUTE_CONSTRAINTS
     );
