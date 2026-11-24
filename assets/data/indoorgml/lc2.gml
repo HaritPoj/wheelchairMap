@@ -94,6 +94,11 @@
                   <core:stateMember><core:State gml:id="corridor_f1_u13" wc:levelId="floor_1" wc:name="East corridor 02" wc:x="790" wc:y="264" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f1_u14" wc:levelId="floor_1" wc:name="East corridor 03" wc:x="870" wc:y="264" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f1_u15" wc:levelId="floor_1" wc:name="Vertical wing junction" wc:x="980" wc:y="264" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f1_d114" wc:levelId="floor_1" wc:name="Room 114 doorway junction" wc:x="640" wc:y="264" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f1_d113" wc:levelId="floor_1" wc:name="Room 113 doorway junction" wc:x="763.5" wc:y="264" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f1_d111" wc:levelId="floor_1" wc:name="Room 111 doorway junction" wc:x="856" wc:y="264" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f1_d110" wc:levelId="floor_1" wc:name="Room 110 doorway junction" wc:x="914.5" wc:y="264" /></core:stateMember>
+                  <core:stateMember><core:State gml:id="corridor_f1_d109" wc:levelId="floor_1" wc:name="Room 109 doorway junction" wc:x="953" wc:y="264" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f1_l01" wc:levelId="floor_1" wc:name="Lower corridor 01" wc:x="79" wc:y="344" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f1_l02" wc:levelId="floor_1" wc:name="Lower corridor 02" wc:x="127" wc:y="344" /></core:stateMember>
                   <core:stateMember><core:State gml:id="corridor_f1_l03" wc:levelId="floor_1" wc:name="Lower corridor 03" wc:x="165" wc:y="344" /></core:stateMember>
@@ -146,10 +151,15 @@
                   <core:transitionMember><core:Transition gml:id="f1_u08_u09" wc:from="corridor_f1_u08" wc:to="corridor_f1_u09" wc:cost="2" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_u09_u10" wc:from="corridor_f1_u09" wc:to="corridor_f1_u10" wc:cost="2" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_u10_u11" wc:from="corridor_f1_u10" wc:to="corridor_f1_u11" wc:cost="2" /></core:transitionMember>
-                  <core:transitionMember><core:Transition gml:id="f1_u11_u12" wc:from="corridor_f1_u11" wc:to="corridor_f1_u12" wc:cost="2" /></core:transitionMember>
-                  <core:transitionMember><core:Transition gml:id="f1_u12_u13" wc:from="corridor_f1_u12" wc:to="corridor_f1_u13" wc:cost="2" /></core:transitionMember>
-                  <core:transitionMember><core:Transition gml:id="f1_u13_u14" wc:from="corridor_f1_u13" wc:to="corridor_f1_u14" wc:cost="2" /></core:transitionMember>
-                  <core:transitionMember><core:Transition gml:id="f1_u14_u15" wc:from="corridor_f1_u14" wc:to="corridor_f1_u15" wc:cost="2" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_u11_d114" wc:from="corridor_f1_u11" wc:to="corridor_f1_d114" wc:cost="0.666667" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_d114_u12" wc:from="corridor_f1_d114" wc:to="corridor_f1_u12" wc:cost="1.333333" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_u12_d113" wc:from="corridor_f1_u12" wc:to="corridor_f1_d113" wc:cost="1.411111" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_d113_u13" wc:from="corridor_f1_d113" wc:to="corridor_f1_u13" wc:cost="0.588889" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_u13_d111" wc:from="corridor_f1_u13" wc:to="corridor_f1_d111" wc:cost="1.65" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_d111_u14" wc:from="corridor_f1_d111" wc:to="corridor_f1_u14" wc:cost="0.35" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_u14_d110" wc:from="corridor_f1_u14" wc:to="corridor_f1_d110" wc:cost="0.809091" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_d110_d109" wc:from="corridor_f1_d110" wc:to="corridor_f1_d109" wc:cost="0.7" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_d109_u15" wc:from="corridor_f1_d109" wc:to="corridor_f1_u15" wc:cost="0.490909" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_u01_l01" wc:from="corridor_f1_u01" wc:to="corridor_f1_l01" wc:cost="2" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_l01_l02" wc:from="corridor_f1_l01" wc:to="corridor_f1_l02" wc:cost="2" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_l02_l03" wc:from="corridor_f1_l02" wc:to="corridor_f1_l03" wc:cost="2" /></core:transitionMember>
@@ -185,12 +195,12 @@
                   <core:transitionMember><core:Transition gml:id="f1_room116_bottom" wc:from="room_116" wc:to="corridor_f1_l08" wc:cost="1" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_room115_top" wc:from="room_115" wc:to="corridor_f1_u09" wc:cost="1" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_room115_bottom" wc:from="room_115" wc:to="corridor_f1_l09" wc:cost="1" /></core:transitionMember>
-                  <core:transitionMember><core:Transition gml:id="f1_room114_left" wc:from="room_114" wc:to="corridor_f1_u11" wc:cost="1" /></core:transitionMember>
-                  <core:transitionMember><core:Transition gml:id="f1_room113_top" wc:from="room_113" wc:to="corridor_f1_u12" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_room114_left" wc:from="room_114" wc:to="corridor_f1_d114" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_room113_top" wc:from="room_113" wc:to="corridor_f1_d113" wc:cost="1" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_wc_center_top" wc:from="restroom_f1_center" wc:to="corridor_f1_u13" wc:cost="1" /></core:transitionMember>
-                  <core:transitionMember><core:Transition gml:id="f1_room111_top" wc:from="room_111" wc:to="corridor_f1_u13" wc:cost="1" /></core:transitionMember>
-                  <core:transitionMember><core:Transition gml:id="f1_room110_top" wc:from="room_110" wc:to="corridor_f1_u14" wc:cost="1" /></core:transitionMember>
-                  <core:transitionMember><core:Transition gml:id="f1_room109_top" wc:from="room_109" wc:to="corridor_f1_u15" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_room111_top" wc:from="room_111" wc:to="corridor_f1_d111" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_room110_top" wc:from="room_110" wc:to="corridor_f1_d110" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f1_room109_top" wc:from="room_109" wc:to="corridor_f1_d109" wc:cost="1" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_room108_left" wc:from="room_108" wc:to="corridor_f1_v01" wc:cost="1" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_room107_left" wc:from="room_107" wc:to="corridor_f1_v02" wc:cost="1" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f1_wc_east_left" wc:from="restroom_f1_east" wc:to="corridor_f1_v03" wc:cost="1" /></core:transitionMember>
