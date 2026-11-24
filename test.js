@@ -39,6 +39,14 @@ const findPath = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
   'findPath'
 );
+const findAStarPath = loadNamedExport(
+  fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
+  'findAStarPath'
+);
+const solveConstrainedRoute = loadNamedExport(
+  fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
+  'solveConstrainedRoute'
+);
 const findAllPaths = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
   'findAllPaths'
@@ -317,4 +325,107 @@ assert.strictEqual(
   'Cross-floor routing must fail when the elevator transition is removed'
 );
 
-console.log('Unified LC2 GML, both-floor room sets, schema v2, and A* routing tests passed.');
+// COP is the app's live route solver, not a post-filter for A*.
+const appScreenSource = fs.readFileSync('./src/screens/NavigationScreen.js', 'utf8');
+assert.ok(
+  appScreenSource.includes('solveConstrainedRoute('),
+  'Live navigation must call the constraint optimizer directly'
+);
+sameValues(
+  findPath(room124.id, room211.id, mapData),
+  solveConstrainedRoute(room124.id, room211.id, mapData).path,
+  'findPath must delegate to COP'
+);
+assert.ok(
+  findAStarPath(room124.id, room211.id, mapData).length > 0,
+  'Original A* should remain available as a separate benchmark baseline'
+);
+
+const copCrossFloor = solveConstrainedRoute(room124.id, room211.id, mapData, {
+  maxElevatorTransfers: 1,
+});
+assert.strictEqual(copCrossFloor.feasible, true);
+assert.strictEqual(copCrossFloor.resources.elevatorTransfers, 1);
+assert.strictEqual(
+  solveConstrainedRoute(room124.id, room211.id, mapData, {
+    maxElevatorTransfers: 0,
+  }).feasible,
+  false,
+  'COP must enforce a route-wide elevator transfer limit'
+);
+
+const syntheticNodes = ['start', 'steep', 'wide', 'goal'].map(id => ({
+  id,
+  type: 'corridor',
+  floor: 1,
+  accessibility: { wheelchairAccessible: true },
+}));
+const syntheticEdges = [
+  { id: 'short_steep', from: 'start', to: 'steep', weight: 1, slope: 3.5 },
+  { id: 'steep_goal', from: 'steep', to: 'goal', weight: 1 },
+  { id: 'wide_a', from: 'start', to: 'wide', weight: 30 },
+  { id: 'wide_goal', from: 'wide', to: 'goal', weight: 30 },
+];
+const syntheticMap = {
+  nodes: syntheticNodes,
+  edges: syntheticEdges,
+  nodeMap: Object.fromEntries(syntheticNodes.map(node => [node.id, node])),
+};
+const defaultCop = solveConstrainedRoute('start', 'goal', syntheticMap);
+assert.strictEqual(defaultCop.feasible, true);
+assert.strictEqual(defaultCop.cost, 52);
+sameValues(defaultCop.path, ['start', 'steep', 'goal']);
+const noSteepCop = solveConstrainedRoute('start', 'goal', syntheticMap, {
+  maxSteepSegments: 0,
+});
+assert.strictEqual(noSteepCop.feasible, true);
+assert.strictEqual(noSteepCop.cost, 60);
+sameValues(noSteepCop.path, ['start', 'wide', 'goal']);
+assert.strictEqual(
+  solveConstrainedRoute('start', 'goal', syntheticMap, {
+    maxCost: 51,
+  }).feasible,
+  false,
+  'COP must reject paths that exceed the total route-cost budget'
+);
+sameValues(
+  solveConstrainedRoute('start', 'goal', syntheticMap, {
+    blockedNodeIds: ['steep'],
+  }).path,
+  ['start', 'wide', 'goal'],
+  'COP must respect forbidden locations'
+);
+sameValues(
+  solveConstrainedRoute('start', 'goal', syntheticMap, {
+    blockedEdgeIds: ['short_steep'],
+  }).path,
+  ['start', 'wide', 'goal'],
+  'COP must respect blocked corridors'
+);
+assert.strictEqual(
+  solveConstrainedRoute('start', 'goal', syntheticMap, {
+    requireMeasuredWidths: true,
+  }).feasible,
+  false,
+  'Strict measurement policy must not treat unknown corridor widths as verified'
+);
+
+const thresholdNodes = syntheticNodes.map(node =>
+  node.id === 'steep' ? { ...node, threshold: 0.015 } : { ...node }
+);
+const thresholdMap = {
+  nodes: thresholdNodes,
+  edges: syntheticEdges.map(edge =>
+    edge.id.startsWith('wide_') ? { ...edge, weight: 55 } : { ...edge }
+  ),
+  nodeMap: Object.fromEntries(thresholdNodes.map(node => [node.id, node])),
+};
+const allowedThreshold = solveConstrainedRoute('start', 'goal', thresholdMap);
+assert.strictEqual(allowedThreshold.cost, 102);
+const noThreshold = solveConstrainedRoute('start', 'goal', thresholdMap, {
+  maxThresholdSegments: 0,
+});
+assert.strictEqual(noThreshold.cost, 110);
+sameValues(noThreshold.path, ['start', 'wide', 'goal']);
+
+console.log('Unified LC2 GML, COP accessibility/optimization, and baseline A* routing tests passed.');
