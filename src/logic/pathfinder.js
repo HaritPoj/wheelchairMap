@@ -203,7 +203,7 @@ function compareQueueItems(a, b) {
   );
 }
 
-export function findPath(startId, goalId, mapData) {
+export function findAStarPath(startId, goalId, mapData) {
   const { nodes, edges, nodeMap } = mapData;
   if (!nodeMap[startId] || !nodeMap[goalId]) return [];
   if (startId === goalId) return [startId];
@@ -257,6 +257,193 @@ export function findPath(startId, goalId, mapData) {
   }
 
   return [];
+}
+
+
+// Constraint Optimization Problem (COP): minimum-cost accessible path
+// with optional *route-wide* resource limits. This is an exact,
+// nonnegative-cost label-setting solver, not an external CP-SAT dependency.
+//
+// Inputs are the same graph used by the app's A*. Unmeasured width,
+// slope, and door size are unknown, not assumed certified accessible.
+// Clients may opt into conservative "requireMeasured..." constraints.
+function routeLimit(value, label) {
+  if (value === undefined || value === null) return Infinity;
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) {
+    throw new RangeError(label + ' must be a nonnegative finite number');
+  }
+  return number;
+}
+
+function makeRouteConstraints(options = {}) {
+  return {
+    maxCost: routeLimit(options.maxCost, 'maxCost'),
+    maxElevatorTransfers: routeLimit(options.maxElevatorTransfers, 'maxElevatorTransfers'),
+    maxSteepSegments: routeLimit(options.maxSteepSegments, 'maxSteepSegments'),
+    maxThresholdSegments: routeLimit(options.maxThresholdSegments, 'maxThresholdSegments'),
+    blockedNodeIds: new Set(options.blockedNodeIds || []),
+    blockedEdgeIds: new Set(options.blockedEdgeIds || []),
+    requireMeasuredWidths: options.requireMeasuredWidths === true,
+    requireMeasuredDoorWidths: options.requireMeasuredDoorWidths === true,
+    requireMeasuredSlopes: options.requireMeasuredSlopes === true,
+  };
+}
+
+function dominatesRoute(a, b) {
+  return (
+    a.cost <= b.cost &&
+    a.elevatorTransfers <= b.elevatorTransfers &&
+    a.steepSegments <= b.steepSegments &&
+    a.thresholdSegments <= b.thresholdSegments
+  );
+}
+
+function emptyConstrainedResult() {
+  return {
+    path: [],
+    cost: Infinity,
+    feasible: false,
+    resources: {
+      elevatorTransfers: 0,
+      steepSegments: 0,
+      thresholdSegments: 0,
+    },
+  };
+}
+
+export function solveConstrainedRoute(startId, goalId, mapData, options = {}) {
+  const { nodes, edges, nodeMap } = mapData;
+  const rules = makeRouteConstraints(options);
+  const start = nodeMap[startId];
+  const goal = nodeMap[goalId];
+
+  if (
+    !start || !goal ||
+    rules.blockedNodeIds.has(startId) ||
+    rules.blockedNodeIds.has(goalId) ||
+    start.type === 'stairs' || goal.type === 'stairs' ||
+    start.accessibility?.wheelchairAccessible === false ||
+    goal.accessibility?.wheelchairAccessible === false
+  ) {
+    return emptyConstrainedResult();
+  }
+
+  if (startId === goalId) {
+    return {
+      path: [startId],
+      cost: 0,
+      feasible: true,
+      resources: { elevatorTransfers: 0, steepSegments: 0, thresholdSegments: 0 },
+    };
+  }
+
+  const adjacency = createAdjacency(nodes, edges);
+  const frontier = new MinHeap((a, b) =>
+    a.cost - b.cost || a.id.localeCompare(b.id)
+  );
+  const labels = new Map();
+  const initial = {
+    id: startId,
+    cost: 0,
+    elevatorTransfers: 0,
+    steepSegments: 0,
+    thresholdSegments: 0,
+    parent: null,
+    active: true,
+  };
+  labels.set(startId, [initial]);
+  frontier.push(initial);
+
+  while (frontier.size > 0) {
+    const current = frontier.pop();
+    if (!current.active) continue;
+
+    if (current.id === goalId) {
+      const path = [];
+      for (let label = current; label; label = label.parent) {
+        path.unshift(label.id);
+      }
+      return {
+        path,
+        cost: current.cost,
+        feasible: true,
+        resources: {
+          elevatorTransfers: current.elevatorTransfers,
+          steepSegments: current.steepSegments,
+          thresholdSegments: current.thresholdSegments,
+        },
+      };
+    }
+
+    for (const { edge, next } of adjacency.get(current.id) || []) {
+      if (rules.blockedEdgeIds.has(edge.id) || rules.blockedNodeIds.has(next)) continue;
+      if (nodeMap[next]?.type === 'room' && next !== goalId) continue;
+      // Enforce all existing wheelchair-accessibility hard constraints.
+      const stepCost = getEdgeCost(edge, current.id, next, nodeMap);
+      if (!Number.isFinite(stepCost) || stepCost < 0) continue;
+
+      const destination = nodeMap[next];
+      if (rules.requireMeasuredWidths && numeric(edge.width) === null) continue;
+      if (rules.requireMeasuredDoorWidths &&
+        destination.type === 'room' && numeric(destination.door_width) === null) continue;
+      if (rules.requireMeasuredSlopes && numeric(edge.slope) === null) continue;
+
+      const cost = current.cost + stepCost;
+      if (cost > rules.maxCost) continue;
+      const elevatorTransfers = current.elevatorTransfers + (
+        current.id !== next &&
+        nodeMap[current.id].floor !== destination.floor &&
+        edge.transition === 'elevator' ? 1 : 0
+      );
+      const steepSegments = current.steepSegments + (
+        Number.isFinite(rules.maxSteepSegments) &&
+        numeric(edge.slope) !== null && numeric(edge.slope) >= 3 ? 1 : 0
+      );
+      const thresholdSegments = current.thresholdSegments + (
+        Number.isFinite(rules.maxThresholdSegments) &&
+        numeric(destination.threshold) !== null &&
+        numeric(destination.threshold) >= 0.01 ? 1 : 0
+      );
+
+      if (
+        elevatorTransfers > rules.maxElevatorTransfers ||
+        steepSegments > rules.maxSteepSegments ||
+        thresholdSegments > rules.maxThresholdSegments
+      ) continue;
+
+      const candidate = {
+        id: next,
+        cost,
+        elevatorTransfers,
+        steepSegments,
+        thresholdSegments,
+        parent: current,
+        active: true,
+      };
+      const currentLabels = labels.get(next) || [];
+      if (currentLabels.some(label => label.active && dominatesRoute(label, candidate))) {
+        continue;
+      }
+      const nonDominated = currentLabels.filter(label => {
+        if (label.active && dominatesRoute(candidate, label)) {
+          label.active = false;
+          return false;
+        }
+        return label.active;
+      });
+      nonDominated.push(candidate);
+      labels.set(next, nonDominated);
+      frontier.push(candidate);
+    }
+  }
+
+  return emptyConstrainedResult();
+}
+
+// App entry point: COP is applied *during search*, never as a post-filter.
+export function findPath(startId, goalId, mapData, constraints = {}) {
+  return solveConstrainedRoute(startId, goalId, mapData, constraints).path;
 }
 
 export function findAllPaths(startId, goalId, mapData) {
