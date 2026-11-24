@@ -1,3 +1,5 @@
+import { getDoorMeasurements } from './pathfinder';
+
 function getEdge(edges, fromId, toId) {
   return edges.find(edge =>
     (edge.from === fromId && edge.to === toId) ||
@@ -11,16 +13,17 @@ function numeric(value) {
   return Number.isFinite(number) ? number : null;
 }
 
-export function getEdgeWarning(edge, destination) {
+export function getEdgeWarning(edge, destination, previous = null) {
   if (!edge || !destination) return '';
 
-  const threshold = numeric(destination.threshold);
-  const doorWidth = numeric(destination.door_width);
+  const door = getDoorMeasurements(edge, previous, destination);
+  const threshold = door ? door.threshold : numeric(destination.threshold);
+  const doorWidth = door ? door.doorWidth : numeric(destination.door_width);
   const slope = numeric(edge.slope);
   const width = numeric(edge.width);
 
-  if (threshold !== null && threshold >= 0.02) {
-    return 'Threshold ahead: ' + (threshold * 100).toFixed(0) + ' cm';
+  if (threshold !== null && threshold >= 0.01) {
+    return 'Raised threshold: ' + (threshold * 100).toFixed(1) + ' cm';
   }
 
   if (doorWidth !== null && doorWidth < 0.9) {
@@ -80,7 +83,7 @@ export function generateRouteSteps(route, nodeMap, edges) {
         key: 'floor-' + index,
         icon: transitionType || 'corridor',
         instruction,
-        warning: getEdgeWarning(edge, current),
+        warning: getEdgeWarning(edge, current, previous),
         node: current,
       });
       index += 1;
@@ -108,7 +111,8 @@ export function generateRouteSteps(route, nodeMap, edges) {
           instruction: 'Follow the accessible corridor to ' + target.name,
           warning: getEdgeWarning(
             getEdge(edges, route[end], target.id),
-            target
+            target,
+            nodeMap[route[end]]
           ),
           node: target,
         });
@@ -125,7 +129,8 @@ export function generateRouteSteps(route, nodeMap, edges) {
         instruction: 'Arrive at ' + current.name,
         warning: getEdgeWarning(
           getEdge(edges, previous.id, current.id),
-          current
+          current,
+          previous
         ),
         node: current,
       });
@@ -144,7 +149,8 @@ export function generateRouteSteps(route, nodeMap, edges) {
         instruction: 'Continue to ' + current.name,
         warning: getEdgeWarning(
           getEdge(edges, previous.id, current.id),
-          current
+          current,
+          previous
         ),
         node: current,
       });
