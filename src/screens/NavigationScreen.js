@@ -63,7 +63,7 @@ export default function NavigationScreen() {
     if (paths.length === 0) {
       setShowDirections(false);
       setRouteMessage(
-        'No wheelchair-accessible route was found between these locations.'
+        'No route meets the recorded wheelchair-accessibility constraints. Check measured doorway widths, blocked passages and elevator availability.'
       );
       return;
     }
