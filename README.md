@@ -93,10 +93,10 @@ const result = solveConstrainedRoute('room_124', 'room_211', mapData, {
 // result = { path, cost, feasible, resources }
 ```
 
-\`findPath(startId, goalId, mapData, optionalConstraints)\` remains available
+`findPath(startId, goalId, mapData, optionalConstraints)` remains available
 as a compatibility wrapper around constrained A*. The original unconstrained
 A* (with existing per-edge accessibility filtering) remains available as
-\`findAStarPath()\` for a separate baseline in the standalone benchmark.
+`findAStarPath()` for a separate baseline in the standalone benchmark.
 
 **Data quality:** Unmeasured widths/slopes/thresholds remain *unknown*;
 the default solver does not falsely mark them as measured. A feasible path
