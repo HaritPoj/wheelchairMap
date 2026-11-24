@@ -438,7 +438,7 @@ const room109To106 = solveConstrainedRoute('room_109', 'room_106', mapData, {
   maxElevatorTransfers: 1,
 });
 assert.strictEqual(room109To106.feasible, true);
-sameValues(room109To106.path.slice(0, 2), ['room_109', 'corridor_f1_u15']);
+sameValues(room109To106.path.slice(0, 2), ['room_109', 'corridor_f1_d109']);
 assert.ok(
   !room109To106.path.includes('corridor_f1_u14'),
   'Room 109 must not backtrack through the west corridor waypoint'
@@ -455,7 +455,7 @@ function routeSegment(fromId, toId) {
   return getRouteSegmentPoints(a, b, edge);
 }
 
-const first109Segment = routeSegment('room_109', 'corridor_f1_u15');
+const first109Segment = routeSegment('room_109', 'corridor_f1_d109');
 assert.ok(
   first109Segment.every(point => point.x >= mapData.nodeMap.room_109.x - 0.001),
   'Route from Room 109 should initially head east instead of west'
