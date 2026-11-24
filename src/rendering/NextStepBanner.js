@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { generateRouteSteps } from '../logic/routeInstructions';
+import { getRouteDoorReport } from '../logic/pathfinder';
 
 function getIcon(type) {
   switch (type) {
@@ -21,6 +22,7 @@ export default function NextStepBanner({ route, nodeMap, edges, onPress }) {
   if (!route || route.length < 2) return null;
 
   const steps = generateRouteSteps(route, nodeMap, edges);
+  const doorReport = getRouteDoorReport(route, nodeMap, edges);
   const firstAction = steps[1] || steps[0];
   const destination = nodeMap[route[route.length - 1]];
 
@@ -43,7 +45,7 @@ export default function NextStepBanner({ route, nodeMap, edges, onPress }) {
         <View style={styles.eyebrowRow}>
           <Text style={styles.eyebrow}>NEXT STEP</Text>
           <View style={styles.accessiblePill}>
-            <Text style={styles.accessiblePillText}>♿ Accessible</Text>
+            <Text style={styles.accessiblePillText}>♿ {doorReport.unknownCount ? 'Data incomplete' : 'Route conditions'}</Text>
           </View>
         </View>
 
@@ -52,8 +54,16 @@ export default function NextStepBanner({ route, nodeMap, edges, onPress }) {
         </Text>
 
         {firstAction.warning ? (
-          <Text style={styles.warning} numberOfLines={1}>
+          <Text style={styles.warning} numberOfLines={2}>
             ! {firstAction.warning}
+          </Text>
+        ) : doorReport.unknownCount > 0 ? (
+          <Text style={styles.warning} numberOfLines={2}>
+            Door measurements missing: {doorReport.unknownCount}. See directions.
+          </Text>
+        ) : doorReport.warningCount > 0 ? (
+          <Text style={styles.warning} numberOfLines={2}>
+            Raised thresholds: {doorReport.warningCount}. See directions.
           </Text>
         ) : (
           <Text style={styles.destination} numberOfLines={1}>
