@@ -7,6 +7,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { generateRouteSteps } from '../logic/routeInstructions';
+import { getRouteDoorReport } from '../logic/pathfinder';
 import { getRouteColor } from './routeColors';
 
 const SCREEN = Dimensions.get('window');
@@ -20,6 +21,11 @@ function getTypeIcon(type) {
     case 'stairs': return '↕';
     default: return '•';
   }
+}
+
+function centimeters(meters) {
+  if (meters === null) return 'Not measured';
+  return (meters * 100).toFixed(1).replace(/\.0$/, '') + ' cm';
 }
 
 function nodeLabel(node) {
@@ -39,6 +45,7 @@ export default function DirectionsSheet({
 
   const routeOptions = routes && routes.length > 0 ? routes : [route];
   const steps = generateRouteSteps(route, nodeMap, edges);
+  const doorReport = getRouteDoorReport(route, nodeMap, edges);
   const start = nodeMap[route[0]];
   const destination = nodeMap[route[route.length - 1]];
 
@@ -49,7 +56,7 @@ export default function DirectionsSheet({
       <View style={styles.header}>
         <View style={styles.headerCopy}>
           <View style={styles.accessibleBadge}>
-            <Text style={styles.accessibleBadgeText}>♿ ACCESSIBLE ROUTE</Text>
+            <Text style={styles.accessibleBadgeText}>♿ ROUTE • {doorReport.unknownCount > 0 ? 'DATA INCOMPLETE' : 'RECORDED CONDITIONS'}</Text>
           </View>
           <Text style={styles.title}>Directions</Text>
           <Text style={styles.routeSummary} numberOfLines={1}>
@@ -79,8 +86,12 @@ export default function DirectionsSheet({
           </Text>
         </View>
         <View style={[styles.statPill, styles.elevatorStat]}>
-          <Text style={styles.statValue}>🛗</Text>
-          <Text style={styles.statLabel}>ELEVATOR OK</Text>
+          <Text style={styles.statValue}>🚪 {doorReport.doors.length}</Text>
+          <Text style={styles.statLabel}>
+            {doorReport.unknownCount > 0
+              ? doorReport.unknownCount + ' UNMEASURED'
+              : 'DOOR RECORDS'}
+          </Text>
         </View>
       </View>
 
@@ -140,6 +151,30 @@ export default function DirectionsSheet({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.doorPanel}>
+          <Text style={styles.doorPanelTitle}>DOORWAY CONDITIONS ON THIS ROUTE</Text>
+          <Text style={styles.doorPanelNote}>
+            {doorReport.unknownCount > 0
+              ? doorReport.unknownCount + ' of ' + doorReport.doors.length +
+                ' doorways have incomplete measurements. Check on site before relying on this route.'
+              : 'Measurements shown are recorded values, not a guarantee of physical accessibility.'}
+          </Text>
+          {doorReport.doors.map((door, index) => (
+            <View key={'door-' + door.edgeId + '-' + index} style={styles.doorRow}>
+              <Text style={styles.doorName}>🚪 {door.name}</Text>
+              <Text style={styles.doorValue}>
+                Clear width: {centimeters(door.doorWidth)}
+              </Text>
+              <Text style={styles.doorValue}>
+                Threshold height: {centimeters(door.threshold)}
+              </Text>
+              {door.threshold !== null && door.threshold >= 0.01 ? (
+                <Text style={styles.doorCaution}>Raised threshold — check before crossing</Text>
+              ) : null}
+            </View>
+          ))}
+        </View>
+
         {steps.map((step, index) => {
           const isFirst = index === 0;
           const isLast = index === steps.length - 1;
@@ -438,6 +473,48 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '900',
     marginRight: 7,
+  },
+  doorPanel: {
+    marginBottom: 18,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    padding: 12,
+  },
+  doorPanelTitle: {
+    color: '#334155',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  doorPanelNote: {
+    color: '#7C2D12',
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 6,
+    marginBottom: 8,
+  },
+  doorRow: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#CBD5E1',
+    paddingVertical: 9,
+  },
+  doorName: {
+    color: '#1F2937',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  doorValue: {
+    color: '#475569',
+    fontSize: 12,
+    lineHeight: 19,
+  },
+  doorCaution: {
+    color: '#C2410C',
+    fontSize: 11,
+    marginTop: 3,
+    fontWeight: '700',
   },
   warningText: {
     flex: 1,
