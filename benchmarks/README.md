@@ -4,7 +4,7 @@ This experiment is **outside the React Native/Expo app**. It reads the single LC
 
 | Algorithm | Definition | Qualification |
 |---|---|---|
-| A* | Production `findPath()` from `src/logic/pathfinder.js` | Uses the existing app heuristic |
+| A* | `findAStarPath()` from `src/logic/pathfinder.js` | Standalone A* baseline, with the same edge accessibility rules and heuristic |
 | Dijkstra | Uniform-cost search | Optimal-cost reference for nonnegative weights |
 | Greedy | Greedy Best-First Search (sorts frontier by heuristic) | May be nonoptimal |
 | ABC | Artificial Bee Colony discrete-route adaptation | Stochastic, fixed search budget |
@@ -28,7 +28,7 @@ node benchmarks/create_charts.cjs
 
 This writes `execution_time.svg`, `optimal_answers.svg`, and `success_rate.svg` to `benchmarks/results/`. You can open these SVGs in a browser or insert them into slides.
 
-No Expo, Android emulator, new npm package, or app build is required. The existing `npm test` is unchanged.
+No Expo, Android emulator, new npm package, or app build is required. The separate app solver now uses Resource-Constrained A* + COP; this four-way comparison intentionally retains the original A* as its baseline.
 
 Run the benchmarking harness smoke test:
 
@@ -63,4 +63,4 @@ Options: `--pairs`, `--runs`, `--seed`, `--abc-sources`, `--abc-cycles`, `--abc-
 5. Dijkstra cost is computed separately as the ground truth for nonnegative weighted edges. Report gap as 100 × (route cost − Dijkstra cost) / Dijkstra cost, as well as success rate.
 6. Run multiple seeds on the same hardware/Node version to estimate variability; do not infer statistical significance from one short run.
 
-**Important:** The production A* heuristic has not been formally proven admissible for every inter-floor transition and geometry. Any positive optimality gap compared to Dijkstra must be reported, not ignored. ABC is a tunable-budget heuristic and should not be presented as an equal-computation-cost comparison without further controls.
+**Important:** The A* heuristic is a nonnegative graph-weight distance lower bound, designed to be admissible on the current graph; it has not been formally validated for every future geometry/transition extension. Any positive optimality gap compared to Dijkstra must be reported, not ignored. ABC is a tunable-budget heuristic and should not be presented as an equal-computation-cost comparison without further controls.
