@@ -699,4 +699,37 @@ assert.ok(directionsSource.includes('Clear width:'));
 assert.ok(directionsSource.includes('Threshold height:'));
 assert.ok(directionsSource.includes('Not measured'));
 
+
+// Turn-by-turn instructions also warn when leaving a room with a raised
+// measured threshold (not only when entering the destination).
+const instructionBody = fs.readFileSync('./src/logic/routeInstructions.js', 'utf8')
+  .replace(/^import[^\n]*\n/gm, '');
+const generateMeasuredSteps = loadNamedExport(
+  fs.readFileSync('./src/logic/pathfinder.js', 'utf8') + '\n' + instructionBody,
+  'generateRouteSteps'
+);
+const instructionSteps = generateMeasuredSteps(
+  surveyedRoute.path, oneDoorSurvey.map.nodeMap, oneDoorSurvey.map.edges
+);
+assert.ok(
+  instructionSteps[0].warning.includes('1.5 cm'),
+  'Starting-room threshold caution must appear in directions'
+);
+
+// An explicit GML inaccessible flag must survive schema migration.
+const forbiddenXml = rawGmlForDoorTests.replace(
+  /(<core:Transition gml:id="f1_room109_top"[^>]*?)(\s*\/>)/,
+  '$1 wc:wheelchairAccessible="false"$2'
+);
+const forbiddenMap = surveyedMap(forbiddenXml);
+assert.strictEqual(
+  forbiddenMap.map.edges.find(edge => edge.id === 'f1_room109_top')
+    .wheelchairAccessible,
+  false
+);
+assert.strictEqual(
+  solveConstrainedRoute('room_109', 'room_110', forbiddenMap.map).feasible,
+  false
+);
+
 console.log('Unified LC2 GML, constrained A*, doorway measurement warnings, and screenshot regressions passed.');
