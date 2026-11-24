@@ -4,6 +4,57 @@ function numeric(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+// A doorway is a same-floor connection into or out of a physical unit.
+// Values are in meters. Null means NOT surveyed; zero is a valid measured
+// flush threshold. Per-transition data overrides room-level legacy values.
+export function getDoorMeasurements(edge, from, to) {
+  if (!edge || !from || !to || from.floor !== to.floor) return null;
+  const isFromRoom = from.type !== 'corridor' && from.type !== 'stairs';
+  const isToRoom = to.type !== 'corridor' && to.type !== 'stairs';
+  if (!isFromRoom && !isToRoom) return null;
+  if (from.type === 'stairs' || to.type === 'stairs') return null;
+  const unit = isFromRoom ? from : to;
+  const doorWidth = numeric(edge.door_width) ?? numeric(unit.door_width);
+  const threshold = numeric(edge.threshold) ?? numeric(unit.threshold);
+  return {
+    edgeId: edge.id,
+    unitId: unit.id,
+    name: unit.name || unit.label || unit.code || unit.id,
+    doorWidth,
+    threshold,
+    missingMeasurement: doorWidth === null || threshold === null,
+  };
+}
+
+// Inspect every doorway of the ACTUAL computed path, including the exit
+// from the starting room. Do not infer measurements for uninspected doors.
+export function getRouteDoorReport(route, nodeMap, edges) {
+  const doors = [];
+  if (!Array.isArray(route)) {
+    return { doors, unknownCount: 0, warningCount: 0 };
+  }
+  for (let index = 1; index < route.length; index += 1) {
+    const from = nodeMap?.[route[index - 1]];
+    const to = nodeMap?.[route[index]];
+    if (!from || !to) continue;
+    const edge = (edges || []).find(item =>
+      (item.from === from.id && item.to === to.id) ||
+      (item.to === from.id && item.from === to.id)
+    );
+    const measurement = getDoorMeasurements(edge, from, to);
+    if (measurement) {
+      doors.push(measurement);
+    }
+  }
+  return {
+    doors,
+    unknownCount: doors.filter(door => door.missingMeasurement).length,
+    // A raised threshold may need attention even when the solver
+    // includes it with a cost penalty rather than a hard exclusion.
+    warningCount: doors.filter(door => door.threshold !== null && door.threshold >= 0.01).length,
+  };
+}
+
 function getEdgeCost(edge, fromId, toId, nodeMap) {
   const storedWeight = numeric(edge.weight);
   let cost = storedWeight !== null ? storedWeight : 1;
@@ -26,10 +77,11 @@ function getEdgeCost(edge, fromId, toId, nodeMap) {
     if (slope >= 3.0) cost += 50;
   }
 
-  const doorWidth = numeric(to.door_width);
+  const door = getDoorMeasurements(edge, from, to);
+  const doorWidth = door ? door.doorWidth : numeric(to.door_width);
   if (doorWidth !== null && doorWidth < 0.9) return Infinity;
 
-  const threshold = numeric(to.threshold);
+  const threshold = door ? door.threshold : numeric(to.threshold);
   if (threshold !== null) {
     if (threshold >= 0.02) cost += 200;
     else if (threshold >= 0.01) cost += 50;
@@ -395,8 +447,9 @@ export function solveConstrainedRoute(startId, goalId, mapData, options = {}) {
 
       const destination = nodeMap[next];
       if (rules.requireMeasuredWidths && numeric(edge.width) === null) continue;
+      const doorway = getDoorMeasurements(edge, nodeMap[current.id], destination);
       if (rules.requireMeasuredDoorWidths &&
-        destination.type === 'room' && numeric(destination.door_width) === null) continue;
+          doorway && doorway.doorWidth === null) continue;
       if (rules.requireMeasuredSlopes && numeric(edge.slope) === null) continue;
 
       const cost = current.cost + stepCost;
@@ -410,8 +463,8 @@ export function solveConstrainedRoute(startId, goalId, mapData, options = {}) {
         numeric(edge.slope) !== null && numeric(edge.slope) >= 3 ? 1 : 0
       );
       const thresholdSegments = current.thresholdSegments + (
-        numeric(destination.threshold) !== null &&
-        numeric(destination.threshold) >= 0.01 ? 1 : 0
+        (doorway ? doorway.threshold : numeric(destination.threshold)) !== null &&
+        (doorway ? doorway.threshold : numeric(destination.threshold)) >= 0.01 ? 1 : 0
       );
 
       if (
