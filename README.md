@@ -50,8 +50,13 @@ restrictions. Unmeasured accessibility attributes are not fabricated.
 The route overlay shares the same door-gap geometry as the wall renderer,
 snaps onto corridor centerlines when they pass within the visible door
 opening, and draws route segments in the original floor coordinate system
-before scaling. The Room 109 connection now targets its nearby east-wing
-junction rather than the west waypoint, removing an incorrect detour.
+before scaling. Floor 1 now has dedicated corridor junctions aligned with the doorways of
+Rooms 109, 110, 111, 113 and 114, eliminating artificial overshoots caused
+by reusing distant waypoints. Original corridor-edge weights were divided
+proportionally across the added segments. Room 114 keeps its left-wall door,
+with a nearer corridor junction to reduce unnecessary detours. Selected room
+highlights are drawn at the exact room footprint independently of larger
+touch targets, so narrow rooms no longer paint over adjacent rooms.
 
 ## Live route optimization (COP)
 
