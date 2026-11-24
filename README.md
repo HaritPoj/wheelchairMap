@@ -47,6 +47,58 @@ Door-gap positions are driven by room-to-corridor transition metadata.
 Cross-floor routing uses the elevator, and A* applies wheelchair routing
 restrictions. Unmeasured accessibility attributes are not fabricated.
 
+## Live route optimization (COP)
+
+The user-facing navigation screen now calls `solveConstrainedRoute()` in
+`src/logic/pathfinder.js` directly. It solves a **Constraint Optimization
+Problem** on the wheelchair-accessible weighted indoor graph using an
+**exact resource-constrained shortest-path label-setting algorithm**.
+This is an on-device, pure-JavaScript solver; it does **not** require
+OR-Tools, CP-SAT, a backend, or an internet connection.
+
+```text
+Unified lc2.gml → validated/normalized graph
+    → COP hard constraints (stairs, known width/slope, elevator)
+    → resource-constrained minimum-cost search
+    → feasible, lowest-cost path or "no feasible route"
+    → FloorPlan and directions
+```
+
+The core applies the same existing wheelchair edge restrictions and penalties:
+blocked stairs, known insufficient widths, inaccessible nodes/edges, and
+cross-floor elevator/ramp transitions. It can additionally enforce route-wide
+limits (`maxCost`, `maxElevatorTransfers`, `maxSteepSegments`,
+`maxThresholdSegments`), temporary blocked nodes/edges, or require
+measured corridor/door widths and slopes. All such limits are applied
+**during optimization**, not after a route is generated.
+
+The LC2 navigation screen currently limits elevator transfers to **one**
+between its two levels. All other optional route-wide limits are unlimited.
+Example for a future preference or accessibility configuration:
+
+```javascript
+const result = solveConstrainedRoute('room_124', 'room_211', mapData, {
+  maxElevatorTransfers: 1,
+  maxSteepSegments: 0,
+  blockedNodeIds: [],
+});
+// result = { path, cost, feasible, resources }
+```
+
+`findPath(startId, goalId, mapData, optionalConstraints)` remains available
+as a compatibility wrapper around COP. The former A* implementation is still
+available as `findAStarPath()` for a valid baseline in independent benchmarks.
+
+**Data quality:** Unmeasured widths/slopes/thresholds remain *unknown*;
+the default solver does not falsely mark them as measured. A feasible path
+means it satisfies **recorded** constraints, not that real-world wheelchair
+passage has been certified safe. Before deployment, survey door widths,
+obstacles, slopes, and other real building features. Strict measurements
+can be required using `requireMeasuredWidths`,
+`requireMeasuredDoorWidths`, and `requireMeasuredSlopes`, but the
+current LC2 source has incomplete measurements, so enabling these will
+likely reject many/all routes.
+
 ## Build and test
 
 ```bash
