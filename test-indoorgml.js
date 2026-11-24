@@ -112,7 +112,7 @@ assert.ok(
     edge =>
       edge.id === 'f1_room114_left' &&
       edge.from === 'room_114' &&
-      edge.to === 'corridor_f1_u11'
+      edge.to === 'corridor_f1_d114'
   ),
   'Room 114 should preserve its corrected left-side access'
 );
@@ -127,6 +127,26 @@ assert.ok(
   ),
   'IndoorGML should preserve the cross-floor elevator transition'
 );
+
+
+for (const [roomId, corridorId, edgeId] of [
+  ['room_114', 'corridor_f1_d114', 'f1_room114_left'],
+  ['room_113', 'corridor_f1_d113', 'f1_room113_top'],
+  ['room_111', 'corridor_f1_d111', 'f1_room111_top'],
+  ['room_110', 'corridor_f1_d110', 'f1_room110_top'],
+  ['room_109', 'corridor_f1_d109', 'f1_room109_top'],
+]) {
+  assert.ok(
+    floor1.spaces.some(space => space.id === corridorId && space.type === 'corridor'),
+    'Dedicated doorway junction must exist: ' + corridorId
+  );
+  assert.ok(
+    floor1.connections.some(edge =>
+      edge.id === edgeId && edge.from === roomId && edge.to === corridorId
+    ),
+    roomId + ' must connect to its own doorway junction rather than another room'
+  );
+}
 
 assert.ok(
   !floor1.connections.some(
