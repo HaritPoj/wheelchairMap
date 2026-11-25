@@ -133,7 +133,7 @@ Example syntax only (these numbers are **illustrative, not LC2 survey data**):
 ```
 
 - `wc:doorWidth`: **clear usable doorway width**, in meters. `0.95` means 95 cm.
-- Record the number of door leaves in `wc:leafCount`. For equal-width leaves, include `wc:leafWidth` when the width of one leaf is known. Use `wc:doorWidth` for the measured clear opening.
+- Record the number of leaves at one opening in `wc:leafCount`. A value of `2` represents double doors at a single entrance. For equal-width leaves, include `wc:leafWidth` when the width of one leaf is known. Use `wc:doorWidth` for the measured clear opening.
 - `wc:threshold`: **vertical threshold height**, in meters. `0.015` means 1.5 cm.
   Record an observed flush threshold as `0`; an unknown threshold is **not** zero.
 - `wc:width` is the **corridor/edge passage width**, which is a different quantity.
@@ -163,7 +163,7 @@ building and individual wheelchair user's needs.
 
 ### Floor 2, Rooms 211–213
 
-Each mapped entrance has two door leaves. The clear opening width is unmeasured for all three rooms.
+Each room has double doors at its mapped entrance. The clear opening width is unmeasured for all three rooms.
 
 | Room | Leaves | Width per leaf | Threshold height |
 | --- | ---: | ---: | ---: |
@@ -191,7 +191,7 @@ needs remain essential. Other room measurements stay unknown until surveyed.
 
 ### Floor 2, Room 223
 
-Room 223 has a two-leaf door with a recorded clear opening of 109 cm and a flush threshold (0 cm). Individual leaf widths are unmeasured.
+Room 223 has double doors at one entrance, with a recorded clear opening of 109 cm and a flush threshold (0 cm). Individual leaf widths are unmeasured.
 
 ## Build and test
 

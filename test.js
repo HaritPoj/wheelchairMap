@@ -811,7 +811,7 @@ for (const [code, leafCm, thresholdCm] of [
   assert.strictEqual(opening.accessibility.leafWidth, leafCm / 100);
   assert.strictEqual(opening.accessibility.width, null);
   assert.strictEqual(opening.accessibility.threshold, thresholdCm / 100);
-  const leaves = '2 door leaves, ' + leafCm + ' cm each';
+  const leaves = 'Double doors, ' + leafCm + ' cm per leaf';
   assert.ok(selectedRoomWarning(room).includes(
     leaves + ', clear width not measured, threshold height ' + thresholdCm + ' cm.'
   ));

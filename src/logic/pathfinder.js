@@ -30,10 +30,12 @@ export function getDoorMeasurements(edge, from, to) {
 
 export function formatDoorLeaves(door) {
   if (door?.leafCount == null) return '';
-  const count = door.leafCount === 1 ? '1 door leaf' : door.leafCount + ' door leaves';
-  if (door.leafWidth == null) return count;
+  let label = door.leafCount + ' door leaves';
+  if (door.leafCount === 1) label = '1 door leaf';
+  if (door.leafCount === 2) label = 'Double doors';
+  if (door.leafWidth == null) return label;
   const cm = Number((door.leafWidth * 100).toFixed(1));
-  return count + ', ' + cm + (door.leafCount === 1 ? ' cm wide' : ' cm each');
+  return label + ', ' + cm + (door.leafCount === 1 ? ' cm wide' : ' cm per leaf');
 }
 
 export function needsDoorCaution(door, referenceWidth = 0.9) {
