@@ -168,8 +168,15 @@ export default function DirectionsSheet({
               <Text style={styles.doorValue}>
                 Threshold height: {centimeters(door.threshold)}
               </Text>
+              {door.doorWidth !== null && door.doorWidth < 0.9 ? (
+                <Text style={styles.doorCaution}>
+                  Narrow door — may not be accessible for your wheelchair. Check on site.
+                </Text>
+              ) : null}
               {door.threshold !== null && door.threshold >= 0.01 ? (
-                <Text style={styles.doorCaution}>Raised threshold — check before crossing</Text>
+                <Text style={styles.doorCaution}>
+                  Raised threshold — may be difficult to cross. Check on site.
+                </Text>
               ) : null}
             </View>
           ))}
