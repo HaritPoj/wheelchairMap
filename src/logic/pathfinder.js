@@ -31,7 +31,7 @@ export function getDoorMeasurements(edge, from, to) {
 export function getRouteDoorReport(route, nodeMap, edges) {
   const doors = [];
   if (!Array.isArray(route)) {
-    return { doors, unknownCount: 0, warningCount: 0 };
+    return { doors, unknownCount: 0, narrowCount: 0, raisedThresholdCount: 0, warningCount: 0 };
   }
   for (let index = 1; index < route.length; index += 1) {
     const from = nodeMap?.[route[index - 1]];
@@ -51,16 +51,22 @@ export function getRouteDoorReport(route, nodeMap, edges) {
     unknownCount: doors.filter(door => door.missingMeasurement).length,
     // A raised threshold may need attention even when the solver
     // includes it with a cost penalty rather than a hard exclusion.
-    warningCount: doors.filter(door => door.threshold !== null && door.threshold >= 0.01).length,
+    narrowCount: doors.filter(door => door.doorWidth !== null && door.doorWidth < 0.9).length,
+    raisedThresholdCount: doors.filter(door => door.threshold !== null && door.threshold >= 0.01).length,
+    warningCount: doors.filter(door =>
+      (door.doorWidth !== null && door.doorWidth < 0.9) ||
+      (door.threshold !== null && door.threshold >= 0.01)
+    ).length,
   };
 }
 
-// Explain why a selected room cannot be routed to under the app's
-// recorded minimum clear-door-width policy. Other unknown/unmeasured
-// entrances prevent a definitive claim, so do not report them as blocked.
-export function getRoomDoorRestrictionMessage(roomId, nodeMap, edges, minimumWidth = 0.9) {
+// Warn about measured room doorway conditions without blocking navigation.
+// A narrower door or raised threshold may be difficult to traverse depending
+// on the wheelchair and person. Do not claim all doors are inaccessible.
+export function getRoomDoorWarningMessage(roomId, nodeMap, edges, referenceWidth = 0.9) {
   const room = nodeMap?.[roomId];
   if (!room || (room.type !== 'room' && room.type !== 'restroom')) return null;
+
   const doors = (edges || []).flatMap(edge => {
     if (edge.from !== roomId && edge.to !== roomId) return [];
     const other = nodeMap?.[edge.from === roomId ? edge.to : edge.from];
@@ -68,19 +74,23 @@ export function getRoomDoorRestrictionMessage(roomId, nodeMap, edges, minimumWid
     const doorway = getDoorMeasurements(edge, room, other);
     return doorway ? [doorway] : [];
   });
-  if (!doors.length || !doors.every(door =>
-    door.doorWidth !== null && door.doorWidth < minimumWidth
-  )) return null;
 
-  const toCm = meters => Number((meters * 100).toFixed(1));
-  const details = doors.map(door =>
-    'width ' + toCm(door.doorWidth) + ' cm' +
-    (door.threshold === null ? ' (threshold not measured)'
-      : ', threshold ' + toCm(door.threshold) + ' cm')
-  ).join('; ');
-  return (room.name || room.code || roomId) + ': recorded door ' + details +
-    '. Below the app\'s ' + toCm(minimumWidth) +
-    ' cm routing minimum; a wheelchair route cannot be offered through these doorways. Please verify conditions on site.';
+  const alerts = doors.filter(door =>
+    (door.doorWidth !== null && door.doorWidth < referenceWidth) ||
+    (door.threshold !== null && door.threshold >= 0.01)
+  );
+  if (!alerts.length) return null;
+
+  const cm = meters => Number((meters * 100).toFixed(1));
+  const descriptions = alerts.map(door => {
+    const attributes = [];
+    if (door.doorWidth !== null) attributes.push('door width ' + cm(door.doorWidth) + ' cm');
+    if (door.threshold !== null) attributes.push('threshold height ' + cm(door.threshold) + ' cm');
+    return attributes.join(', ');
+  });
+  const prefix = room.name || room.code || roomId;
+  return prefix + ': ' + descriptions.join('; ') +
+    '. This doorway may not be accessible for some wheelchair users. Please verify on site. Routing remains available.';
 }
 
 function getEdgeCost(edge, fromId, toId, nodeMap) {
@@ -106,9 +116,9 @@ function getEdgeCost(edge, fromId, toId, nodeMap) {
   }
 
   const door = getDoorMeasurements(edge, from, to);
-  const doorWidth = door ? door.doorWidth : numeric(to.door_width);
-  if (doorWidth !== null && doorWidth < 0.9) return Infinity;
-
+  // Measured narrow *room doors* are warnings, NOT hard routing barriers.
+  // Corridor/edge clear width, explicit inaccessible flags, and stairs
+  // retain their original hard constraints.
   const threshold = door ? door.threshold : numeric(to.threshold);
   if (threshold !== null) {
     if (threshold >= 0.02) cost += 200;
