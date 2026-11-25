@@ -84,13 +84,17 @@ export function getRoomDoorWarningMessage(roomId, nodeMap, edges, referenceWidth
   const cm = meters => Number((meters * 100).toFixed(1));
   const descriptions = alerts.map(door => {
     const attributes = [];
-    if (door.doorWidth !== null) attributes.push('door width ' + cm(door.doorWidth) + ' cm');
-    if (door.threshold !== null) attributes.push('threshold height ' + cm(door.threshold) + ' cm');
-    return attributes.join(', ');
+    if (door.doorWidth !== null) {
+      attributes.push('ประตูกว้าง ' + cm(door.doorWidth) + ' ซม.');
+    }
+    if (door.threshold !== null) {
+      attributes.push('ธรณีประตูสูง ' + cm(door.threshold) + ' ซม.');
+    }
+    return attributes.join(' และ ');
   });
-  const prefix = room.name || room.code || roomId;
-  return prefix + ': ' + descriptions.join('; ') +
-    '. This doorway may not be accessible for some wheelchair users. Please verify on site. Routing remains available.';
+  return (room.name || room.code || roomId) + ': ' + descriptions.join('; ') +
+    ' อาจไม่สามารถเข้าถึงได้สำหรับผู้ใช้รถเข็นบางราย โปรดตรวจสอบสภาพจริงก่อนผ่านประตู (ยังสามารถเลือกเส้นทางนี้ได้)';
+
 }
 
 function getEdgeCost(edge, fromId, toId, nodeMap) {
