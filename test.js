@@ -51,9 +51,9 @@ const getRouteDoorReport = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
   'getRouteDoorReport'
 );
-const getRoomDoorRestrictionMessage = loadNamedExport(
+const getRoomDoorWarningMessage = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
-  'getRoomDoorRestrictionMessage'
+  'getRoomDoorWarningMessage'
 );
 const findAllPaths = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
@@ -228,22 +228,10 @@ assert.ok(
 const routeDestinations = mapData.nodes.filter(
   node => node.type === 'room' || node.type === 'restroom'
 );
-const recordedNarrowDoorRooms = new Set(
-  [217, 218, 219, 220, 221, 222].map(number => 'room_' + number)
-);
-
+// Measured narrow room doors are advisories, not hard routing barriers.
 for (const start of routeDestinations) {
   for (const goal of routeDestinations) {
     const path = findPath(start.id, goal.id, mapData);
-    if (start.id !== goal.id &&
-        (recordedNarrowDoorRooms.has(start.id) ||
-         recordedNarrowDoorRooms.has(goal.id))) {
-      assert.strictEqual(
-        path.length, 0,
-        `Recorded 80 cm door must block the route from ${start.id} to ${goal.id}`
-      );
-      continue;
-    }
     assert.ok(
       path.length > 0,
       `Expected a wheelchair route from ${start.id} to ${goal.id}`
@@ -690,14 +678,20 @@ const blockedNarrowDoor = surveyedMap(insertDoorMeasurement(
 ));
 assert.strictEqual(
   solveConstrainedRoute('room_109', 'room_110', blockedNarrowDoor.map).feasible,
-  false,
-  'Recorded clear width below 0.9 m must block the doorway in both directions'
+  true,
+  'Recorded 80 cm door should warn rather than block the route'
 );
 assert.strictEqual(
   solveConstrainedRoute('room_110', 'room_109', blockedNarrowDoor.map).feasible,
-  false,
-  'Door width restriction must also apply when entering the room'
+  true,
+  'Room doors should remain routable in both directions'
 );
+const narrowRoute = solveConstrainedRoute('room_109', 'room_110', blockedNarrowDoor.map);
+const narrowReport = getRouteDoorReport(
+  narrowRoute.path, blockedNarrowDoor.map.nodeMap, blockedNarrowDoor.map.edges
+);
+assert.strictEqual(narrowReport.narrowCount, 1);
+assert.strictEqual(narrowReport.warningCount, 1);
 const invalidSurvey = surveyedMap(insertDoorMeasurement(
   rawGmlForDoorTests, 'f1_room109_top', '0.9', '-0.01'
 ));
@@ -765,20 +759,28 @@ for (const number of [217, 218, 219, 220, 221, 222]) {
   assert.strictEqual(migratedTransition.accessibility.threshold, 0.04);
   assert.strictEqual(edge.door_width, 0.8);
   assert.strictEqual(edge.threshold, 0.04);
-  const message = getRoomDoorRestrictionMessage(roomId, mapData.nodeMap, mapData.edges);
+  const message = getRoomDoorWarningMessage(roomId, mapData.nodeMap, mapData.edges);
   assert.ok(message.includes('80 cm') && message.includes('4 cm') &&
-    message.includes('90 cm'), 'User should see the measured door conditions: ' + roomId);
-  assert.strictEqual(findPath('room_211', roomId, mapData).length, 0);
-  assert.strictEqual(findPath(roomId, 'room_211', mapData).length, 0);
+    message.includes('may not be accessible'),
+    'User should see the warning for the measured door: ' + roomId);
+  const routeIntoRoom = findPath('room_211', roomId, mapData);
+  const routeOutOfRoom = findPath(roomId, 'room_211', mapData);
+  assert.ok(routeIntoRoom.length > 1 && routeOutOfRoom.length > 1,
+    'Room door width must not prevent route calculation: ' + roomId);
+  const roomReport = getRouteDoorReport(routeIntoRoom, mapData.nodeMap, mapData.edges);
+  assert.ok(roomReport.doors.some(door =>
+    door.unitId === roomId && door.doorWidth === 0.8 &&
+    door.threshold === 0.04
+  ), 'Directions must display the measured doorway: ' + roomId);
 }
 assert.strictEqual(
-  getRoomDoorRestrictionMessage('room_223', mapData.nodeMap, mapData.edges),
+  getRoomDoorWarningMessage('room_223', mapData.nodeMap, mapData.edges),
   null,
   'Other rooms must not inherit the measurements'
 );
 const screenWithDoorNotices = fs.readFileSync('./src/screens/NavigationScreen.js', 'utf8');
 const hudWithDoorNotices = fs.readFileSync('./src/rendering/HUD.js', 'utf8');
-assert.ok(screenWithDoorNotices.includes('getRoomDoorRestrictionMessage'));
+assert.ok(screenWithDoorNotices.includes('getRoomDoorWarningMessage'));
 assert.ok(hudWithDoorNotices.includes('accessibilityNotice'));
 
-console.log('Unified LC2 GML, constrained A*, doorway measurement warnings, and screenshot regressions passed.');
+console.log('LC2 constrained A* advisory narrow-door routing and screenshot regressions passed.');
