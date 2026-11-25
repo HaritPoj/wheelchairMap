@@ -143,11 +143,14 @@ Example syntax only (these numbers are **illustrative, not LC2 survey data**):
   validation; measurements are not treated as certified accessibility.
 
 The app reads these measurements through the XML parser, schema-v2 migration
-and building adapter. Resource-Constrained A* enforces the existing **project
-rule** against recorded doorway widths below **0.9 m**, and adds route costs
-for a recorded threshold from **1 cm** (50) and **2 cm** (200). These are
-prototype routing parameters, **not legal accessibility standards**. The
-same doorway rules apply in both travel directions.
+and building adapter. **Measured room-door widths below 0.9 m are advisory
+only**, not hard barriers: Resource-Constrained A* still finds routes into
+and out of these rooms, while the app displays a caution that wheelchair
+access may not be possible for some users. Recorded thresholds from **1 cm**
+and **2 cm** retain the prototype's route-cost penalties (50 and 200).
+Explicitly inaccessible doors, stairs, and known insufficient corridor/edge
+widths remain hard routing constraints. These are prototype routing
+parameters, **not legal accessibility standards**.
 
 When a route is selected, **Next Step** reports missing measurements or raised
 thresholds. **Directions → Doorway Conditions** lists the clear width and
@@ -166,14 +169,14 @@ and 222** are recorded on their individual `f2_roomNNN_top` transitions:
 - **Raised doorway threshold:** `0.04` m (4 cm).
 
 These are reported measurements, not independently verified by the app.
-Each of these six rooms currently has one modeled doorway. The prototype's
-existing `0.90` m minimum width policy therefore excludes routes **into
-or out of** these rooms; its navigation HUD now explains the recorded
-width, raised threshold, and project rule when either endpoint is selected.
-They remain present on the map and searchable. This does **not** imply
-that all wheelchair users would be unable to pass physically: on-site
-verification and user-specific clearance needs are essential. Other room
-measurements stay unknown until surveyed.
+Each of these six rooms currently has one modeled doorway. **These rooms
+remain selectable as a starting point or destination, and paths are
+calculated normally.** The navigation HUD advises that a door of **80 cm**
+with a **4 cm threshold** may not be accessible to some wheelchair users;
+the Directions and Next Step UI also report the doorway conditions on a
+chosen route. This is a caution, **not an automatic determination that
+every user cannot enter**. On-site verification and user-specific clearance
+needs remain essential. Other room measurements stay unknown until surveyed.
 
 ## Build and test
 
