@@ -42,8 +42,7 @@ export default function NavigationScreen() {
 
   // Show measured doorway cautions without preventing users from selecting or routing to these rooms.
   const doorwayNotice = useMemo(() =>
-    getRoomDoorWarningMessage(destination, mapData.nodeMap, mapData.edges) ||
-    getRoomDoorWarningMessage(locationId, mapData.nodeMap, mapData.edges),
+    getRoomDoorWarningMessage([locationId, destination], mapData.nodeMap, mapData.edges),
     [destination, locationId, mapData]
   );
 
@@ -83,7 +82,7 @@ export default function NavigationScreen() {
 
     setRouteMessage(null);
     setShowDirections(false);
-  }, [locationId, destination, mapData, doorwayNotice]);
+  }, [locationId, destination, mapData]);
 
   function openFloor(floor) {
     setCurrentFloor(floor);

@@ -60,10 +60,7 @@ export function getRouteDoorReport(route, nodeMap, edges) {
   };
 }
 
-// Warn about measured room doorway conditions without blocking navigation.
-// A narrower door or raised threshold may be difficult to traverse depending
-// on the wheelchair and person. Do not claim all doors are inaccessible.
-export function getRoomDoorWarningMessage(roomId, nodeMap, edges, referenceWidth = 0.9) {
+function describeRoomDoorConditions(roomId, nodeMap, edges, referenceWidth) {
   const room = nodeMap?.[roomId];
   if (!room || (room.type !== 'room' && room.type !== 'restroom')) return null;
 
@@ -92,9 +89,19 @@ export function getRoomDoorWarningMessage(roomId, nodeMap, edges, referenceWidth
     }
     return attributes.join(' และ ');
   });
-  return (room.name || room.code || roomId) + ': ' + descriptions.join('; ') +
-    ' อาจไม่สามารถเข้าถึงได้สำหรับผู้ใช้รถเข็นบางราย โปรดตรวจสอบสภาพจริงก่อนผ่านประตู (ยังสามารถเลือกเส้นทางนี้ได้)';
+  return (room.name || room.code || roomId) + ': ' + descriptions.join('; ');
+}
 
+// Accept a single room or both selected endpoints in route order.
+export function getRoomDoorWarningMessage(roomIds, nodeMap, edges, referenceWidth = 0.9) {
+  const ids = new Set(Array.isArray(roomIds) ? roomIds : [roomIds]);
+  const descriptions = Array.from(ids, id =>
+    describeRoomDoorConditions(id, nodeMap, edges, referenceWidth)
+  ).filter(Boolean);
+  if (!descriptions.length) return null;
+
+  return descriptions.join('\n') +
+    ' อาจไม่สามารถเข้าถึงได้สำหรับผู้ใช้รถเข็นบางราย โปรดตรวจสอบสภาพจริงก่อนผ่านประตู (ยังสามารถเลือกเส้นทางนี้ได้)';
 }
 
 function getEdgeCost(edge, fromId, toId, nodeMap) {

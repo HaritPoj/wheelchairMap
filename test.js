@@ -778,9 +778,22 @@ assert.strictEqual(
   null,
   'Other rooms must not inherit the measurements'
 );
+const selectedRoomWarning = (...ids) =>
+  getRoomDoorWarningMessage(ids, mapData.nodeMap, mapData.edges);
+const room217Warning = getRoomDoorWarningMessage('room_217', mapData.nodeMap, mapData.edges);
+assert.strictEqual(selectedRoomWarning(null, 'room_217'), room217Warning);
+assert.strictEqual(selectedRoomWarning('room_217', 'room_223'), room217Warning);
+assert.strictEqual(selectedRoomWarning('room_217', 'room_217'), room217Warning);
+assert.strictEqual(selectedRoomWarning(null, 'room_223'), null);
+for (const [start, goal] of [['217', '218'], ['218', '217']]) {
+  const notice = selectedRoomWarning('room_' + start, 'room_' + goal);
+  const measuredDoor = 'ประตูกว้าง 80 ซม. และ ธรณีประตูสูง 4 ซม.';
+  assert.ok(notice.startsWith('Room ' + start + ': ' + measuredDoor + '\nRoom ' + goal + ': ' + measuredDoor),
+    'Selection must show the measured conditions of both rooms in route order');
+}
 const screenWithDoorNotices = fs.readFileSync('./src/screens/NavigationScreen.js', 'utf8');
 const hudWithDoorNotices = fs.readFileSync('./src/rendering/HUD.js', 'utf8');
-assert.ok(screenWithDoorNotices.includes('getRoomDoorWarningMessage'));
+assert.match(screenWithDoorNotices, /getRoomDoorWarningMessage\(\s*\[locationId,\s*destination\]/);
 assert.ok(hudWithDoorNotices.includes('accessibilityNotice'));
 
 console.log('LC2 constrained A* advisory narrow-door routing and screenshot regressions passed.');
