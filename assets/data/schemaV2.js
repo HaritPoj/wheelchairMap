@@ -132,6 +132,8 @@ export function migrateBuildingV1ToV2(
         width:
           connection.accessibility?.doorWidth ??
           primary.accessibility?.doorWidth ?? null,
+        leafCount: connection.accessibility?.leafCount ?? null,
+        leafWidth: connection.accessibility?.leafWidth ?? null,
         threshold:
           connection.accessibility?.threshold ??
           primary.accessibility?.threshold ?? null,
@@ -189,6 +191,8 @@ export function migrateBuildingV1ToV2(
           connection.accessibility?.doorWidth === undefined
             ? null
             : connection.accessibility.doorWidth,
+        leafCount: connection.accessibility?.leafCount ?? null,
+        leafWidth: connection.accessibility?.leafWidth ?? null,
         threshold:
           connection.accessibility?.threshold === undefined
             ? null

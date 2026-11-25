@@ -7,7 +7,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { generateRouteSteps } from '../logic/routeInstructions';
-import { getRouteDoorReport } from '../logic/pathfinder';
+import { formatDoorLeaves, getRouteDoorReport } from '../logic/pathfinder';
 import { getRouteColor } from './routeColors';
 
 const SCREEN = Dimensions.get('window');
@@ -162,6 +162,9 @@ export default function DirectionsSheet({
           {doorReport.doors.map((door, index) => (
             <View key={'door-' + door.edgeId + '-' + index} style={styles.doorRow}>
               <Text style={styles.doorName}>🚪 {door.name}</Text>
+              {door.leafWidth !== null && (
+                <Text style={styles.doorValue}>{formatDoorLeaves(door)}</Text>
+              )}
               <Text style={styles.doorValue}>
                 Clear width: {centimeters(door.doorWidth)}
               </Text>

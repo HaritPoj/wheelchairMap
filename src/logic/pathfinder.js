@@ -21,9 +21,24 @@ export function getDoorMeasurements(edge, from, to) {
     unitId: unit.id,
     name: unit.name || unit.label || unit.code || unit.id,
     doorWidth,
+    leafCount: numeric(edge.leaf_count),
+    leafWidth: numeric(edge.leaf_width),
     threshold,
     missingMeasurement: doorWidth === null || threshold === null,
   };
+}
+
+export function formatDoorLeaves(door) {
+  if (door?.leafCount == null || door.leafWidth == null) return '';
+  const cm = Number((door.leafWidth * 100).toFixed(1));
+  return door.leafCount === 1 ? '1 door leaf, ' + cm + ' cm wide' :
+    door.leafCount + ' door leaves, ' + cm + ' cm each';
+}
+
+function needsDoorCaution(door, referenceWidth = 0.9) {
+  return (door.doorWidth === null && door.leafWidth !== null) ||
+    (door.doorWidth !== null && door.doorWidth < referenceWidth) ||
+    (door.threshold !== null && door.threshold >= 0.01);
 }
 
 // Inspect every doorway of the ACTUAL computed path, including the exit
@@ -53,10 +68,7 @@ export function getRouteDoorReport(route, nodeMap, edges) {
     // includes it with a cost penalty rather than a hard exclusion.
     narrowCount: doors.filter(door => door.doorWidth !== null && door.doorWidth < 0.9).length,
     raisedThresholdCount: doors.filter(door => door.threshold !== null && door.threshold >= 0.01).length,
-    warningCount: doors.filter(door =>
-      (door.doorWidth !== null && door.doorWidth < 0.9) ||
-      (door.threshold !== null && door.threshold >= 0.01)
-    ).length,
+    warningCount: doors.filter(door => needsDoorCaution(door)).length,
   };
 }
 
@@ -72,17 +84,18 @@ function describeRoomDoorConditions(roomId, nodeMap, edges, referenceWidth) {
     return doorway ? [doorway] : [];
   });
 
-  const alerts = doors.filter(door =>
-    (door.doorWidth !== null && door.doorWidth < referenceWidth) ||
-    (door.threshold !== null && door.threshold >= 0.01)
-  );
+  const alerts = doors.filter(door => needsDoorCaution(door, referenceWidth));
   if (!alerts.length) return null;
 
   const cm = meters => Number((meters * 100).toFixed(1));
   const descriptions = alerts.map(door => {
     const attributes = [];
+    const leaves = formatDoorLeaves(door);
+    if (leaves) attributes.push(leaves);
     if (door.doorWidth !== null) {
       attributes.push('door width ' + cm(door.doorWidth) + ' cm');
+    } else if (leaves) {
+      attributes.push('clear width not measured');
     }
     if (door.threshold !== null) {
       attributes.push('threshold height ' + cm(door.threshold) + ' cm');

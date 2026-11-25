@@ -242,10 +242,10 @@
                   <core:transitionMember><core:Transition gml:id="f2_room219_top" wc:from="room_219" wc:to="corridor_f2_c13" wc:cost="1" wc:doorWidth="0.80" wc:threshold="0.04" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f2_room218_top" wc:from="room_218" wc:to="corridor_f2_c14" wc:cost="1" wc:doorWidth="0.80" wc:threshold="0.04" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f2_room217_top" wc:from="room_217" wc:to="corridor_f2_c15" wc:cost="1" wc:doorWidth="0.80" wc:threshold="0.04" /></core:transitionMember>
-                  <core:transitionMember><core:Transition gml:id="f2_room213_top_left" wc:from="room_213" wc:to="corridor_f2_c17" wc:cost="1" /></core:transitionMember>
-                  <core:transitionMember><core:Transition gml:id="f2_room212_left" wc:from="room_212" wc:to="corridor_f2_v02" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room213_top_left" wc:from="room_213" wc:to="corridor_f2_c17" wc:cost="1" wc:leafCount="2" wc:leafWidth="0.80" wc:threshold="0" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room212_left" wc:from="room_212" wc:to="corridor_f2_v02" wc:cost="1" wc:leafCount="2" wc:leafWidth="0.76" wc:threshold="0.04" /></core:transitionMember>
                   <core:transitionMember><core:Transition gml:id="f2_wc_east_left" wc:from="restroom_f2_east" wc:to="corridor_f2_v03" wc:cost="1" /></core:transitionMember>
-                  <core:transitionMember><core:Transition gml:id="f2_room211_bottom_left" wc:from="room_211" wc:to="corridor_f2_v04" wc:cost="1" /></core:transitionMember>
+                  <core:transitionMember><core:Transition gml:id="f2_room211_bottom_left" wc:from="room_211" wc:to="corridor_f2_v04" wc:cost="1" wc:leafCount="2" wc:leafWidth="0.90" wc:threshold="0.07" /></core:transitionMember>
                 </core:Edges>
               </core:edges>
             </core:SpaceLayer>

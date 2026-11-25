@@ -193,6 +193,8 @@ export function parseIndoorGML(xmlText) {
         width,
         slope,
         doorWidth,
+        leafCount: numberOrNull(localAttr(attrs, 'leafCount')),
+        leafWidth: numberOrNull(localAttr(attrs, 'leafWidth')),
         threshold,
       },
       ...(transitionType ? { transition: { type: transitionType } } : {}),

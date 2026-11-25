@@ -133,6 +133,7 @@ Example syntax only (these numbers are **illustrative, not LC2 survey data**):
 ```
 
 - `wc:doorWidth`: **clear usable doorway width**, in meters. `0.95` means 95 cm.
+- For equal-width door leaves, record the number of leaves in `wc:leafCount` and the width of one leaf in meters in `wc:leafWidth`. Supply `wc:doorWidth` separately when the clear opening has been measured.
 - `wc:threshold`: **vertical threshold height**, in meters. `0.015` means 1.5 cm.
   Record an observed flush threshold as `0`; an unknown threshold is **not** zero.
 - `wc:width` is the **corridor/edge passage width**, which is a different quantity.
@@ -160,7 +161,17 @@ with unknown measurements are labelled **Data incomplete**, not guaranteed
 accessible. Physical access still requires on-site verification of the
 building and individual wheelchair user's needs.
 
-### Currently recorded measurements: Floor 2, Rooms 217–222
+### Floor 2, Rooms 211–213
+
+Each mapped entrance has two door leaves. The clear opening width is unmeasured for all three rooms.
+
+| Room | Leaves | Width per leaf | Threshold height |
+| --- | ---: | ---: | ---: |
+| 211 | 2 | 90 cm | 7 cm |
+| 212 | 2 | 76 cm | 4 cm |
+| 213 | 2 | 80 cm | 0 cm (flush) |
+
+### Floor 2, Rooms 217–222
 
 The user-supplied door measurements for **Rooms 217, 218, 219, 220, 221
 and 222** are recorded on their individual `f2_roomNNN_top` transitions:

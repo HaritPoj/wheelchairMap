@@ -781,6 +781,40 @@ assert.strictEqual(
 );
 const selectedRoomWarning = (...ids) =>
   getRoomDoorWarningMessage(ids, mapData.nodeMap, mapData.edges);
+for (const [code, leafCm, thresholdCm] of [
+  ['211', 90, 7], ['212', 76, 4], ['213', 80, 0],
+]) {
+  const room = 'room_' + code;
+  const opening = buildingData.openings.find(item => item.connects.includes(room));
+  assert.strictEqual(opening.accessibility.leafCount, 2);
+  assert.strictEqual(opening.accessibility.leafWidth, leafCm / 100);
+  assert.strictEqual(opening.accessibility.width, null);
+  assert.strictEqual(opening.accessibility.threshold, thresholdCm / 100);
+  const leaves = '2 door leaves, ' + leafCm + ' cm each';
+  assert.ok(selectedRoomWarning(room).includes(
+    leaves + ', clear width not measured, threshold height ' + thresholdCm + ' cm.'
+  ));
+  const corridor = opening.connects.find(id => id !== room);
+  for (const [from, to] of [[room, corridor], [corridor, room]]) {
+    const route = solveConstrainedRoute(from, to, mapData);
+    assert.strictEqual(route.feasible, true);
+    const report = getRouteDoorReport(route.path, mapData.nodeMap, mapData.edges);
+    assert.strictEqual(report.doors.length, 1);
+    const [door] = report.doors;
+    assert.strictEqual(door.unitId, room);
+    assert.strictEqual(door.leafCount, 2);
+    assert.strictEqual(door.leafWidth, leafCm / 100);
+    assert.strictEqual(door.doorWidth, null);
+    assert.strictEqual(door.threshold, thresholdCm / 100);
+    assert.strictEqual(report.unknownCount, 1);
+    assert.strictEqual(report.narrowCount, 0);
+    assert.strictEqual(report.raisedThresholdCount, thresholdCm > 0 ? 1 : 0);
+    assert.strictEqual(route.resources.thresholdSegments, thresholdCm > 0 ? 1 : 0);
+    assert.strictEqual(solveConstrainedRoute(from, to, mapData, {requireMeasuredDoorWidths: true}).feasible, false);
+    const steps = generateMeasuredSteps(route.path, mapData.nodeMap, mapData.edges);
+    assert.ok(steps.some(step => step.warning.includes(leaves) && step.warning.includes('Clear width not measured')));
+  }
+}
 const room217Warning = getRoomDoorWarningMessage('room_217', mapData.nodeMap, mapData.edges);
 assert.strictEqual(selectedRoomWarning(null, 'room_217'), room217Warning);
 assert.strictEqual(selectedRoomWarning('room_217', 'room_223'), room217Warning);

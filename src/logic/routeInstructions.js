@@ -1,4 +1,4 @@
-import { getDoorMeasurements } from './pathfinder';
+import { formatDoorLeaves, getDoorMeasurements } from './pathfinder';
 
 function getEdge(edges, fromId, toId) {
   return edges.find(edge =>
@@ -23,12 +23,19 @@ export function getEdgeWarning(edge, destination, previous = null) {
   const width = numeric(edge.width);
 
   const notices = [];
+  const leaves = formatDoorLeaves(door);
+  if (leaves) {
+    notices.push(leaves);
+    if (doorWidth === null) notices.push('Clear width not measured');
+  }
   if (doorWidth !== null && doorWidth < 0.9) {
     notices.push('Door width ' + (doorWidth * 100).toFixed(0) +
       ' cm may not be wheelchair-accessible');
   }
   if (threshold !== null && threshold >= 0.01) {
     notices.push('Raised threshold: ' + (threshold * 100).toFixed(1) + ' cm');
+  } else if (leaves && threshold !== null) {
+    notices.push('Threshold height: ' + Number((threshold * 100).toFixed(1)) + ' cm');
   }
   if (notices.length > 0) return notices.join('. ') + '. Check on site.';
 
