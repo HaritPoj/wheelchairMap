@@ -157,6 +157,24 @@ with unknown measurements are labelled **Data incomplete**, not guaranteed
 accessible. Physical access still requires on-site verification of the
 building and individual wheelchair user's needs.
 
+### Currently recorded measurements: Floor 2, Rooms 217–222
+
+The user-supplied door measurements for **Rooms 217, 218, 219, 220, 221
+and 222** are recorded on their individual `f2_roomNNN_top` transitions:
+
+- **Clear doorway width:** `0.80` m (80 cm).
+- **Raised doorway threshold:** `0.04` m (4 cm).
+
+These are reported measurements, not independently verified by the app.
+Each of these six rooms currently has one modeled doorway. The prototype's
+existing `0.90` m minimum width policy therefore excludes routes **into
+or out of** these rooms; its navigation HUD now explains the recorded
+width, raised threshold, and project rule when either endpoint is selected.
+They remain present on the map and searchable. This does **not** imply
+that all wheelchair users would be unable to pass physically: on-site
+verification and user-specific clearance needs are essential. Other room
+measurements stay unknown until surveyed.
+
 ## Build and test
 
 ```bash
