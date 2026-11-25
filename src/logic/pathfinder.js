@@ -55,6 +55,34 @@ export function getRouteDoorReport(route, nodeMap, edges) {
   };
 }
 
+// Explain why a selected room cannot be routed to under the app's
+// recorded minimum clear-door-width policy. Other unknown/unmeasured
+// entrances prevent a definitive claim, so do not report them as blocked.
+export function getRoomDoorRestrictionMessage(roomId, nodeMap, edges, minimumWidth = 0.9) {
+  const room = nodeMap?.[roomId];
+  if (!room || (room.type !== 'room' && room.type !== 'restroom')) return null;
+  const doors = (edges || []).flatMap(edge => {
+    if (edge.from !== roomId && edge.to !== roomId) return [];
+    const other = nodeMap?.[edge.from === roomId ? edge.to : edge.from];
+    if (!other) return [];
+    const doorway = getDoorMeasurements(edge, room, other);
+    return doorway ? [doorway] : [];
+  });
+  if (!doors.length || !doors.every(door =>
+    door.doorWidth !== null && door.doorWidth < minimumWidth
+  )) return null;
+
+  const toCm = meters => Number((meters * 100).toFixed(1));
+  const details = doors.map(door =>
+    'width ' + toCm(door.doorWidth) + ' cm' +
+    (door.threshold === null ? ' (threshold not measured)'
+      : ', threshold ' + toCm(door.threshold) + ' cm')
+  ).join('; ');
+  return (room.name || room.code || roomId) + ': recorded door ' + details +
+    '. Below the app\'s ' + toCm(minimumWidth) +
+    ' cm routing minimum; a wheelchair route cannot be offered through these doorways. Please verify conditions on site.';
+}
+
 function getEdgeCost(edge, fromId, toId, nodeMap) {
   const storedWeight = numeric(edge.weight);
   let cost = storedWeight !== null ? storedWeight : 1;
