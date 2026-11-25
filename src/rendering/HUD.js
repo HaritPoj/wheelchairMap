@@ -40,6 +40,7 @@ export default function HUD({
   onClearDestination,
   onClearAll,
   routeMessage,
+  accessibilityNotice,
 }) {
   const [query, setQuery] = useState('');
 
@@ -239,10 +240,12 @@ export default function HUD({
               </ScrollView>
             )}
 
-            {routeMessage && (
+            {(routeMessage || accessibilityNotice) && (
               <View style={styles.messageBox}>
                 <Text style={styles.messageIcon}>!</Text>
-                <Text style={styles.messageText}>{routeMessage}</Text>
+                <Text style={styles.messageText}>
+                  {routeMessage || accessibilityNotice}
+                </Text>
               </View>
             )}
           </>
