@@ -760,7 +760,7 @@ for (const number of [217, 218, 219, 220, 221, 222]) {
   assert.strictEqual(edge.door_width, 0.8);
   assert.strictEqual(edge.threshold, 0.04);
   const message = getRoomDoorWarningMessage(roomId, mapData.nodeMap, mapData.edges);
-  assert.ok(message.includes('80 cm') && message.includes('4 cm') &&
+  assert.ok(message.includes('80 ซม.') && message.includes('4 ซม.') &&
     message.includes('อาจไม่สามารถเข้าถึงได้'),
     'User should see the warning for the measured door: ' + roomId);
   const routeIntoRoom = findPath('room_211', roomId, mapData);
