@@ -760,9 +760,10 @@ for (const number of [217, 218, 219, 220, 221, 222]) {
   assert.strictEqual(edge.door_width, 0.8);
   assert.strictEqual(edge.threshold, 0.04);
   const message = getRoomDoorWarningMessage(roomId, mapData.nodeMap, mapData.edges);
-  assert.ok(message.includes('80 ซม.') && message.includes('4 ซม.') &&
-    message.includes('อาจไม่สามารถเข้าถึงได้'),
-    'User should see the warning for the measured door: ' + roomId);
+  assert.strictEqual(message,
+    'Room ' + number + ': door width 80 cm, threshold height 4 cm.\n' +
+    'Wheelchair access may be difficult. Check the doorway on site. You can still select this route.',
+    'The room warning should show both measurements in English: ' + roomId);
   const routeIntoRoom = findPath('room_211', roomId, mapData);
   const routeOutOfRoom = findPath(roomId, 'room_211', mapData);
   assert.ok(routeIntoRoom.length > 1 && routeOutOfRoom.length > 1,
@@ -787,7 +788,7 @@ assert.strictEqual(selectedRoomWarning('room_217', 'room_217'), room217Warning);
 assert.strictEqual(selectedRoomWarning(null, 'room_223'), null);
 for (const [start, goal] of [['217', '218'], ['218', '217']]) {
   const notice = selectedRoomWarning('room_' + start, 'room_' + goal);
-  const measuredDoor = 'ประตูกว้าง 80 ซม. และ ธรณีประตูสูง 4 ซม.';
+  const measuredDoor = 'door width 80 cm, threshold height 4 cm.';
   assert.ok(notice.startsWith('Room ' + start + ': ' + measuredDoor + '\nRoom ' + goal + ': ' + measuredDoor),
     'Selection must show the measured conditions of both rooms in route order');
 }

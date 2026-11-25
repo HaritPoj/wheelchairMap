@@ -82,14 +82,14 @@ function describeRoomDoorConditions(roomId, nodeMap, edges, referenceWidth) {
   const descriptions = alerts.map(door => {
     const attributes = [];
     if (door.doorWidth !== null) {
-      attributes.push('ประตูกว้าง ' + cm(door.doorWidth) + ' ซม.');
+      attributes.push('door width ' + cm(door.doorWidth) + ' cm');
     }
     if (door.threshold !== null) {
-      attributes.push('ธรณีประตูสูง ' + cm(door.threshold) + ' ซม.');
+      attributes.push('threshold height ' + cm(door.threshold) + ' cm');
     }
-    return attributes.join(' และ ');
+    return attributes.join(', ');
   });
-  return (room.name || room.code || roomId) + ': ' + descriptions.join('; ');
+  return (room.name || room.code || roomId) + ': ' + descriptions.join('; ') + '.';
 }
 
 // Accept a single room or both selected endpoints in route order.
@@ -101,7 +101,7 @@ export function getRoomDoorWarningMessage(roomIds, nodeMap, edges, referenceWidt
   if (!descriptions.length) return null;
 
   return descriptions.join('\n') +
-    ' อาจไม่สามารถเข้าถึงได้สำหรับผู้ใช้รถเข็นบางราย โปรดตรวจสอบสภาพจริงก่อนผ่านประตู (ยังสามารถเลือกเส้นทางนี้ได้)';
+    '\nWheelchair access may be difficult. Check the doorway on site. You can still select this route.';
 }
 
 function getEdgeCost(edge, fromId, toId, nodeMap) {
