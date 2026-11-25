@@ -59,9 +59,15 @@ export default function NextStepBanner({ route, nodeMap, edges, onPress }) {
           </Text>
         ) : doorReport.warningCount > 0 ? (
           <Text style={styles.warning} numberOfLines={2}>
-            Raised thresholds: {doorReport.warningCount}.
+            Doorway cautions: {doorReport.warningCount}
+            {doorReport.narrowCount > 0
+              ? ' (narrow doors: ' + doorReport.narrowCount + ')'
+              : ''}
+            {doorReport.raisedThresholdCount > 0
+              ? ' (raised thresholds: ' + doorReport.raisedThresholdCount + ')'
+              : ''}.
             {doorReport.unknownCount > 0
-              ? ' Unmeasured doorways: ' + doorReport.unknownCount + '.'
+              ? ' Unmeasured: ' + doorReport.unknownCount + '.'
               : ''} See directions.
           </Text>
         ) : doorReport.unknownCount > 0 ? (
