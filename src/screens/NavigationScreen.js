@@ -7,7 +7,7 @@ import {
   Text,
 } from 'react-native';
 import { getMapData } from '../../assets/data/buildingLoader';
-import { solveConstrainedRoute, getRoomDoorRestrictionMessage } from '../logic/pathfinder';
+import { solveConstrainedRoute, getRoomDoorWarningMessage } from '../logic/pathfinder';
 
 import FloorPlan from '../rendering/FloorPlan';
 import BuildingOverview from '../rendering/BuildingOverview';
@@ -40,10 +40,10 @@ export default function NavigationScreen() {
   const [routeMessage, setRouteMessage] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
 
-  // Show measured restrictions even before a complete route has been chosen.
+  // Show measured doorway cautions without preventing users from selecting or routing to these rooms.
   const doorwayNotice = useMemo(() =>
-    getRoomDoorRestrictionMessage(destination, mapData.nodeMap, mapData.edges) ||
-    getRoomDoorRestrictionMessage(locationId, mapData.nodeMap, mapData.edges),
+    getRoomDoorWarningMessage(destination, mapData.nodeMap, mapData.edges) ||
+    getRoomDoorWarningMessage(locationId, mapData.nodeMap, mapData.edges),
     [destination, locationId, mapData]
   );
 
@@ -70,8 +70,7 @@ export default function NavigationScreen() {
     if (paths.length === 0) {
       setShowDirections(false);
       setRouteMessage(
-        doorwayNotice ||
-        'No route meets the recorded wheelchair-accessibility constraints. Check measured doorway widths, blocked passages and elevator availability.'
+        'No route meets the recorded hard accessibility constraints. Check blocked passages, corridor widths, stairs and elevator availability.'
       );
       return;
     }
