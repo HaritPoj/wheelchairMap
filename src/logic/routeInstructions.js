@@ -22,13 +22,15 @@ export function getEdgeWarning(edge, destination, previous = null) {
   const slope = numeric(edge.slope);
   const width = numeric(edge.width);
 
-  if (threshold !== null && threshold >= 0.01) {
-    return 'Raised threshold: ' + (threshold * 100).toFixed(1) + ' cm';
-  }
-
+  const notices = [];
   if (doorWidth !== null && doorWidth < 0.9) {
-    return 'Narrow door ahead: ' + doorWidth.toFixed(2) + ' m';
+    notices.push('Door width ' + (doorWidth * 100).toFixed(0) +
+      ' cm may not be wheelchair-accessible');
   }
+  if (threshold !== null && threshold >= 0.01) {
+    notices.push('Raised threshold: ' + (threshold * 100).toFixed(1) + ' cm');
+  }
+  if (notices.length > 0) return notices.join('. ') + '. Check on site.';
 
   if (slope !== null && slope >= 3) {
     return 'Steep slope ahead: ' + slope.toFixed(1) + '°';
