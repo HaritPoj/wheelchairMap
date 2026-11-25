@@ -26,8 +26,8 @@ function validateDoorNumbers(accessibility, label, errors) {
     if (!Number.isSafeInteger(leafCount) || leafCount < 1) {
       errors.push(label + ': leafCount must be a positive integer when recording door leaves.');
     }
-    if (!finite(leafWidth) || leafWidth <= 0) {
-      errors.push(label + ': leafWidth must be a positive number of meters when recording door leaves.');
+    if (leafWidth != null && (!finite(leafWidth) || leafWidth <= 0)) {
+      errors.push(label + ': leafWidth must be a positive number of meters when supplied.');
     }
   }
   if (doorWidth !== null && doorWidth !== undefined &&

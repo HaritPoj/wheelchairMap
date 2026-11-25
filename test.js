@@ -775,12 +775,33 @@ for (const number of [217, 218, 219, 220, 221, 222]) {
   ), 'Directions must display the measured doorway: ' + roomId);
 }
 assert.strictEqual(
-  getRoomDoorWarningMessage('room_223', mapData.nodeMap, mapData.edges),
+  getRoomDoorWarningMessage('room_224', mapData.nodeMap, mapData.edges),
   null,
   'Other rooms must not inherit the measurements'
 );
 const selectedRoomWarning = (...ids) =>
   getRoomDoorWarningMessage(ids, mapData.nodeMap, mapData.edges);
+const room223 = 'room_223';
+const landing223 = 'corridor_f2_c09';
+assert.strictEqual(selectedRoomWarning(room223), null);
+for (const [from, to] of [[room223, landing223], [landing223, room223]]) {
+  const route = solveConstrainedRoute(from, to, mapData, {
+    requireMeasuredDoorWidths: true, maxThresholdSegments: 0,
+  });
+  assert.strictEqual(route.feasible, true);
+  const report = getRouteDoorReport(route.path, mapData.nodeMap, mapData.edges);
+  assert.strictEqual(report.doors.length, 1);
+  const [door] = report.doors;
+  assert.strictEqual(door.unitId, room223);
+  assert.strictEqual(door.doorWidth, 1.09);
+  assert.strictEqual(door.leafCount, 2);
+  assert.strictEqual(door.leafWidth, null);
+  assert.strictEqual(door.threshold, 0);
+  assert.strictEqual(report.unknownCount, 0);
+  assert.strictEqual(report.warningCount, 0);
+  const steps = generateMeasuredSteps(route.path, mapData.nodeMap, mapData.edges);
+  assert.ok(steps.every(step => !step.warning), 'A leaf count alone should not trigger a doorway warning');
+}
 for (const [code, leafCm, thresholdCm] of [
   ['211', 90, 7], ['212', 76, 4], ['213', 80, 0],
 ]) {

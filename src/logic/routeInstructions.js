@@ -1,4 +1,4 @@
-import { formatDoorLeaves, getDoorMeasurements } from './pathfinder';
+import { formatDoorLeaves, getDoorMeasurements, needsDoorCaution } from './pathfinder';
 
 function getEdge(edges, fromId, toId) {
   return edges.find(edge =>
@@ -23,7 +23,7 @@ export function getEdgeWarning(edge, destination, previous = null) {
   const width = numeric(edge.width);
 
   const notices = [];
-  const leaves = formatDoorLeaves(door);
+  const leaves = door && needsDoorCaution(door) ? formatDoorLeaves(door) : '';
   if (leaves) {
     notices.push(leaves);
     if (doorWidth === null) notices.push('Clear width not measured');

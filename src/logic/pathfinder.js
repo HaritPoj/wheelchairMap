@@ -29,13 +29,14 @@ export function getDoorMeasurements(edge, from, to) {
 }
 
 export function formatDoorLeaves(door) {
-  if (door?.leafCount == null || door.leafWidth == null) return '';
+  if (door?.leafCount == null) return '';
+  const count = door.leafCount === 1 ? '1 door leaf' : door.leafCount + ' door leaves';
+  if (door.leafWidth == null) return count;
   const cm = Number((door.leafWidth * 100).toFixed(1));
-  return door.leafCount === 1 ? '1 door leaf, ' + cm + ' cm wide' :
-    door.leafCount + ' door leaves, ' + cm + ' cm each';
+  return count + ', ' + cm + (door.leafCount === 1 ? ' cm wide' : ' cm each');
 }
 
-function needsDoorCaution(door, referenceWidth = 0.9) {
+export function needsDoorCaution(door, referenceWidth = 0.9) {
   return (door.doorWidth === null && door.leafWidth !== null) ||
     (door.doorWidth !== null && door.doorWidth < referenceWidth) ||
     (door.threshold !== null && door.threshold >= 0.01);

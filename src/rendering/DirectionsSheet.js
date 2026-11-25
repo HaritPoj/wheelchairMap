@@ -162,7 +162,7 @@ export default function DirectionsSheet({
           {doorReport.doors.map((door, index) => (
             <View key={'door-' + door.edgeId + '-' + index} style={styles.doorRow}>
               <Text style={styles.doorName}>🚪 {door.name}</Text>
-              {door.leafWidth !== null && (
+              {door.leafCount !== null && (
                 <Text style={styles.doorValue}>{formatDoorLeaves(door)}</Text>
               )}
               <Text style={styles.doorValue}>
