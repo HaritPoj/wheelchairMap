@@ -51,6 +51,10 @@ const getRouteDoorReport = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
   'getRouteDoorReport'
 );
+const getRoomDoorRestrictionMessage = loadNamedExport(
+  fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
+  'getRoomDoorRestrictionMessage'
+);
 const findAllPaths = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8'),
   'findAllPaths'
@@ -224,10 +228,22 @@ assert.ok(
 const routeDestinations = mapData.nodes.filter(
   node => node.type === 'room' || node.type === 'restroom'
 );
+const recordedNarrowDoorRooms = new Set(
+  [217, 218, 219, 220, 221, 222].map(number => 'room_' + number)
+);
 
 for (const start of routeDestinations) {
   for (const goal of routeDestinations) {
     const path = findPath(start.id, goal.id, mapData);
+    if (start.id !== goal.id &&
+        (recordedNarrowDoorRooms.has(start.id) ||
+         recordedNarrowDoorRooms.has(goal.id))) {
+      assert.strictEqual(
+        path.length, 0,
+        `Recorded 80 cm door must block the route from ${start.id} to ${goal.id}`
+      );
+      continue;
+    }
     assert.ok(
       path.length > 0,
       `Expected a wheelchair route from ${start.id} to ${goal.id}`
@@ -731,5 +747,38 @@ assert.strictEqual(
   solveConstrainedRoute('room_109', 'room_110', forbiddenMap.map).feasible,
   false
 );
+
+
+for (const number of [217, 218, 219, 220, 221, 222]) {
+  const roomId = 'room_' + number;
+  const transitionId = 'f2_room' + number + '_top';
+  const connection = mergedLegacy.connections.find(edge => edge.id === transitionId);
+  const migratedTransition = buildingData.routing.transitions.find(
+    edge => edge.id === transitionId
+  );
+  const edge = mapData.edges.find(item => item.id === transitionId);
+  assert.ok(connection && migratedTransition && edge,
+    'The doorway must exist through each GML-to-routing transformation: ' + roomId);
+  assert.strictEqual(connection.accessibility.doorWidth, 0.8);
+  assert.strictEqual(connection.accessibility.threshold, 0.04);
+  assert.strictEqual(migratedTransition.accessibility.doorWidth, 0.8);
+  assert.strictEqual(migratedTransition.accessibility.threshold, 0.04);
+  assert.strictEqual(edge.door_width, 0.8);
+  assert.strictEqual(edge.threshold, 0.04);
+  const message = getRoomDoorRestrictionMessage(roomId, mapData.nodeMap, mapData.edges);
+  assert.ok(message.includes('80 cm') && message.includes('4 cm') &&
+    message.includes('90 cm'), 'User should see the measured door conditions: ' + roomId);
+  assert.strictEqual(findPath('room_211', roomId, mapData).length, 0);
+  assert.strictEqual(findPath(roomId, 'room_211', mapData).length, 0);
+}
+assert.strictEqual(
+  getRoomDoorRestrictionMessage('room_223', mapData.nodeMap, mapData.edges),
+  null,
+  'Other rooms must not inherit the measurements'
+);
+const screenWithDoorNotices = fs.readFileSync('./src/screens/NavigationScreen.js', 'utf8');
+const hudWithDoorNotices = fs.readFileSync('./src/rendering/HUD.js', 'utf8');
+assert.ok(screenWithDoorNotices.includes('getRoomDoorRestrictionMessage'));
+assert.ok(hudWithDoorNotices.includes('accessibilityNotice'));
 
 console.log('Unified LC2 GML, constrained A*, doorway measurement warnings, and screenshot regressions passed.');
