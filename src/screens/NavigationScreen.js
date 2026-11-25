@@ -7,7 +7,7 @@ import {
   Text,
 } from 'react-native';
 import { getMapData } from '../../assets/data/buildingLoader';
-import { solveConstrainedRoute } from '../logic/pathfinder';
+import { solveConstrainedRoute, getRoomDoorRestrictionMessage } from '../logic/pathfinder';
 
 import FloorPlan from '../rendering/FloorPlan';
 import BuildingOverview from '../rendering/BuildingOverview';
@@ -40,6 +40,13 @@ export default function NavigationScreen() {
   const [routeMessage, setRouteMessage] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
 
+  // Show measured restrictions even before a complete route has been chosen.
+  const doorwayNotice = useMemo(() =>
+    getRoomDoorRestrictionMessage(destination, mapData.nodeMap, mapData.edges) ||
+    getRoomDoorRestrictionMessage(locationId, mapData.nodeMap, mapData.edges),
+    [destination, locationId, mapData]
+  );
+
   useEffect(() => {
     if (!locationId || !destination) {
       setRouteOptions([]);
@@ -63,6 +70,7 @@ export default function NavigationScreen() {
     if (paths.length === 0) {
       setShowDirections(false);
       setRouteMessage(
+        doorwayNotice ||
         'No route meets the recorded wheelchair-accessibility constraints. Check measured doorway widths, blocked passages and elevator availability.'
       );
       return;
@@ -76,7 +84,7 @@ export default function NavigationScreen() {
 
     setRouteMessage(null);
     setShowDirections(false);
-  }, [locationId, destination, mapData]);
+  }, [locationId, destination, mapData, doorwayNotice]);
 
   function openFloor(floor) {
     setCurrentFloor(floor);
@@ -193,6 +201,7 @@ export default function NavigationScreen() {
         onClearDestination={handleClearDestination}
         onClearAll={handleClearAll}
         routeMessage={routeMessage}
+        accessibilityNotice={doorwayNotice}
       />
 
       {!showDirections && viewMode !== 'site' && (
