@@ -614,8 +614,10 @@ assert.ok(floorPlanSourceLatest.includes("width={roomWidth}"));
 assert.ok(floorPlanSourceLatest.includes("getRouteSegmentPoints(previous, current, edge)"));
 
 
-// Simulate survey data without inventing physical measurements in lc2.gml.
-const rawGmlForDoorTests = fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8');
+// Start the simulated surveys with two unmeasured entrances.
+const rawGmlForDoorTests = fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8')
+  .replace(/<core:Transition gml:id="f1_room(?:109|110)_top"[^>]*\/>/g,
+    tag => tag.replace(/\s+wc:(?:doorWidth|leafCount|leafWidth|threshold)="[^"]*"/g, ''));
 function insertDoorMeasurement(xml, transitionId, doorWidth, threshold) {
   const pattern = new RegExp('(<core:Transition gml:id="' + transitionId + '"[^>]*?)(\\s*/>)');
   assert.ok(pattern.test(xml), 'Expected doorway transition ' + transitionId);
@@ -781,6 +783,27 @@ assert.strictEqual(
 );
 const selectedRoomWarning = (...ids) =>
   getRoomDoorWarningMessage(ids, mapData.nodeMap, mapData.edges);
+for (const code of ['109', '110', '111']) {
+  const room = 'room_' + code;
+  const landing = 'corridor_f1_d' + code;
+  assert.ok(selectedRoomWarning(room).includes(
+    'Room ' + code + ': Double doors, door width 74 cm, threshold height 10 cm.'
+  ));
+  for (const [from, to] of [[room, landing], [landing, room]]) {
+    const route = solveConstrainedRoute(from, to, mapData);
+    assert.strictEqual(route.feasible, true);
+    const report = getRouteDoorReport(route.path, mapData.nodeMap, mapData.edges);
+    assert.strictEqual(report.doors.length, 1);
+    const [door] = report.doors;
+    assert.strictEqual(door.unitId, room);
+    assert.strictEqual(door.leafCount, 2);
+    assert.strictEqual(door.leafWidth, null);
+    assert.strictEqual(door.doorWidth, 0.74);
+    assert.strictEqual(door.threshold, 0.10);
+    assert.strictEqual(report.narrowCount, 1);
+    assert.strictEqual(report.raisedThresholdCount, 1);
+  }
+}
 const room223 = 'room_223';
 const landing223 = 'corridor_f2_c09';
 assert.strictEqual(selectedRoomWarning(room223), null);

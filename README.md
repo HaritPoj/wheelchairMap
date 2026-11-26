@@ -120,7 +120,7 @@ to the corresponding `core:Transition` in the **single source**
 `assets/data/indoorgml/lc2.gml`. Keep attributes **absent** when not measured;
 do not estimate meters from map pixels.
 
-Example syntax only (these numbers are **illustrative, not LC2 survey data**):
+Rooms 109, 110 and 111 on Floor 1 each have double doors at one entrance, with a reported clear opening of 74 cm and a threshold height of 10 cm. The Room 109 record is shown below.
 
 ```xml
 <core:Transition
@@ -128,8 +128,9 @@ Example syntax only (these numbers are **illustrative, not LC2 survey data**):
   wc:from="room_109"
   wc:to="corridor_f1_d109"
   wc:cost="1"
-  wc:doorWidth="0.95"
-  wc:threshold="0.015" />
+  wc:doorWidth="0.74"
+  wc:leafCount="2"
+  wc:threshold="0.10" />
 ```
 
 - `wc:doorWidth`: **clear usable doorway width**, in meters. `0.95` means 95 cm.
