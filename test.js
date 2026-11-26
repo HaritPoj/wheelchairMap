@@ -253,15 +253,16 @@ const sameFloor = findPath(room124.id, room120.id, mapData);
 assert.strictEqual(sameFloor[0], room124.id);
 assert.strictEqual(sameFloor[sameFloor.length - 1], room120.id);
 
-const routeAlternatives = findAllPaths(room124.id, room109.id, mapData);
+// Room 120 has an entrance on each corridor, so both approaches are valid.
+const routeAlternatives = findAllPaths(room124.id, room120.id, mapData);
 assert.ok(routeAlternatives.length >= 2, 'Expected upper/lower Floor 1 alternatives');
 assert.ok(
-  routeAlternatives.some(path => path.includes('corridor_f1_l10')),
-  'At least one route should use the lower central corridor'
+  routeAlternatives.some(path => path[path.length - 2] === 'corridor_f1_l06'),
+  'At least one route should reach the lower door of Room 120'
 );
 assert.ok(
-  routeAlternatives.some(path => !path.includes('corridor_f1_l10')),
-  'At least one route should use the upper corridor'
+  routeAlternatives.some(path => path[path.length - 2] === 'corridor_f1_u06'),
+  'At least one route should reach the upper door of Room 120'
 );
 assert.ok(
   routeAlternatives.every(path =>
@@ -573,27 +574,33 @@ for (const [from, to] of screenshotCases) {
   assert.strictEqual(result.path[result.path.length - 1], to);
 }
 
-// Check the actual drawn line, including its 6-unit stroke. A corridor
-// edge can cross a room even when the room is absent from the node path.
+// The upper and lower corridors end at Room 126. Check the entire painted
+// stroke against the room and the closed area behind its west wall.
 const room126 = roomByCode('126');
-const westHall = mapData.nodeMap.corridor_f1_west_area;
-const hallLeft = westHall.x - westHall.width / 2;
-const roomLeft = room126.x - room126.width / 2;
 const roomRight = room126.x + room126.width / 2;
 const roomTop = room126.y - room126.height / 2;
 const roomBottom = room126.y + room126.height / 2;
 const strokeRadius = 3;
 for (const [from, to] of [['room_124', 'room_125'], ['room_125', 'room_124']]) {
-  const { points } = screenshotRoutePoints(from, to);
+  const { path, points } = screenshotRoutePoints(from, to);
+  assert.ok(path.some((node, i) =>
+    (node === 'corridor_f1_l11' && path[i + 1] === 'corridor_f1_u11') ||
+    (node === 'corridor_f1_u11' && path[i + 1] === 'corridor_f1_l11')
+  ), 'Rooms 124 and 125 must connect via the central corridor');
+  assert.strictEqual(solveConstrainedRoute(from, to, mapData, {
+    blockedEdgeIds: ['f1_l11_u11'],
+  }).feasible, false, 'Blocking the central crossing must not allow a shortcut via Room 126');
   for (let i = 1; i < points.length; i++) {
     const a = points[i - 1], b = points[i];
-    const clearOfRoom = Math.max(a.x, b.x) + strokeRadius < roomLeft ||
-      Math.min(a.x, b.x) - strokeRadius > roomRight ||
+    const clearOfRoomAndBackWall = Math.min(a.x, b.x) - strokeRadius > roomRight ||
       Math.max(a.y, b.y) + strokeRadius < roomTop ||
       Math.min(a.y, b.y) - strokeRadius > roomBottom;
-    assert.ok(clearOfRoom, from + ' -> ' + to + ': route stroke touches Room 126');
-    assert.ok(Math.min(a.x, b.x) - strokeRadius > hallLeft, 'Route leaves the west corridor');
+    assert.ok(clearOfRoomAndBackWall, from + ' -> ' + to + ': route cuts through or behind Room 126');
   }
+}
+for (const [from, door] of [['room_124', 'corridor_f1_l01'], ['room_125', 'corridor_f1_u01']]) {
+  const path = findPath(from, room126.id, mapData);
+  assert.strictEqual(path[path.length - 2], door, 'Room 126 must retain access from both corridors');
 }
 
 const route109to110 = screenshotRoutePoints('room_109', 'room_110');

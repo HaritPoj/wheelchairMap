@@ -667,7 +667,6 @@
             <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_1"/></gml:GenericMetaData></gml:metaDataProperty>
             <gml:name>Upper corridor 01</gml:name>
             <core:connects xlink:href="#f1_u01_u02"/>
-            <core:connects xlink:href="#f1_u01_west_north"/>
             <core:connects xlink:href="#f1_room126_top"/>
             <core:geometry><gml:Point gml:id="point_corridor_f1_u01"><gml:pos>79 264</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
@@ -824,24 +823,9 @@
           <core:stateMember><core:State gml:id="corridor_f1_l01">
             <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_1"/></gml:GenericMetaData></gml:metaDataProperty>
             <gml:name>Lower corridor 01</gml:name>
-            <core:connects xlink:href="#f1_west_south_l01"/>
             <core:connects xlink:href="#f1_l01_l02"/>
             <core:connects xlink:href="#f1_room126_bottom"/>
             <core:geometry><gml:Point gml:id="point_corridor_f1_l01"><gml:pos>79 344</gml:pos></gml:Point></core:geometry>
-          </core:State></core:stateMember>
-          <core:stateMember><core:State gml:id="corridor_f1_west_north">
-            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_1"/></gml:GenericMetaData></gml:metaDataProperty>
-            <gml:name>West corridor north turn</gml:name>
-            <core:connects xlink:href="#f1_u01_west_north"/>
-            <core:connects xlink:href="#f1_west_north_south"/>
-            <core:geometry><gml:Point gml:id="point_corridor_f1_west_north"><gml:pos>41.5 264</gml:pos></gml:Point></core:geometry>
-          </core:State></core:stateMember>
-          <core:stateMember><core:State gml:id="corridor_f1_west_south">
-            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_1"/></gml:GenericMetaData></gml:metaDataProperty>
-            <gml:name>West corridor south turn</gml:name>
-            <core:connects xlink:href="#f1_west_north_south"/>
-            <core:connects xlink:href="#f1_west_south_l01"/>
-            <core:geometry><gml:Point gml:id="point_corridor_f1_west_south"><gml:pos>41.5 344</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="corridor_f1_l02">
             <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_1"/></gml:GenericMetaData></gml:metaDataProperty>
@@ -1204,21 +1188,6 @@
             <core:weight>0.490909</core:weight>
             <core:connects xlink:href="#corridor_f1_d109"/>
             <core:connects xlink:href="#corridor_f1_u15"/>
-          </core:Transition></core:transitionMember>
-          <core:transitionMember><core:Transition gml:id="f1_u01_west_north">
-            <core:weight>1.5625</core:weight>
-            <core:connects xlink:href="#corridor_f1_u01"/>
-            <core:connects xlink:href="#corridor_f1_west_north"/>
-          </core:Transition></core:transitionMember>
-          <core:transitionMember><core:Transition gml:id="f1_west_north_south">
-            <core:weight>2</core:weight>
-            <core:connects xlink:href="#corridor_f1_west_north"/>
-            <core:connects xlink:href="#corridor_f1_west_south"/>
-          </core:Transition></core:transitionMember>
-          <core:transitionMember><core:Transition gml:id="f1_west_south_l01">
-            <core:weight>1.5625</core:weight>
-            <core:connects xlink:href="#corridor_f1_west_south"/>
-            <core:connects xlink:href="#corridor_f1_l01"/>
           </core:Transition></core:transitionMember>
           <core:transitionMember><core:Transition gml:id="f1_l01_l02">
             <core:weight>2</core:weight>
