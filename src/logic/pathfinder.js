@@ -22,7 +22,6 @@ export function getDoorMeasurements(edge, from, to) {
     name: unit.name || unit.label || unit.code || unit.id,
     doorWidth,
     leafCount: numeric(edge.leaf_count),
-    leafWidth: numeric(edge.leaf_width),
     threshold,
     missingMeasurement: doorWidth === null || threshold === null,
   };
@@ -30,16 +29,13 @@ export function getDoorMeasurements(edge, from, to) {
 
 export function formatDoorLeaves(door) {
   if (door?.leafCount == null) return '';
-  let label = door.leafCount + ' door leaves';
-  if (door.leafCount === 1) label = '1 door leaf';
-  if (door.leafCount === 2) label = 'Double doors';
-  if (door.leafWidth == null) return label;
-  const cm = Number((door.leafWidth * 100).toFixed(1));
-  return label + ', ' + cm + (door.leafCount === 1 ? ' cm wide' : ' cm per leaf');
+  if (door.leafCount === 1) return '1 door leaf';
+  if (door.leafCount === 2) return 'Double doors';
+  return door.leafCount + ' door leaves';
 }
 
 export function needsDoorCaution(door, referenceWidth = 0.9) {
-  return (door.doorWidth === null && door.leafWidth !== null) ||
+  return (door.doorWidth === null && door.leafCount != null) ||
     (door.doorWidth !== null && door.doorWidth < referenceWidth) ||
     (door.threshold !== null && door.threshold >= 0.01);
 }

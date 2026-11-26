@@ -129,7 +129,7 @@ function readCoreBuilding(xml) {
         wheelchairAccessible: passage?.getAttribute('wheelchairAccessible') !== 'false',
         width: passage?.hasAttribute('width') ? Number(passage.getAttribute('width')) : null,
         slope: passage?.hasAttribute('slope') ? Number(passage.getAttribute('slope')) : null,
-        doorWidth: null, leafCount: null, leafWidth: null, threshold: null,
+        doorWidth: null, leafCount: null, threshold: null,
       },
       ...(type ? { transition: { type } } : {}),
     };

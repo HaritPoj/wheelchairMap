@@ -119,18 +119,18 @@ likely reject many/all routes.
 ## Recording doorway measurements and informing users
 
 Edit doorway measurements in `assets/data/buildings/lc2.doors.json`. Use the
-transition ID for the physical doorway as the key. Include all four fields for every entry. Use `null` for an unknown value.
+transition ID for the physical doorway as the key. Include all three fields for every entry. Use `null` for an unknown value.
 
 Room 106 has double doors with a 92 cm clear opening and a 12 cm threshold. Rooms 107–111 and 114 on Floor 1 each have double doors at one entrance and a 10 cm threshold. The reported clear opening is 74 cm for Rooms 107–111 and 84 cm for Room 114. The Room 109 record is shown below.
 
 ```json
 {
-  "f1_room109_top": { "doorWidth": 0.74, "leafCount": 2, "leafWidth": null, "threshold": 0.10 }
+  "f1_room109_top": { "doorWidth": 0.74, "leafCount": 2, "threshold": 0.10 }
 }
 ```
 
 - `doorWidth` records the measured clear opening in meters. A value of `0.74` means 74 cm.
-- `leafCount` records the number of leaves at one opening. A value of `2` represents double doors. For equal-width leaves, `leafWidth` records the measured width of one leaf in meters.
+- `leafCount` records the number of leaves at one opening. Use `1` for a single door and `2` for double doors.
 - `threshold` records the vertical threshold height in meters. Use `0` for a measured flush threshold.
 - In the Core file, corridor width and slope can be recorded as `width` and `slope` on `wc:Passage` in transition metadata.
 - For older maps, the parser also reads inline GML measurements. Supplied JSON fields take precedence over inline transition values.
@@ -159,11 +159,11 @@ building and individual wheelchair user's needs.
 
 Each room has double doors at its mapped entrance. The clear opening width is unmeasured for all three rooms.
 
-| Room | Leaves | Width per leaf | Threshold height |
+| Room | Leaves | Clear opening width | Threshold height |
 | --- | ---: | ---: | ---: |
-| 211 | 2 | 90 cm | 7 cm |
-| 212 | 2 | 76 cm | 4 cm |
-| 213 | 2 | 80 cm | 0 cm (flush) |
+| 211 | 2 | Unknown | 7 cm |
+| 212 | 2 | Unknown | 4 cm |
+| 213 | 2 | Unknown | 0 cm (flush) |
 
 ### Floor 2, Rooms 217–222
 
@@ -185,7 +185,7 @@ needs remain essential. Other room measurements stay unknown until surveyed.
 
 ### Floor 2, Room 223
 
-Room 223 has double doors at one entrance, with a recorded clear opening of 109 cm and a flush threshold (0 cm). Individual leaf widths are unmeasured.
+Room 223 has double doors at one entrance, with a recorded clear opening of 109 cm and a flush threshold (0 cm).
 
 ## Build and test
 

@@ -796,7 +796,7 @@ for (const number of [217, 218, 219, 220, 221, 222]) {
   assert.strictEqual(edge.threshold, 0.04);
   const message = getRoomDoorWarningMessage(roomId, mapData.nodeMap, mapData.edges);
   assert.strictEqual(message,
-    'Room ' + number + ': door width 80 cm, threshold height 4 cm.\n' +
+    'Room ' + number + ': 1 door leaf, door width 80 cm, threshold height 4 cm.\n' +
     'Wheelchair access may be difficult. Check the doorway on site. You can still select this route.',
     'The room warning should show both measurements in English: ' + roomId);
   const routeIntoRoom = findPath('room_211', roomId, mapData);
@@ -830,7 +830,6 @@ for (const [code, widthCm] of [['109', 74], ['110', 74], ['111', 74], ['114', 84
     const [door] = report.doors;
     assert.strictEqual(door.unitId, room);
     assert.strictEqual(door.leafCount, 2);
-    assert.strictEqual(door.leafWidth, null);
     assert.strictEqual(door.doorWidth, widthCm / 100);
     assert.strictEqual(door.threshold, 0.10);
     assert.strictEqual(report.narrowCount, 1);
@@ -851,23 +850,21 @@ for (const [from, to] of [[room223, landing223], [landing223, room223]]) {
   assert.strictEqual(door.unitId, room223);
   assert.strictEqual(door.doorWidth, 1.09);
   assert.strictEqual(door.leafCount, 2);
-  assert.strictEqual(door.leafWidth, null);
   assert.strictEqual(door.threshold, 0);
   assert.strictEqual(report.unknownCount, 0);
   assert.strictEqual(report.warningCount, 0);
   const steps = generateMeasuredSteps(route.path, mapData.nodeMap, mapData.edges);
   assert.ok(steps.every(step => !step.warning), 'A leaf count alone should not trigger a doorway warning');
 }
-for (const [code, leafCm, thresholdCm] of [
-  ['211', 90, 7], ['212', 76, 4], ['213', 80, 0],
+for (const [code, thresholdCm] of [
+  ['211', 7], ['212', 4], ['213', 0],
 ]) {
   const room = 'room_' + code;
   const opening = buildingData.openings.find(item => item.connects.includes(room));
   assert.strictEqual(opening.accessibility.leafCount, 2);
-  assert.strictEqual(opening.accessibility.leafWidth, leafCm / 100);
   assert.strictEqual(opening.accessibility.width, null);
   assert.strictEqual(opening.accessibility.threshold, thresholdCm / 100);
-  const leaves = 'Double doors, ' + leafCm + ' cm per leaf';
+  const leaves = 'Double doors';
   assert.ok(selectedRoomWarning(room).includes(
     leaves + ', clear width not measured, threshold height ' + thresholdCm + ' cm.'
   ));
@@ -880,7 +877,6 @@ for (const [code, leafCm, thresholdCm] of [
     const [door] = report.doors;
     assert.strictEqual(door.unitId, room);
     assert.strictEqual(door.leafCount, 2);
-    assert.strictEqual(door.leafWidth, leafCm / 100);
     assert.strictEqual(door.doorWidth, null);
     assert.strictEqual(door.threshold, thresholdCm / 100);
     assert.strictEqual(report.unknownCount, 1);
@@ -899,7 +895,7 @@ assert.strictEqual(selectedRoomWarning('room_217', 'room_217'), room217Warning);
 assert.strictEqual(selectedRoomWarning(null, 'room_223'), null);
 for (const [start, goal] of [['217', '218'], ['218', '217']]) {
   const notice = selectedRoomWarning('room_' + start, 'room_' + goal);
-  const measuredDoor = 'door width 80 cm, threshold height 4 cm.';
+  const measuredDoor = '1 door leaf, door width 80 cm, threshold height 4 cm.';
   assert.ok(notice.startsWith('Room ' + start + ': ' + measuredDoor + '\nRoom ' + goal + ': ' + measuredDoor),
     'Selection must show the measured conditions of both rooms in route order');
 }

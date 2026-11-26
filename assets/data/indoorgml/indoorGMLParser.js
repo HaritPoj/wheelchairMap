@@ -192,7 +192,6 @@ function readLegacyBuilding(xmlText) {
         slope,
         doorWidth,
         leafCount: numberOrNull(localAttr(attrs, 'leafCount')),
-        leafWidth: numberOrNull(localAttr(attrs, 'leafWidth')),
         threshold,
       },
       ...(transitionType ? { transition: { type: transitionType } } : {}),
@@ -218,7 +217,7 @@ function parseIndoorGML(xmlText, doorwayMeasurements = {}) {
   if (typeof xmlText !== 'string') throw new Error('Expected an IndoorGML document');
   const building = readCoreBuilding(xmlText) || readLegacyBuilding(xmlText);
   const connectionsById = new Map(building.connections.map(edge => [edge.id, edge]));
-  const doorFields = ['doorWidth', 'threshold', 'leafCount', 'leafWidth'];
+  const doorFields = ['doorWidth', 'threshold', 'leafCount'];
   for (const [id, measurements] of Object.entries(doorwayMeasurements)) {
     const edge = connectionsById.get(id);
     if (!edge) throw new Error('Door measurements reference an unknown transition: ' + id);
@@ -226,6 +225,8 @@ function parseIndoorGML(xmlText, doorwayMeasurements = {}) {
       throw new Error('Expected doorway measurements for transition ' + id);
     }
     for (const [field, value] of Object.entries(measurements)) {
+      // Older surveys may include widths per leaf. Only the clear opening is used.
+      if (field === 'leafWidth') continue;
       if (!doorFields.includes(field) || (value !== null && !Number.isFinite(value))) {
         throw new Error('Invalid doorway measurement ' + id + '.' + field);
       }

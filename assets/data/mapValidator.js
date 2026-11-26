@@ -21,14 +21,9 @@ function nullableNumber(value) {
 }
 
 function validateDoorNumbers(accessibility, label, errors) {
-  const { doorWidth, width, threshold, leafCount, leafWidth } = accessibility || {};
-  if (leafCount != null || leafWidth != null) {
-    if (!Number.isSafeInteger(leafCount) || leafCount < 1) {
-      errors.push(label + ': leafCount must be a positive integer when recording door leaves.');
-    }
-    if (leafWidth != null && (!finite(leafWidth) || leafWidth <= 0)) {
-      errors.push(label + ': leafWidth must be a positive number of meters when supplied.');
-    }
+  const { doorWidth, width, threshold, leafCount } = accessibility || {};
+  if (leafCount != null && (!Number.isSafeInteger(leafCount) || leafCount < 1)) {
+    errors.push(label + ': leafCount must be a positive integer when recording door leaves.');
   }
   if (doorWidth !== null && doorWidth !== undefined &&
       (!finite(doorWidth) || doorWidth <= 0)) {
