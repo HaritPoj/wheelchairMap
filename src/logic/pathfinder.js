@@ -465,7 +465,7 @@ export function solveConstrainedRoute(startId, goalId, mapData, options = {}) {
   const adjacency = createAdjacency(nodes, edges);
   // A* lower bound remains admissible after imposing extra constraints:
   // restricting feasible paths cannot decrease the true remaining cost.
-  const heuristic = createHeuristic(mapData);
+  const heuristic = options.useHeuristic === false ? () => 0 : createHeuristic(mapData);
   const frontier = new MinHeap((a, b) =>
     a.f - b.f || a.cost - b.cost || a.id.localeCompare(b.id)
   );

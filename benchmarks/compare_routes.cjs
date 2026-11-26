@@ -33,9 +33,9 @@ const { normalizeBuildingData } = loadFunctions(
 // Reuse the production A*, its edge accessibility/weight rules, heuristic
 // and priority queue without importing any React Native/Expo code.
 const {
-  findAStarPath, getEdgeCost, createHeuristic, createAdjacency, MinHeap,
+  solveConstrainedRoute, findAStarPath, getEdgeCost, createHeuristic, createAdjacency, MinHeap,
 } = loadFunctions('src/logic/pathfinder.js', [
-  'findAStarPath', 'getEdgeCost', 'createHeuristic', 'createAdjacency', 'MinHeap',
+  'solveConstrainedRoute', 'findAStarPath', 'getEdgeCost', 'createHeuristic', 'createAdjacency', 'MinHeap',
 ]);
 
 function readMap() {
@@ -123,7 +123,7 @@ function adjacencyFor(mapData) {
 function neighbors(adjacency, id, goalId, nodeMap) {
   const valid = [];
   for (const { edge, next } of adjacency.get(id) || []) {
-    if (nodeMap[next].type === 'room' && next !== goalId) continue;
+    if (nodeMap[next].type === 'room' && next !== goalId && !nodeMap[next].accessibility?.throughRoom) continue;
     const cost = getEdgeCost(edge, id, next, nodeMap);
     if (Number.isFinite(cost) && cost >= 0) valid.push({ next, cost });
   }
@@ -384,12 +384,16 @@ function csvText(records, columns) {
   ].join('\n') + '\n';
 }
 
-function main() {
-  const config = optionsFromArgs(process.argv.slice(2));
-  const mapData = readMap();
+function runSuite(config, mapData, constrained) {
   const rawAdjacency = adjacencyFor(mapData);
   const scenarios = getPairs(mapData, config.pairs, config.seed);
-  const algorithms = {
+  const constrainedDijkstra = (a, b) => solveConstrainedRoute(a, b, mapData, {
+    maxElevatorTransfers: 1, useHeuristic: false,
+  });
+  const algorithms = constrained ? {
+    'Resource-Constrained A*': (a, b) => solveConstrainedRoute(a, b, mapData, { maxElevatorTransfers: 1 }),
+    'Resource-Constrained Dijkstra': constrainedDijkstra,
+  } : {
     'A*': (a, b) => ({ path: findAStarPath(a, b, mapData) }),
     Dijkstra: (a, b) => dijkstra(a, b, mapData),
     Greedy: (a, b) => greedyBestFirst(a, b, mapData),
@@ -400,7 +404,7 @@ function main() {
   let invalid = 0;
 
   for (const scenario of scenarios) {
-    const reference = dijkstra(scenario.from, scenario.to, mapData);
+    const reference = constrained ? constrainedDijkstra(scenario.from, scenario.to) : dijkstra(scenario.from, scenario.to, mapData);
     const optimum = pathCost(reference.path, mapData, rawAdjacency);
     // Warm-up runs are not recorded.
     for (const name of names) {
@@ -418,6 +422,8 @@ function main() {
         const route = result.path || [];
         const score = pathCost(route, mapData, rawAdjacency);
         const success = route.length > 0 && Number.isFinite(score) &&
+          (!constrained || (result.feasible && result.resources.elevatorTransfers <= 1 &&
+            route.filter((id, i) => i > 0 && mapData.nodeMap[id].floor !== mapData.nodeMap[route[i - 1]].floor).length <= 1)) &&
           route[0] === scenario.from && route[route.length - 1] === scenario.to;
         if (route.length && !success) invalid += 1;
         const gap = success && Number.isFinite(optimum) && optimum > 0
@@ -482,6 +488,7 @@ function main() {
       runtime: { node: process.version, platform: process.platform,
         arch: process.arch, cpu: os.cpus()[0]?.model },
       input: ['assets/data/indoorgml/lc2.gml', 'assets/data/buildings/lc2.doors.json'],
+      maxElevatorTransfers: constrained ? 1 : null,
       config, nodes: mapData.nodes.length, edges: mapData.edges.length,
       scenarios,
     }, null, 2) + '\n');
@@ -496,7 +503,7 @@ function main() {
     '',
     'Generated: ' + new Date().toISOString(),
     '',
-    '## Summary',
+    constrained ? '## Single elevator ride limit' : '## Baseline algorithms',
     '| Algorithm | Success rate | Mean time (ms) | p95 (ms) | Mean optimality gap | Optimal answers |',
     '|---|---:|---:|---:|---:|---:|',
     table,
@@ -504,9 +511,14 @@ function main() {
     '## Experimental method',
     '- The graph combines the LC2 IndoorGML map and its doorway survey via the project parser and adapter.',
     '- Identical wheelchair eligibility and directed transition costs come from the production pathfinder getEdgeCost().',
+    ...(constrained ? [
+      '- Both methods call the production solveConstrainedRoute() with maxElevatorTransfers = 1.',
+      '- The Dijkstra reference uses the same solver with h = 0 and skips heuristic preparation.',
+    ] : [
     '- A* is the preserved baseline findAStarPath(); the live app now uses Resource-Constrained A* with COP constraints. Dijkstra is the optimal-cost reference for nonnegative weights.',
     '- Greedy means Greedy Best-First Search using the production heuristic (not Greedy Nearest Neighbor).',
     '- ABC is a stochastic, fixed-budget Artificial Bee Colony **route-search adaptation** with employed/onlooker/scout phases and randomized feasible-path repair; it does not call Dijkstra/A* internally.',
+    ]),
     '- All algorithms are warmed up; timed runs include their per-query graph/heuristic preparation.',
     '- Dijkstra optimum is computed separately outside timed runs. A* is not assumed optimal; deviations are reported.',
     '- Costs are **abstract routing weights**, not meters or guaranteed travel time.',
@@ -533,7 +545,10 @@ function main() {
 }
 
 try {
-  main();
+  const config = optionsFromArgs(process.argv.slice(2));
+  const mapData = readMap();
+  runSuite(config, mapData, false);
+  runSuite({ ...config, output: path.join(config.output, 'constrained') }, mapData, true);
 } catch (error) {
   console.error(error.stack || error.message);
   process.exitCode = 1;

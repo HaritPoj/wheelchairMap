@@ -67,7 +67,7 @@ function plot(file, heading, data, opts = {}) {
 }
 
 const values = key => rows.map(row => ({
-  label: row.algorithm,
+  label: row.algorithm.replace('Resource-Constrained ', 'RC '),
   value: Number(row[key]) || 0,
 }));
 plot('execution_time.svg', 'Mean routing time (ms)', values('mean_ms'), {

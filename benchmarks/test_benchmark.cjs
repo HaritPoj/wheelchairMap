@@ -25,6 +25,15 @@ try {
   }
   const summary = fs.readFileSync(path.join(output, 'summary.csv'), 'utf8');
   assert.ok(summary.includes('Dijkstra,3,3,100'), 'Dijkstra should solve all smoke cases');
+  const constrainedDir = path.join(output, 'constrained');
+  const constrainedSummary = fs.readFileSync(path.join(constrainedDir, 'summary.csv'), 'utf8');
+  for (const algorithm of ['Resource-Constrained A*', 'Resource-Constrained Dijkstra']) {
+    const row = constrainedSummary.split('\n').find(line => line.startsWith(algorithm + ','));
+    assert.ok(row, algorithm);
+    const fields = row.split(',');
+    assert.deepEqual(fields.slice(1, 4), ['3', '3', '100']);
+    assert.equal(fields[9], '100');
+  }
   console.log('Standalone routing benchmark smoke test passed.');
 } finally {
   fs.rmSync(output, { recursive: true, force: true });
