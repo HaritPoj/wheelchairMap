@@ -29,9 +29,12 @@ The app converts the XML/GML into the existing generic schema v2 with
 `site`, `facility`, `levels`, `units`, `openings`,
 `routing.states`, and `routing.transitions`. The building footprint is
 separately georeferenced using `lc2.site.json`; the indoor room
-coordinates remain local. The current `wc:` namespace and simplified
-geometry encoding are a project-specific IndoorGML application profile,
-**not** proof of strict OGC XSD conformance.
+coordinates remain local to each floor. The active map uses **OGC IndoorGML
+1.0.3 Core** with GML 3.2 geometry. Each cell has a polygon and a link to its
+dual state. Each transition carries a weight and two local XLinks to states.
+Floor layouts, room classifications and app-specific passage properties live in
+`gml:metaDataProperty/gml:GenericMetaData` under the project’s `wc:` namespace.
+The app reads older LC2 files as well as this rectangular, 2D Core encoding.
 
 ### Room layouts
 
@@ -129,7 +132,7 @@ Rooms 109, 110, 111 and 114 on Floor 1 each have double doors at one entrance an
 - `doorWidth` records the measured clear opening in meters. A value of `0.74` means 74 cm.
 - `leafCount` records the number of leaves at one opening. A value of `2` represents double doors. For equal-width leaves, include `leafWidth` when the width of one leaf is known.
 - `threshold` records the vertical threshold height in meters. Use `0` for a measured flush threshold.
-- Corridor width stays on the GML transition as `wc:width`.
+- In the Core file, corridor width and slope can be recorded as `width` and `slope` on `wc:Passage` in transition metadata.
 - For older maps, the parser also reads inline GML measurements. Supplied JSON fields take precedence over inline transition values.
 - Invalid negative heights or nonpositive doorway widths fail schema-v2 data
   validation; measurements are not treated as certified accessibility.
@@ -185,6 +188,16 @@ needs remain essential. Other room measurements stay unknown until surveyed.
 Room 223 has double doors at one entrance, with a recorded clear opening of 109 cm and a flush threshold (0 cm). Individual leaf widths are unmeasured.
 
 ## Build and test
+
+To check the active file against the OGC IndoorGML 1.0.3 Core XSD in PowerShell:
+
+```powershell
+./scripts/Test-IndoorGmlSchema.ps1
+```
+
+The script loads the published Core schema and its dependencies. For offline checks,
+pass `-SchemaDirectory` pointing to the same schema files listed in the script.
+`npm test` also checks graph links, cell/state duality and LC2 navigation behavior.
 
 ```bash
 npm install

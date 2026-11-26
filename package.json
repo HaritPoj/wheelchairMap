@@ -10,6 +10,7 @@
     "test": "node test.js && node test-indoorgml.js"
   },
   "dependencies": {
+    "@xmldom/xmldom": "0.8.15",
     "@react-native-ml-kit/text-recognition": "^2.0.0",
     "babel-preset-expo": "~54.0.10",
     "expo": "~54.0.34",

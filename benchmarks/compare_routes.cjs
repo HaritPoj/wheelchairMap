@@ -23,9 +23,7 @@ function loadFunctions(relativePath, names) {
   return context.benchmarkExports;
 }
 
-const { parseIndoorGML } = loadFunctions(
-  'assets/data/indoorgml/indoorGMLParser.js', ['parseIndoorGML']
-);
+const { parseIndoorGML } = require('../assets/data/indoorgml/indoorGMLParser');
 const { migrateBuildingV1ToV2 } = loadFunctions(
   'assets/data/schemaV2.js', ['migrateBuildingV1ToV2']
 );

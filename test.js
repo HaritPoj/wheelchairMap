@@ -64,10 +64,7 @@ const getRouteSegmentPoints = loadNamedExport(
   'getRouteSegmentPoints'
 );
 
-const parseIndoorGML = loadNamedExport(
-  fs.readFileSync('./assets/data/indoorgml/indoorGMLParser.js', 'utf8'),
-  'parseIndoorGML'
-);
+const { parseIndoorGML } = require('./assets/data/indoorgml/indoorGMLParser');
 const mergedLegacy = parseIndoorGML(
   fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8'),
   require('./assets/data/buildings/lc2.doors.json')
@@ -616,7 +613,7 @@ assert.ok(floorPlanSourceLatest.includes("getRouteSegmentPoints(previous, curren
 
 
 // Exercise the legacy inline-measurement format independently of the LC2 survey.
-const rawGmlForDoorTests = fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8');
+const rawGmlForDoorTests = fs.readFileSync('./tests/fixtures/legacy-doorway.gml', 'utf8');
 function insertDoorMeasurement(xml, transitionId, doorWidth, threshold) {
   const pattern = new RegExp('(<core:Transition gml:id="' + transitionId + '"[^>]*?)(\\s*/>)');
   assert.ok(pattern.test(xml), 'Expected doorway transition ' + transitionId);

@@ -28,7 +28,7 @@ node benchmarks/create_charts.cjs
 
 This writes `execution_time.svg`, `optimal_answers.svg`, and `success_rate.svg` to `benchmarks/results/`. You can open these SVGs in a browser or insert them into slides.
 
-No Expo, Android emulator, new npm package, or app build is required. The separate app solver now uses Resource-Constrained A* + COP; this four-way comparison intentionally retains the original A* as its baseline.
+Run `npm ci` from the repository root to install the XML reader and project dependencies. The benchmark runs in Node.js. Its A* baseline remains separate from the app’s Resource-Constrained A* solver.
 
 Run the benchmarking harness smoke test:
 

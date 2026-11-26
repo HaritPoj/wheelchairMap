@@ -1,17 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
-const vm = require('vm');
-
-function loadNamedExport(source, exportName) {
-  const sandbox = {};
-  vm.createContext(sandbox);
-  const body = source.replace(/export\s+function\s+/g, 'function ');
-  vm.runInContext(
-    body + '\nthis.' + exportName + ' = ' + exportName + ';',
-    sandbox
-  );
-  return sandbox[exportName];
-}
+const { DOMParser } = require('@xmldom/xmldom');
+const { parseIndoorGML } = require('./assets/data/indoorgml/indoorGMLParser');
 
 function sameValues(actual, expected, message) {
   assert.strictEqual(
@@ -21,11 +11,6 @@ function sameValues(actual, expected, message) {
   );
 }
 
-const parseIndoorGML = loadNamedExport(
-  fs.readFileSync('./assets/data/indoorgml/indoorGMLParser.js', 'utf8'),
-  'parseIndoorGML'
-);
-
 const xml = fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8');
 assert.doesNotMatch(xml, /\bwc:(?:doorWidth|leafCount|leafWidth|threshold)\s*=/,
   'LC2 door survey values belong in lc2.doors.json');
@@ -33,7 +18,47 @@ assert.strictEqual((xml.match(/<core:IndoorFeatures/g) || []).length, 1);
 assert.strictEqual((xml.match(/<core:MultiLayeredGraph/g) || []).length, 1);
 const gmlIds = Array.from(xml.matchAll(/gml:id="([^"]+)"/g), match => match[1]);
 assert.strictEqual(new Set(gmlIds).size, gmlIds.length, 'All GML identifiers must be unique');
+// XSD checks the property structure. Verify that the fragment links resolve
+// to the correct features and that both directions of each relation agree.
+const core = 'http://www.opengis.net/indoorgml/1.0/core';
+const gml = 'http://www.opengis.net/gml/3.2';
+const xlink = 'http://www.w3.org/1999/xlink';
+const doc = new DOMParser().parseFromString(xml, 'application/xml');
+const idOf = element => element.getAttributeNS(gml, 'id');
+const features = new Map(Array.from(doc.getElementsByTagName('*'))
+  .filter(element => element.hasAttributeNS(gml, 'id')).map(element => [idOf(element), element]));
+function refs(element, property) {
+  return Array.from(element.getElementsByTagNameNS(core, property)).map(link => {
+    const uri = link.getAttributeNS(xlink, 'href');
+    assert.ok(uri.startsWith('#') && features.has(uri.slice(1)), 'Unresolved XLink ' + uri);
+    return features.get(uri.slice(1));
+  });
+}
+for (const transition of Array.from(doc.getElementsByTagNameNS(core, 'Transition'))) {
+  const ends = refs(transition, 'connects');
+  assert.strictEqual(ends.length, 2, 'Expected two endpoints on ' + idOf(transition));
+  for (const state of ends) {
+    assert.strictEqual(state.localName, 'State');
+    assert.ok(refs(state, 'connects').includes(transition), 'Missing reverse link on ' + idOf(state));
+  }
+}
+for (const state of Array.from(doc.getElementsByTagNameNS(core, 'State'))) {
+  assert.strictEqual(state.getElementsByTagNameNS(gml, 'Point').length, 1);
+  for (const transition of refs(state, 'connects')) {
+    assert.strictEqual(transition.localName, 'Transition');
+    assert.ok(refs(transition, 'connects').includes(state));
+  }
+}
+for (const cell of Array.from(doc.getElementsByTagNameNS(core, 'CellSpace'))) {
+  assert.strictEqual(cell.getElementsByTagNameNS(gml, 'Polygon').length, 1);
+  const states = refs(cell, 'duality');
+  assert.strictEqual(states.length, 1);
+  assert.strictEqual(states[0].localName, 'State');
+  assert.deepStrictEqual(refs(states[0], 'duality'), [cell]);
+}
 const building = parseIndoorGML(xml);
+const renamedPrefixes = xml.replace(/xmlns:core=/g, 'xmlns:indoor=').replace(/<(\/?)core:/g, '<$1indoor:');
+assert.deepStrictEqual(parseIndoorGML(renamedPrefixes), building);
 assert.throws(() => parseIndoorGML(xml, { missing_door: { threshold: 0 } }), /unknown transition: missing_door/);
 assert.throws(() => parseIndoorGML(xml, { f1_room114_left: { width: 0.84 } }), /f1_room114_left\.width/);
 assert.strictEqual(building.floors.length, 2, 'A single GML must contain both floors');

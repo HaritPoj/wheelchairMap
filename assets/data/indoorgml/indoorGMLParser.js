@@ -1,3 +1,5 @@
+const { readCoreBuilding } = require('./readCoreBuilding');
+
 function decodeXml(value = '') {
   return String(value)
     .replace(/&quot;/g, '"')
@@ -114,11 +116,7 @@ function parsePoint(body, attrs = {}) {
   };
 }
 
-export function parseIndoorGML(xmlText, doorwayMeasurements = {}) {
-  if (typeof xmlText !== 'string' || !xmlText.includes('IndoorFeatures')) {
-    throw new Error('Invalid IndoorGML document: IndoorFeatures root is missing.');
-  }
-
+function readLegacyBuilding(xmlText) {
   const rootMatch = xmlText.match(/<(?:[\w-]+:)?IndoorFeatures\b([^>]*)>/i);
   const rootAttrs = parseAttributes(rootMatch?.[1] || '');
   const buildingId = localAttr(rootAttrs, 'id', 'lc2');
@@ -201,22 +199,6 @@ export function parseIndoorGML(xmlText, doorwayMeasurements = {}) {
     };
   });
 
-  const connectionsById = new Map(connections.map(edge => [edge.id, edge]));
-  const doorFields = ['doorWidth', 'threshold', 'leafCount', 'leafWidth'];
-  for (const [id, measurements] of Object.entries(doorwayMeasurements)) {
-    const edge = connectionsById.get(id);
-    if (!edge) throw new Error('Door measurements reference an unknown transition: ' + id);
-    if (!measurements || typeof measurements !== 'object' || Array.isArray(measurements)) {
-      throw new Error('Expected doorway measurements for transition ' + id);
-    }
-    for (const [field, value] of Object.entries(measurements)) {
-      if (!doorFields.includes(field) || (value !== null && !Number.isFinite(value))) {
-        throw new Error('Invalid doorway measurement ' + id + '.' + field);
-      }
-      edge.accessibility[field] = value;
-    }
-  }
-
   return {
     schemaVersion: '1.0',
     sourceFormat: 'IndoorGML-GML',
@@ -231,3 +213,26 @@ export function parseIndoorGML(xmlText, doorwayMeasurements = {}) {
     connections,
   };
 }
+
+function parseIndoorGML(xmlText, doorwayMeasurements = {}) {
+  if (typeof xmlText !== 'string') throw new Error('Expected an IndoorGML document');
+  const building = readCoreBuilding(xmlText) || readLegacyBuilding(xmlText);
+  const connectionsById = new Map(building.connections.map(edge => [edge.id, edge]));
+  const doorFields = ['doorWidth', 'threshold', 'leafCount', 'leafWidth'];
+  for (const [id, measurements] of Object.entries(doorwayMeasurements)) {
+    const edge = connectionsById.get(id);
+    if (!edge) throw new Error('Door measurements reference an unknown transition: ' + id);
+    if (!measurements || typeof measurements !== 'object' || Array.isArray(measurements)) {
+      throw new Error('Expected doorway measurements for transition ' + id);
+    }
+    for (const [field, value] of Object.entries(measurements)) {
+      if (!doorFields.includes(field) || (value !== null && !Number.isFinite(value))) {
+        throw new Error('Invalid doorway measurement ' + id + '.' + field);
+      }
+      edge.accessibility[field] = value;
+    }
+  }
+  return building;
+}
+
+exports.parseIndoorGML = parseIndoorGML;
