@@ -61,7 +61,7 @@ const renamedPrefixes = xml.replace(/xmlns:core=/g, 'xmlns:indoor=').replace(/<(
 assert.deepStrictEqual(parseIndoorGML(renamedPrefixes), building);
 assert.throws(() => parseIndoorGML(xml, { missing_door: { threshold: 0 } }), /unknown transition: missing_door/);
 assert.throws(() => parseIndoorGML(xml, { f1_room114_left: { width: 0.84 } }), /f1_room114_left\.width/);
-assert.strictEqual(building.floors.length, 2, 'A single GML must contain both floors');
+assert.strictEqual(building.floors.length, 3, 'A single GML must contain all three floors');
 assert.strictEqual(
   building.connections.filter(edge => edge.transition?.type === 'elevator').length,
   1,
@@ -78,6 +78,11 @@ const filterFloor = floorId => ({
 });
 const floor1 = filterFloor('floor_1');
 const floor2 = filterFloor('floor_2');
+const floor3 = filterFloor('floor_3');
+assert.deepStrictEqual(floor3.spaces.filter(space => space.type === 'room').map(space => space.code).sort(),
+  Array.from({ length: 17 }, (_, i) => String(301 + i)));
+assert.strictEqual(floor3.spaces.filter(space => space.type === 'restroom').length, 2);
+assert.strictEqual(floor3.connections.length, 0);
 
 assert.strictEqual(floor1.sourceFormat, 'IndoorGML-GML');
 assert.strictEqual(floor1.building.id, 'lc2');

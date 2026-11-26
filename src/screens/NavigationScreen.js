@@ -67,7 +67,9 @@ export default function NavigationScreen() {
     if (paths.length === 0) {
       setShowDirections(false);
       setRouteMessage(
-        'No route meets the recorded hard accessibility constraints. Check blocked passages, corridor widths, slopes, stairs and elevator availability.'
+        mapData.nodeMap[locationId]?.floor === 3 || mapData.nodeMap[destination]?.floor === 3
+          ? 'Floor 3 is available on the map. Routing connections for this floor have not been confirmed.'
+          : 'No route meets the recorded hard accessibility constraints. Check blocked passages, corridor widths, slopes, stairs and elevator availability.'
       );
       return;
     }

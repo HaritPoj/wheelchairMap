@@ -4,7 +4,7 @@ Accessible indoor-navigation prototype for the LC2 building at Thammasat Univers
 
 ## LC2 map and doorway survey
 
-`assets/data/indoorgml/lc2.gml` contains both floors, room and corridor
+`assets/data/indoorgml/lc2.gml` contains three floors, room and corridor
 geometries, routing states, transitions, and the inter-floor elevator connection.
 `assets/data/buildings/lc2.doors.json` contains the doorway survey.
 Each JSON key matches the `gml:id` of a transition in the map.
@@ -45,6 +45,8 @@ areas, an elevator, and the central stairs.
 Floor 2: 17 numbered rooms (`211, 212, 213, 217, 218, 219, 220, 221,
 222, 223, 224, 225, 226, 227, 228, 229, 230`), WC and an elevator.
 The latest Floor 2 layout **does not include stairs**.
+
+Floor 3 follows the directory board with approximate room outlines for Rooms 301–317, the restroom area and the central stairs. Rooms appear on the floor plan and in search. Doorway measurements, corridor connections and elevator access on this level still need confirmation.
 
 Door-gap positions are driven by room-to-corridor transition metadata.
 Cross-floor routing uses the elevator, and A* applies wheelchair routing

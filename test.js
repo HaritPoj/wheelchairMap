@@ -72,7 +72,7 @@ const mergedLegacy = parseIndoorGML(
 const floor1Data = {
   floors: mergedLegacy.floors.filter(floor => floor.id === 'floor_1'),
 };
-assert.strictEqual(mergedLegacy.floors.length, 2);
+assert.strictEqual(mergedLegacy.floors.length, 3);
 
 const buildingData = migrateBuildingV1ToV2(mergedLegacy, siteGeoJSON, {
   siteId: 'tu_rangsit',
@@ -123,7 +123,7 @@ assert.ok(
 
 const mapData = normalizeBuildingData(buildingData);
 assert.strictEqual(mapData.buildingId, 'lc2');
-assert.strictEqual(mapData.floors.length, 2);
+assert.strictEqual(mapData.floors.length, 3);
 assert.strictEqual(
   mapData.floors.find(floor => floor.level === 1).map.boundarySource,
   'facility.geojson'
@@ -215,7 +215,7 @@ assert.strictEqual(
 );
 
 const stairs = mapData.nodes.filter(node => node.type === 'stairs');
-assert.strictEqual(stairs.length, 1, 'Only the Floor 1 stairs remain in the current map');
+sameValues(stairs.map(node => node.floor).sort(), [1, 3]);
 assert.ok(
   stairs.every(
     stair => !mapData.edges.some(edge => edge.from === stair.id || edge.to === stair.id)
@@ -230,6 +230,10 @@ const routeDestinations = mapData.nodes.filter(
 for (const start of routeDestinations) {
   for (const goal of routeDestinations) {
     const path = findPath(start.id, goal.id, mapData);
+    if (start.id !== goal.id && (start.floor === 3 || goal.floor === 3)) {
+      assert.strictEqual(path.length, 0, 'Floor 3 has no surveyed routing connections yet');
+      continue;
+    }
     assert.ok(
       path.length > 0,
       `Expected a wheelchair route from ${start.id} to ${goal.id}`
