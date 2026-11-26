@@ -1,4 +1,6 @@
 {
+  "f1_room107_left": { "doorWidth": 0.74, "leafCount": 2, "threshold": 0.1 },
+  "f1_room108_left": { "doorWidth": 0.74, "leafCount": 2, "threshold": 0.1 },
   "f1_room109_top": { "doorWidth": 0.74, "leafCount": 2, "threshold": 0.1 },
   "f1_room110_top": { "doorWidth": 0.74, "leafCount": 2, "threshold": 0.1 },
   "f1_room111_top": { "doorWidth": 0.74, "leafCount": 2, "threshold": 0.1 },
