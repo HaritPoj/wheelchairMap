@@ -783,11 +783,11 @@ assert.strictEqual(
 );
 const selectedRoomWarning = (...ids) =>
   getRoomDoorWarningMessage(ids, mapData.nodeMap, mapData.edges);
-for (const code of ['109', '110', '111']) {
+for (const [code, widthCm] of [['109', 74], ['110', 74], ['111', 74], ['114', 84]]) {
   const room = 'room_' + code;
   const landing = 'corridor_f1_d' + code;
   assert.ok(selectedRoomWarning(room).includes(
-    'Room ' + code + ': Double doors, door width 74 cm, threshold height 10 cm.'
+    'Room ' + code + ': Double doors, door width ' + widthCm + ' cm, threshold height 10 cm.'
   ));
   for (const [from, to] of [[room, landing], [landing, room]]) {
     const route = solveConstrainedRoute(from, to, mapData);
@@ -798,7 +798,7 @@ for (const code of ['109', '110', '111']) {
     assert.strictEqual(door.unitId, room);
     assert.strictEqual(door.leafCount, 2);
     assert.strictEqual(door.leafWidth, null);
-    assert.strictEqual(door.doorWidth, 0.74);
+    assert.strictEqual(door.doorWidth, widthCm / 100);
     assert.strictEqual(door.threshold, 0.10);
     assert.strictEqual(report.narrowCount, 1);
     assert.strictEqual(report.raisedThresholdCount, 1);

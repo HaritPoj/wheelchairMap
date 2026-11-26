@@ -120,7 +120,7 @@ to the corresponding `core:Transition` in the **single source**
 `assets/data/indoorgml/lc2.gml`. Keep attributes **absent** when not measured;
 do not estimate meters from map pixels.
 
-Rooms 109, 110 and 111 on Floor 1 each have double doors at one entrance, with a reported clear opening of 74 cm and a threshold height of 10 cm. The Room 109 record is shown below.
+Rooms 109, 110, 111 and 114 on Floor 1 each have double doors at one entrance and a 10 cm threshold. The reported clear opening is 74 cm for Rooms 109–111 and 84 cm for Room 114. The Room 109 record is shown below.
 
 ```xml
 <core:Transition
