@@ -44,8 +44,8 @@ function readMap() {
     fs.readFileSync(path.join(gmlDir, 'lc2.gml'), 'utf8'),
     require('../assets/data/buildings/lc2.doors.json')
   );
-  if (merged.floors.length !== 2) {
-    throw new Error('Unified LC2 GML must contain both building levels.');
+  if (merged.floors.length !== 3) {
+    throw new Error('Unified LC2 GML must contain all three building levels.');
   }
   const site = JSON.parse(fs.readFileSync(
     path.join(ROOT, 'assets/data/buildings/lc2.site.json'), 'utf8'

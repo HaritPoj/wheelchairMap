@@ -15,10 +15,7 @@ import DirectionsSheet from '../rendering/DirectionsSheet';
 import NextStepBanner from '../rendering/NextStepBanner';
 import CameraScanner from '../rendering/CameraScanner';
 
-// Resource-Constrained A* optimizes under COP hard constraints during
-// the search. LC2's two levels need at most one elevator transfer.
-// Constraints apply during optimization, including the entire route,
-// not just one edge at a time. LC2 has two connected levels.
+// A single elevator ride connects any two LC2 floors.
 const WHEELCHAIR_ROUTE_CONSTRAINTS = Object.freeze({
   maxElevatorTransfers: 1,
 });
@@ -67,9 +64,7 @@ export default function NavigationScreen() {
     if (paths.length === 0) {
       setShowDirections(false);
       setRouteMessage(
-        mapData.nodeMap[locationId]?.floor === 3 || mapData.nodeMap[destination]?.floor === 3
-          ? 'No mapped route connects these locations yet. The Floor 3 elevator connection has not been confirmed.'
-          : 'No route meets the recorded hard accessibility constraints. Check blocked passages, corridor widths, slopes, stairs and elevator availability.'
+        'No route meets the recorded hard accessibility constraints. Check blocked passages, corridor widths, slopes, stairs and elevator availability.'
       );
       return;
     }

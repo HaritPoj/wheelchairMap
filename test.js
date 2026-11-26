@@ -230,10 +230,6 @@ const routeDestinations = mapData.nodes.filter(
 for (const start of routeDestinations) {
   for (const goal of routeDestinations) {
     const path = findPath(start.id, goal.id, mapData);
-    if (start.floor !== goal.floor && (start.floor === 3 || goal.floor === 3)) {
-      assert.strictEqual(path.length, 0, 'No confirmed connection between these areas');
-      continue;
-    }
     assert.ok(
       path.length > 0,
       `Expected a wheelchair route from ${start.id} to ${goal.id}`
@@ -764,6 +760,18 @@ const generateMeasuredSteps = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8') + '\n' + instructionBody,
   'generateRouteSteps'
 );
+const elevatorTestRooms = [room124, room211, mapData.nodeMap.room_316];
+for (const start of elevatorTestRooms) {
+  for (const goal of elevatorTestRooms) {
+    if (start.floor === goal.floor) continue;
+    const route = solveConstrainedRoute(start.id, goal.id, mapData, { maxElevatorTransfers: 1 });
+    assert.ok(route.feasible);
+    assert.strictEqual(route.resources.elevatorTransfers, 1);
+    const steps = generateMeasuredSteps(route.path, mapData.nodeMap, mapData.edges);
+    sameValues(steps.filter(step => step.key.startsWith('floor-')).map(step => step.instruction),
+      ['Take the elevator to Floor ' + goal.floor]);
+  }
+}
 for (const [from, to, direction] of [
   ['restroom_f1_east', room106.id, 'uphill'], [room106.id, 'restroom_f1_east', 'downhill'],
   [room124.id, room106.id, 'uphill'], [room106.id, room124.id, 'downhill'],

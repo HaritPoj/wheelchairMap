@@ -705,6 +705,7 @@
             <core:duality xlink:href="#elevator_01_f1"/>
             <core:connects xlink:href="#f1_elevator"/>
             <core:connects xlink:href="#connection_elevator_f1_f2"/>
+            <core:connects xlink:href="#connection_elevator_f1_f3"/>
             <core:geometry><gml:Point gml:id="point_state_elevator_01_f1"><gml:pos>406 245</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_stairs_f1_central">
@@ -845,6 +846,7 @@
             <core:duality xlink:href="#elevator_01_f2"/>
             <core:connects xlink:href="#connection_elevator_f1_f2"/>
             <core:connects xlink:href="#f2_elevator_bottom"/>
+            <core:connects xlink:href="#connection_elevator_f2_f3"/>
             <core:geometry><gml:Point gml:id="point_state_elevator_01_f2"><gml:pos>502 264</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="corridor_f1_u01">
@@ -1392,6 +1394,8 @@
             <gml:name>Elevator Floor 3</gml:name>
             <core:duality xlink:href="#elevator_01_f3"/>
             <core:connects xlink:href="#f3_elevator_bottom"/>
+            <core:connects xlink:href="#connection_elevator_f1_f3"/>
+            <core:connects xlink:href="#connection_elevator_f2_f3"/>
             <core:geometry><gml:Point gml:id="point_state_elevator_01_f3"><gml:pos>427 35</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="corridor_f3_313">
@@ -1836,6 +1840,18 @@
             <core:weight>10</core:weight>
             <core:connects xlink:href="#state_elevator_01_f1"/>
             <core:connects xlink:href="#state_elevator_01_f2"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="connection_elevator_f1_f3">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage transitionType="elevator"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>20</core:weight>
+            <core:connects xlink:href="#state_elevator_01_f1"/>
+            <core:connects xlink:href="#state_elevator_01_f3"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="connection_elevator_f2_f3">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage transitionType="elevator"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>10</core:weight>
+            <core:connects xlink:href="#state_elevator_01_f2"/>
+            <core:connects xlink:href="#state_elevator_01_f3"/>
           </core:Transition></core:transitionMember>
           <core:transitionMember><core:Transition gml:id="f2_c01_c02">
             <core:weight>2</core:weight>

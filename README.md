@@ -5,7 +5,7 @@ Accessible indoor-navigation prototype for the LC2 building at Thammasat Univers
 ## LC2 map and doorway survey
 
 `assets/data/indoorgml/lc2.gml` contains three floors, room and corridor
-geometries, routing states, transitions, and the inter-floor elevator connection.
+geometries, routing states, transitions, and the inter-floor elevator connections.
 `assets/data/buildings/lc2.doors.json` contains the doorway survey.
 Each JSON key matches the `gml:id` of a transition in the map.
 
@@ -46,7 +46,7 @@ Floor 2: 17 numbered rooms (`211, 212, 213, 217, 218, 219, 220, 221,
 222, 223, 224, 225, 226, 227, 228, 229, 230`), WC and an elevator.
 The latest Floor 2 layout **does not include stairs**.
 
-Floor 3 follows the supplied oriented plan, with traced interior walls, Rooms 301–317, a WC and an elevator marker along the upper corridor. Rooms appear on the floor plan and in search. Rooms 314–317 open into Room 313, which connects to the landing outside its entrance. The mapped corridor connects all 17 rooms and the WC on Floor 3. A short approach links the Floor 3 elevator door to the main corridor. Inter-floor routing for this elevator stop is still unconfirmed. Doorway measurements on this floor remain unknown.
+Floor 3 follows the supplied oriented plan, with traced interior walls, Rooms 301–317, a WC and an elevator marker along the upper corridor. Rooms appear on the floor plan and in search. Rooms 314–317 open into Room 313, which connects to the landing outside its entrance. The mapped corridor connects all 17 rooms and the WC on Floor 3. A short approach links the Floor 3 elevator door to the main corridor. The same elevator serves Floors 1, 2 and 3, with one ride between any two stops. Doorway measurements on this floor remain unknown.
 
 Door-gap positions are driven by room-to-corridor transition metadata.
 Cross-floor routing uses the elevator, and A* applies wheelchair routing
@@ -91,7 +91,7 @@ measured corridor/door widths and slopes. All such limits are applied
 **during optimization**, not after a route is generated.
 
 The LC2 navigation screen currently limits elevator transfers to **one**
-between its two levels. All other optional route-wide limits are unlimited.
+between any two of its three levels. All other optional route-wide limits are unlimited.
 Example for a future preference or accessibility configuration:
 
 ```javascript

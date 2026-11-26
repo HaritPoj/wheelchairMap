@@ -64,8 +64,8 @@ assert.throws(() => parseIndoorGML(xml, { f1_room114_left: { width: 0.84 } }), /
 assert.strictEqual(building.floors.length, 3, 'A single GML must contain all three floors');
 assert.strictEqual(
   building.connections.filter(edge => edge.transition?.type === 'elevator').length,
-  1,
-  'Single GML must preserve one elevator transition between floors'
+  3,
+  'The elevator must connect each pair of floors'
 );
 const filterFloor = floorId => ({
   ...building,
@@ -82,7 +82,8 @@ const floor3 = filterFloor('floor_3');
 assert.deepStrictEqual(floor3.spaces.filter(space => space.type === 'room').map(space => space.code).sort(),
   Array.from({ length: 17 }, (_, i) => String(301 + i)));
 assert.strictEqual(floor3.spaces.filter(space => space.type === 'restroom').length, 1);
-assert.ok(floor3.connections.every(edge => edge.displayPath?.length >= 2));
+const floor3Walkways = floor3.connections.filter(edge => edge.transition?.type !== 'elevator');
+assert.ok(floor3Walkways.every(edge => edge.displayPath?.length >= 2));
 assert.strictEqual(floor3.connections.filter(edge => edge.from.startsWith('room_')).length, 17);
 // The traced routes are orthogonal. Even a segment ending on a solid wall
 // would put the drawn line outside a door gap.
@@ -95,7 +96,7 @@ function intersectsWall(a, b, c, d) {
   );
   return overlaps && turn(a, b, c) * turn(a, b, d) <= 0 && turn(c, d, a) * turn(c, d, b) <= 0;
 }
-for (const edge of floor3.connections) {
+for (const edge of floor3Walkways) {
   const path = edge.displayPath;
   for (let i = 1; i < path.length; i++) {
     for (const wall of floor3.floors[0].map.walls) {
