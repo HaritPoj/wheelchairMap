@@ -82,13 +82,13 @@ const floor3 = filterFloor('floor_3');
 assert.deepStrictEqual(floor3.spaces.filter(space => space.type === 'room').map(space => space.code).sort(),
   Array.from({ length: 17 }, (_, i) => String(301 + i)));
 assert.strictEqual(floor3.spaces.filter(space => space.type === 'restroom').length, 2);
-assert.strictEqual(floor3.connections.length, 0);
+assert.strictEqual(floor3.connections.length, 5);
 // The directory board is rotated 180 degrees to match the other floor plans.
 const room301 = floor3.spaces.find(space => space.code === '301');
 const room317 = floor3.spaces.find(space => space.code === '317');
 assert.ok(room317.geometry.x < room301.geometry.x);
 assert.strictEqual(floor3.spaces.find(space => space.type === 'stairs').geometry.y, 31);
-for (const space of floor3.spaces) {
+for (const space of floor3.spaces.filter(space => space.type !== 'corridor')) {
   const { x, y, width, height } = space.geometry;
   const state = features.get('state_' + space.id);
   const position = state.getElementsByTagNameNS(gml, 'pos')[0].textContent.split(/\s+/).map(Number);

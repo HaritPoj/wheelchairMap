@@ -476,10 +476,10 @@
       <core:duality xlink:href="#state_room_312"/>
     </core:CellSpace></core:cellSpaceMember>
     <core:cellSpaceMember><core:CellSpace gml:id="room_313">
-      <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="313"/></gml:GenericMetaData></gml:metaDataProperty>
+      <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="313" throughRoom="true"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 313</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_313">
-        <gml:exterior><gml:LinearRing><gml:posList>314 307 146 307 146 125 314 125 314 307</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>314 307 112 307 112 125 314 125 314 307</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_313"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -1316,26 +1316,35 @@
           <core:stateMember><core:State gml:id="state_room_313">
             <gml:name>Room 313</gml:name>
             <core:duality xlink:href="#room_313"/>
-            <core:geometry><gml:Point gml:id="point_state_room_313"><gml:pos>230 216</gml:pos></gml:Point></core:geometry>
+            <core:connects xlink:href="#f3_room313_top"/>
+            <core:connects xlink:href="#f3_room314_left_top"/>
+            <core:connects xlink:href="#f3_room315_left_bottom"/>
+            <core:connects xlink:href="#f3_room316_right"/>
+            <core:connects xlink:href="#f3_room317_right_bottom"/>
+            <core:geometry><gml:Point gml:id="point_state_room_313"><gml:pos>213 216</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_314">
             <gml:name>Room 314</gml:name>
             <core:duality xlink:href="#room_314"/>
+            <core:connects xlink:href="#f3_room314_left_top"/>
             <core:geometry><gml:Point gml:id="point_state_room_314"><gml:pos>341.5 272</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_315">
             <gml:name>Room 315</gml:name>
             <core:duality xlink:href="#room_315"/>
+            <core:connects xlink:href="#f3_room315_left_bottom"/>
             <core:geometry><gml:Point gml:id="point_state_room_315"><gml:pos>341.5 201.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_316">
             <gml:name>Room 316</gml:name>
             <core:duality xlink:href="#room_316"/>
+            <core:connects xlink:href="#f3_room316_right"/>
             <core:geometry><gml:Point gml:id="point_state_room_316"><gml:pos>73 286</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_317">
             <gml:name>Room 317</gml:name>
             <core:duality xlink:href="#room_317"/>
+            <core:connects xlink:href="#f3_room317_right_bottom"/>
             <core:geometry><gml:Point gml:id="point_state_room_317"><gml:pos>73 195</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_restroom_f3_west">
@@ -1352,6 +1361,12 @@
             <gml:name>Central stairs</gml:name>
             <core:duality xlink:href="#stairs_f3_central"/>
             <core:geometry><gml:Point gml:id="point_state_stairs_f3_central"><gml:pos>657 63</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_313">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Corridor outside Room 313</gml:name>
+            <core:connects xlink:href="#f3_room313_top"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_313"><gml:pos>213 107</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
         </core:nodes>
         <core:edges gml:id="lc2_edges">
@@ -1867,6 +1882,31 @@
             <core:weight>1</core:weight>
             <core:connects xlink:href="#state_room_211"/>
             <core:connects xlink:href="#corridor_f2_v04"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room313_top">
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_313"/>
+            <core:connects xlink:href="#corridor_f3_313"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room314_left_top">
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_314"/>
+            <core:connects xlink:href="#state_room_313"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room315_left_bottom">
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_315"/>
+            <core:connects xlink:href="#state_room_313"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room316_right">
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_316"/>
+            <core:connects xlink:href="#state_room_313"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room317_right_bottom">
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_317"/>
+            <core:connects xlink:href="#state_room_313"/>
           </core:Transition></core:transitionMember>
         </core:edges>
       </core:SpaceLayer></core:spaceLayerMember>

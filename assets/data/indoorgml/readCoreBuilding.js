@@ -93,6 +93,7 @@ function readCoreBuilding(xml) {
       name: nameOf(cell), code: info.getAttribute('code') || null, geometry: rectangle(cell),
       accessibility: {
         wheelchairAccessible: info.getAttribute('wheelchairAccessible') !== 'false',
+        throughRoom: info.getAttribute('throughRoom') === 'true',
         doorwayNotice: info.getAttribute('doorwayNotice') || null,
         doorWidth: null, threshold: null,
       },

@@ -45,10 +45,21 @@ export function getDoorSpecs(node, edges, nodeMap) {
   for (const edge of edges || []) {
     if (edge.from !== node.id && edge.to !== node.id) continue;
     const other = nodeMap[edge.from === node.id ? edge.to : edge.from];
-    if (!other || other.type !== 'corridor') continue;
-    const spec = getDoorSpec(edge, node, other);
-    if (spec && !specs.has(spec.side)) {
-      specs.set(spec.side, spec.position);
+    if (!other) continue;
+    let spec;
+    if (other.type === 'corridor' || other.accessibility?.throughRoom) {
+      spec = getDoorSpec(edge, node, other);
+    } else if (node.accessibility?.throughRoom && other.type === 'room') {
+      const door = routeAnchor(other, node, edge);
+      const opposite = { left: 'right', right: 'left', top: 'bottom', bottom: 'top' };
+      const vertical = door.side === 'left' || door.side === 'right';
+      const position = vertical ? (door.y - node.y) / node.height + 0.5
+        : (door.x - node.x) / node.width + 0.5;
+      spec = { side: opposite[door.side], position };
+    }
+    if (spec) {
+      if (!specs.has(spec.side)) specs.set(spec.side, []);
+      specs.get(spec.side).push(spec.position);
     }
   }
   return specs;
@@ -101,8 +112,8 @@ function routeAnchor(node, other, edge) {
 // and offset used by all other rooms, walls and waypoints.
 export function getRouteSegmentPoints(nodeA, nodeB, edge) {
   if (!nodeA || !nodeB) return [];
-  const start = routeAnchor(nodeA, nodeB, edge);
-  const end = routeAnchor(nodeB, nodeA, edge);
+  const start = nodeA.accessibility?.throughRoom ? { x: nodeA.x, y: nodeA.y } : routeAnchor(nodeA, nodeB, edge);
+  const end = nodeB.accessibility?.throughRoom ? { x: nodeB.x, y: nodeB.y } : routeAnchor(nodeB, nodeA, edge);
   const close = (a, b) => Math.abs(a - b) < 0.00001;
 
   if (close(start.x, end.x) && close(start.y, end.y)) return [start];

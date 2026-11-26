@@ -230,8 +230,10 @@ const routeDestinations = mapData.nodes.filter(
 for (const start of routeDestinations) {
   for (const goal of routeDestinations) {
     const path = findPath(start.id, goal.id, mapData);
-    if (start.id !== goal.id && (start.floor === 3 || goal.floor === 3)) {
-      assert.strictEqual(path.length, 0, 'Floor 3 has no surveyed routing connections yet');
+    const in313Group = node => ['313', '314', '315', '316', '317'].includes(node.code);
+    if (start.id !== goal.id && (start.floor === 3 || goal.floor === 3) &&
+        !(in313Group(start) && in313Group(goal))) {
+      assert.strictEqual(path.length, 0, 'No confirmed connection between these areas');
       continue;
     }
     assert.ok(
@@ -253,6 +255,12 @@ sameValues(
   'Same-room path should contain one room'
 );
 
+for (const code of [314, 315, 316, 317]) {
+  const child = 'room_' + code;
+  const entrance = 'corridor_f3_313';
+  sameValues(findPath(entrance, child, mapData), [entrance, 'room_313', child]);
+  sameValues(findPath(child, entrance, mapData), [child, 'room_313', entrance]);
+}
 const sameFloor = findPath(room124.id, room120.id, mapData);
 assert.strictEqual(sameFloor[0], room124.id);
 assert.strictEqual(sameFloor[sameFloor.length - 1], room120.id);
@@ -774,6 +782,10 @@ for (const [from, to, direction] of [
 const instructionSteps = generateMeasuredSteps(
   surveyedRoute.path, oneDoorSurvey.map.nodeMap, oneDoorSurvey.map.edges
 );
+for (const [from, to] of [['corridor_f3_313', 'room_317'], ['room_314', 'room_315']]) {
+  const steps = generateMeasuredSteps(findPath(from, to, mapData), mapData.nodeMap, mapData.edges);
+  assert.ok(steps.some(step => step.instruction === 'Pass through Room 313'));
+}
 assert.ok(
   instructionSteps[0].warning.includes('1.5 cm'),
   'Starting-room threshold caution must appear in directions'

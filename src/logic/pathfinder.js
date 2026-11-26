@@ -13,7 +13,7 @@ export function getDoorMeasurements(edge, from, to) {
   const isToRoom = to.type !== 'corridor' && to.type !== 'stairs';
   if (!isFromRoom && !isToRoom) return null;
   if (from.type === 'stairs' || to.type === 'stairs') return null;
-  const unit = isFromRoom ? from : to;
+  const unit = isFromRoom && isToRoom ? (from.id === edge.from ? from : to) : (isFromRoom ? from : to);
   const doorWidth = numeric(edge.door_width) ?? numeric(unit.door_width);
   const threshold = numeric(edge.threshold) ?? numeric(unit.threshold);
   return {
@@ -355,7 +355,7 @@ export function findAStarPath(startId, goalId, mapData) {
     }
 
     for (const { edge, next } of adjacency.get(current.id) || []) {
-      if (nodeMap[next]?.type === 'room' && next !== goalId) continue;
+      if (nodeMap[next]?.type === 'room' && next !== goalId && !nodeMap[next].accessibility?.throughRoom) continue;
 
       const edgeCost = getEdgeCost(edge, current.id, next, nodeMap);
       if (!Number.isFinite(edgeCost)) continue;
@@ -506,7 +506,7 @@ export function solveConstrainedRoute(startId, goalId, mapData, options = {}) {
 
     for (const { edge, next } of adjacency.get(current.id) || []) {
       if (rules.blockedEdgeIds.has(edge.id) || rules.blockedNodeIds.has(next)) continue;
-      if (nodeMap[next]?.type === 'room' && next !== goalId) continue;
+      if (nodeMap[next]?.type === 'room' && next !== goalId && !nodeMap[next].accessibility?.throughRoom) continue;
       // Enforce all existing wheelchair-accessibility hard constraints.
       const stepCost = getEdgeCost(edge, current.id, next, nodeMap);
       if (!Number.isFinite(stepCost) || stepCost < 0) continue;
@@ -608,7 +608,7 @@ export function findAllPaths(startId, goalId, mapData) {
 
     for (const { edge, next } of adjacency.get(current.id) || []) {
       if (current.visited.has(next)) continue;
-      if (nodeMap[next]?.type === 'room' && next !== goalId) continue;
+      if (nodeMap[next]?.type === 'room' && next !== goalId && !nodeMap[next].accessibility?.throughRoom) continue;
 
       const edgeCost = getEdgeCost(edge, current.id, next, nodeMap);
       if (!Number.isFinite(edgeCost)) continue;

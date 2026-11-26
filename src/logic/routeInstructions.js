@@ -185,7 +185,7 @@ export function generateRouteSteps(route, nodeMap, edges) {
       steps.push({
         key: 'node-' + index,
         icon: current.type,
-        instruction: 'Continue to ' + current.name,
+        instruction: (current.accessibility?.throughRoom ? 'Pass through ' : 'Continue to ') + current.name,
         warning: getEdgeWarning(
           getEdge(edges, previous.id, current.id),
           current,

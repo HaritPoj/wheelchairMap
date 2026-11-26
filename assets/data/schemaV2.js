@@ -91,6 +91,7 @@ export function migrateBuildingV1ToV2(
       wheelchairAccessible:
         space.type !== "stairs" &&
         space.accessibility?.wheelchairAccessible !== false,
+      throughRoom: space.accessibility?.throughRoom === true,
       doorwayNotice: space.accessibility?.doorwayNotice ?? null,
       doorWidth:
         space.accessibility?.doorWidth === undefined

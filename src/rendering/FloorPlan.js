@@ -261,90 +261,33 @@ export default function FloorPlan({
     const verticalGap = Math.min(18 * scale, height * 0.34);
     const strokeWidth = 2 * scale;
 
-    const horizontalWall = (key, wallY, doorPosition) => {
-      if (doorPosition === undefined) {
-        return (
-          <Line
-            key={key}
-            x1={left}
-            y1={wallY}
-            x2={right}
-            y2={wallY}
-            stroke={WALL_COLOR}
-            strokeWidth={strokeWidth}
-          />
-        );
+    function wall(side, fixed, horizontal) {
+      const origin = horizontal ? left : top;
+      const length = horizontal ? width : height;
+      const gap = horizontal ? horizontalGap : verticalGap;
+      const positions = (doorSpecs.get(side) || []).slice().sort((a, b) => a - b);
+      const segments = [];
+      let cursor = origin;
+      for (const fraction of positions) {
+        const center = origin + fraction * length;
+        const before = Math.min(origin + length, center - gap / 2);
+        if (before > cursor) segments.push([cursor, before]);
+        cursor = Math.max(cursor, center + gap / 2);
       }
-
-      const gapCenter = left + width * doorPosition;
-
-      return (
-        <React.Fragment key={key}>
-          <Line
-            x1={left}
-            y1={wallY}
-            x2={gapCenter - horizontalGap / 2}
-            y2={wallY}
-            stroke={WALL_COLOR}
-            strokeWidth={strokeWidth}
-          />
-          <Line
-            x1={gapCenter + horizontalGap / 2}
-            y1={wallY}
-            x2={right}
-            y2={wallY}
-            stroke={WALL_COLOR}
-            strokeWidth={strokeWidth}
-          />
-        </React.Fragment>
-      );
-    };
-
-    const verticalWall = (key, wallX, doorPosition) => {
-      if (doorPosition === undefined) {
-        return (
-          <Line
-            key={key}
-            x1={wallX}
-            y1={top}
-            x2={wallX}
-            y2={bottom}
-            stroke={WALL_COLOR}
-            strokeWidth={strokeWidth}
-          />
-        );
-      }
-
-      const gapCenter = top + height * doorPosition;
-
-      return (
-        <React.Fragment key={key}>
-          <Line
-            x1={wallX}
-            y1={top}
-            x2={wallX}
-            y2={gapCenter - verticalGap / 2}
-            stroke={WALL_COLOR}
-            strokeWidth={strokeWidth}
-          />
-          <Line
-            x1={wallX}
-            y1={gapCenter + verticalGap / 2}
-            x2={wallX}
-            y2={bottom}
-            stroke={WALL_COLOR}
-            strokeWidth={strokeWidth}
-          />
-        </React.Fragment>
-      );
-    };
+      if (cursor < origin + length) segments.push([cursor, origin + length]);
+      return segments.map(([a, b]) => (
+        <Line key={side + '-' + a} x1={horizontal ? a : fixed} y1={horizontal ? fixed : a}
+          x2={horizontal ? b : fixed} y2={horizontal ? fixed : b}
+          stroke={WALL_COLOR} strokeWidth={strokeWidth} />
+      ));
+    }
 
     return (
       <G key={'walls-' + node.id}>
-        {horizontalWall('top', top, doorSpecs.get('top'))}
-        {horizontalWall('bottom', bottom, doorSpecs.get('bottom'))}
-        {verticalWall('left', left, doorSpecs.get('left'))}
-        {verticalWall('right', right, doorSpecs.get('right'))}
+        {wall('top', top, true)}
+        {wall('bottom', bottom, true)}
+        {wall('left', left, false)}
+        {wall('right', right, false)}
       </G>
     );
   }
