@@ -8,7 +8,8 @@
     <wc:Level id="floor_1" number="1" name="Floor 1" width="1104" height="395" boundary="33,249 390,249 390,223 690,223 690,246 946,246 946,42 1082,42 1082,349 690,349 690,377 389,377 389,354 33,354"/>
     <wc:Level id="floor_2" number="2" name="Floor 2" width="1331" height="452" boundary="56,279 486,279 486,249 847,249 847,273 1156,273 1156,31 1288,31 1288,400 843,400 843,432 483,432 483,408 56,408"/>
     <wc:Level id="floor_3" number="3" name="Floor 3" width="970" height="253" boundary="14,78 289,78 290,46 672,46 672,72 954,72 954,209 671,209 671,238 285,238 285,211 14,211">
-      <wc:Wall points="14,78 289,78 290,46 672,46 672,72 954,72 954,209 671,209"/>
+      <wc:Wall points="14,78 289,78 290,46 418,46"/>
+      <wc:Wall points="436,46 672,46 672,72 954,72 954,209 671,209"/>
       <wc:Wall points="14,82 14,210 241,210 241,178"/>
       <wc:Wall points="14,170 84,170 84,153"/>
       <wc:Wall points="84,78 84,113"/>
@@ -1390,6 +1391,7 @@
           <core:stateMember><core:State gml:id="state_elevator_01_f3">
             <gml:name>Elevator Floor 3</gml:name>
             <core:duality xlink:href="#elevator_01_f3"/>
+            <core:connects xlink:href="#f3_elevator_bottom"/>
             <core:geometry><gml:Point gml:id="point_state_elevator_01_f3"><gml:pos>427 35</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="corridor_f3_313">
@@ -1411,14 +1413,14 @@
             <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
             <gml:name>Floor 3 corridor</gml:name>
             <core:connects xlink:href="#f3_walk_wc_to_west_hall"/>
-            <core:connects xlink:href="#f3_walk_west_hall_to_310"/>
+            <core:connects xlink:href="#f3_walk_west_hall_to_lift"/>
             <core:connects xlink:href="#f3_walk_west_hall_to_312"/>
             <core:geometry><gml:Point gml:id="point_corridor_f3_west_hall"><gml:pos>343 89</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="corridor_f3_310">
             <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
             <gml:name>Floor 3 corridor</gml:name>
-            <core:connects xlink:href="#f3_walk_west_hall_to_310"/>
+            <core:connects xlink:href="#f3_walk_lift_to_310"/>
             <core:connects xlink:href="#f3_walk_310_to_309"/>
             <core:connects xlink:href="#f3_room310_top_left"/>
             <core:geometry><gml:Point gml:id="point_corridor_f3_310"><gml:pos>448 89</gml:pos></gml:Point></core:geometry>
@@ -1501,6 +1503,14 @@
             <core:connects xlink:href="#f3_room303_left_top"/>
             <core:connects xlink:href="#f3_room304_right_top"/>
             <core:geometry><gml:Point gml:id="point_corridor_f3_304"><gml:pos>904 165</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_lift">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 elevator junction</gml:name>
+            <core:connects xlink:href="#f3_walk_west_hall_to_lift"/>
+            <core:connects xlink:href="#f3_walk_lift_to_310"/>
+            <core:connects xlink:href="#f3_elevator_bottom"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_lift"><gml:pos>427 89</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
         </core:nodes>
         <core:edges gml:id="lc2_edges">
@@ -2059,11 +2069,23 @@
             <core:connects xlink:href="#corridor_f3_wc"/>
             <core:connects xlink:href="#corridor_f3_west_hall"/>
           </core:Transition></core:transitionMember>
-          <core:transitionMember><core:Transition gml:id="f3_walk_west_hall_to_310">
-            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="343,89 448,89"/></gml:GenericMetaData></gml:metaDataProperty>
-            <core:weight>5</core:weight>
+          <core:transitionMember><core:Transition gml:id="f3_walk_west_hall_to_lift">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="343,89 427,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>4</core:weight>
             <core:connects xlink:href="#corridor_f3_west_hall"/>
+            <core:connects xlink:href="#corridor_f3_lift"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_lift_to_310">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="427,89 448,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#corridor_f3_lift"/>
             <core:connects xlink:href="#corridor_f3_310"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_elevator_bottom">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="427,45 427,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>2</core:weight>
+            <core:connects xlink:href="#state_elevator_01_f3"/>
+            <core:connects xlink:href="#corridor_f3_lift"/>
           </core:Transition></core:transitionMember>
           <core:transitionMember><core:Transition gml:id="f3_walk_310_to_309">
             <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="448,89 582,89"/></gml:GenericMetaData></gml:metaDataProperty>

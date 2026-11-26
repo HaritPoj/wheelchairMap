@@ -224,7 +224,7 @@ assert.ok(
 );
 
 const routeDestinations = mapData.nodes.filter(
-  node => node.type === 'room' || node.type === 'restroom'
+  node => node.type === 'room' || node.type === 'restroom' || node.id === 'elevator_01_f3'
 );
 // Measured narrow room doors are advisories, not hard routing barriers.
 for (const start of routeDestinations) {
