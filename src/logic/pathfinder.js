@@ -105,7 +105,8 @@ function describeRoomDoorConditions(roomId, nodeMap, edges, referenceWidth) {
     const measurements = attributes.join(', ');
     return [measurements, door.accessNote].filter(Boolean).join('. ');
   });
-  return (room.name || room.code || roomId) + ': ' + descriptions.join('; ') + '.';
+  const uniqueDescriptions = [...new Set(descriptions)];
+  return (room.name || room.code || roomId) + ': ' + uniqueDescriptions.join('; ') + '.';
 }
 
 // Accept a single room or both selected endpoints in route order.

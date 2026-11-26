@@ -830,6 +830,13 @@ assert.strictEqual(
 );
 const selectedRoomWarning = (...ids) =>
   getRoomDoorWarningMessage(ids, mapData.nodeMap, mapData.edges);
+assert.strictEqual(
+  selectedRoomWarning(null, 'room_115').split('\n')[0],
+  'Room 115: Double doors, door width 80 cm, threshold height 9 cm.'
+);
+const room126Notice = selectedRoomWarning('room_126');
+assert.ok(room126Notice.includes('Double doors, door width 80 cm, threshold height 0 cm'));
+assert.ok(room126Notice.includes('1 door leaf, door width 80 cm, threshold height 0 cm'));
 for (const [code, widthCm] of [['109', 74], ['110', 74], ['111', 74], ['114', 84]]) {
   const room = 'room_' + code;
   const landing = 'corridor_f1_d' + code;
