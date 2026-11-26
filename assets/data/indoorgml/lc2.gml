@@ -171,7 +171,7 @@
       <core:duality xlink:href="#state_restroom_f1_east"/>
     </core:CellSpace></core:cellSpaceMember>
     <core:cellSpaceMember><core:CellSpace gml:id="room_106">
-      <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_1" category="room" code="106" wheelchairAccessible="true"/></gml:GenericMetaData></gml:metaDataProperty>
+      <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_1" category="room" code="106" wheelchairAccessible="true" doorwayNotice="directions"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 106</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_106">
         <gml:exterior><gml:LinearRing><gml:posList>1013 43 1082 43 1082 144 1013 144 1013 43</gml:posList></gml:LinearRing></gml:exterior>
@@ -1260,7 +1260,7 @@
             <core:connects xlink:href="#corridor_f1_v03"/>
           </core:Transition></core:transitionMember>
           <core:transitionMember><core:Transition gml:id="f1_v03_v04">
-            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage width="1.02" rise="0.165" horizontalRun="0.675" slope="13.736268" higherEndpoint="corridor_f1_v04" accessNote="Ramp rises from the east restroom toward Room 106"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage width="1.02" rise="0.165" horizontalRun="0.675" slope="13.736268" slopePolicy="advisory" higherEndpoint="corridor_f1_v04" accessNote="Ramp rises from the east restroom toward Room 106"/></gml:GenericMetaData></gml:metaDataProperty>
             <core:weight>2</core:weight>
             <core:connects xlink:href="#corridor_f1_v03"/>
             <core:connects xlink:href="#corridor_f1_v04"/>

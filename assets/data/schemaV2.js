@@ -91,6 +91,7 @@ export function migrateBuildingV1ToV2(
       wheelchairAccessible:
         space.type !== "stairs" &&
         space.accessibility?.wheelchairAccessible !== false,
+      doorwayNotice: space.accessibility?.doorwayNotice ?? null,
       doorWidth:
         space.accessibility?.doorWidth === undefined
           ? null
@@ -184,6 +185,7 @@ export function migrateBuildingV1ToV2(
           connection.accessibility?.slope === undefined
             ? null
             : connection.accessibility.slope,
+        advisoryRampHighEnd: connection.accessibility?.advisoryRampHighEnd ?? null,
         accessNote: connection.accessibility?.accessNote ?? null,
         // Door measurements belong to this transition; do not confuse
         // corridor width with clear doorway opening width.

@@ -230,10 +230,6 @@ const routeDestinations = mapData.nodes.filter(
 for (const start of routeDestinations) {
   for (const goal of routeDestinations) {
     const path = findPath(start.id, goal.id, mapData);
-    if (start.id !== goal.id && (start.id === room106.id || goal.id === room106.id)) {
-      assert.strictEqual(path.length, 0, 'The east ramp is the only mapped approach to Room 106');
-      continue;
-    }
     assert.ok(
       path.length > 0,
       `Expected a wheelchair route from ${start.id} to ${goal.id}`
@@ -279,10 +275,9 @@ const eastRamp = mapData.edges.find(edge => edge.id === 'f1_v03_v04');
 assert.strictEqual(eastRamp.width, 1.02);
 assert.ok(Math.abs(eastRamp.slope - Math.atan2(16.5, 67.5) * 180 / Math.PI) < 0.000001);
 assert.strictEqual(eastRamp.accessNote, 'Ramp rises from the east restroom toward Room 106');
-for (const [from, to] of [['restroom_f1_east', room106.id], [room106.id, 'restroom_f1_east']]) {
-  assert.strictEqual(solveConstrainedRoute(from, to, mapData).feasible, false);
-}
-assert.strictEqual(findPath(room124.id, room106.id, mapData).length, 0);
+assert.strictEqual(eastRamp.advisoryRampHighEnd, 'corridor_f1_v04');
+assert.strictEqual(getRoomDoorWarningMessage(room106.id, mapData.nodeMap, mapData.edges), null);
+assert.strictEqual(solveConstrainedRoute(room124.id, room106.id, mapData, { maxSteepSegments: 0 }).feasible, false);
 assert.ok(findPath('corridor_f1_v04', room106.id, mapData).length > 0);
 
 const crossFloor = findPath(room124.id, room211.id, mapData);
@@ -759,6 +754,19 @@ const generateMeasuredSteps = loadNamedExport(
   fs.readFileSync('./src/logic/pathfinder.js', 'utf8') + '\n' + instructionBody,
   'generateRouteSteps'
 );
+for (const [from, to, direction] of [
+  ['restroom_f1_east', room106.id, 'uphill'], [room106.id, 'restroom_f1_east', 'downhill'],
+  [room124.id, room106.id, 'uphill'], [room106.id, room124.id, 'downhill'],
+]) {
+  const route = solveConstrainedRoute(from, to, mapData, { maxElevatorTransfers: 1 });
+  assert.ok(route.feasible);
+  const steps = generateMeasuredSteps(route.path, mapData.nodeMap, mapData.edges);
+  const rampSteps = steps.filter(step => step.icon === 'ramp');
+  assert.strictEqual(rampSteps.length, 1);
+  assert.ok(rampSteps[0].instruction.includes(direction));
+  assert.ok(rampSteps[0].warning.includes('13.7°'));
+  assert.ok(steps.some(step => step.warning.includes('12.0 cm')));
+}
 const instructionSteps = generateMeasuredSteps(
   surveyedRoute.path, oneDoorSurvey.map.nodeMap, oneDoorSurvey.map.edges
 );

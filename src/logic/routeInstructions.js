@@ -102,19 +102,47 @@ export function generateRouteSteps(route, nodeMap, edges) {
     }
 
     if (current.type === 'corridor') {
+      const incoming = getEdge(edges, previous.id, current.id);
+      if (incoming?.advisoryRampHighEnd) {
+        const direction = current.id === incoming.advisoryRampHighEnd ? 'uphill' : 'downhill';
+        steps.push({
+          key: 'ramp-' + index,
+          icon: 'ramp',
+          instruction: 'Steep ' + direction + ' ramp ahead',
+          warning: 'Slope: ' + incoming.slope.toFixed(1) + '°.'
+            + (incoming.width == null ? '' : ' Ramp width: ' + Math.round(incoming.width * 100) + ' cm.'),
+          node: current,
+        });
+        index += 1;
+        continue;
+      }
       let end = index;
 
       while (
         end + 1 < route.length &&
         nodeMap[route[end + 1]] &&
         nodeMap[route[end + 1]].type === 'corridor' &&
-        nodeMap[route[end + 1]].floor === current.floor
+        nodeMap[route[end + 1]].floor === current.floor &&
+        !getEdge(edges, route[end], route[end + 1])?.advisoryRampHighEnd
       ) {
         end += 1;
       }
 
       const target = nodeMap[route[end + 1]];
 
+      if (target && getEdge(edges, route[end], target.id)?.advisoryRampHighEnd) {
+        if (end > index) {
+          steps.push({
+            key: 'corridor-' + index,
+            icon: 'corridor',
+            instruction: 'Follow the corridor to the ramp',
+            warning: '',
+            node: nodeMap[route[end]],
+          });
+        }
+        index = end + 1;
+        continue;
+      }
       if (target) {
         steps.push({
           key: 'corridor-' + index,

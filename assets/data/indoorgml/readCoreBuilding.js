@@ -91,7 +91,11 @@ function readCoreBuilding(xml) {
     return {
       id: idOf(cell), type: info.getAttribute('category'), floorId: info.getAttribute('levelId'),
       name: nameOf(cell), code: info.getAttribute('code') || null, geometry: rectangle(cell),
-      accessibility: { wheelchairAccessible: info.getAttribute('wheelchairAccessible') !== 'false', doorWidth: null, threshold: null },
+      accessibility: {
+        wheelchairAccessible: info.getAttribute('wheelchairAccessible') !== 'false',
+        doorwayNotice: info.getAttribute('doorwayNotice') || null,
+        doorWidth: null, threshold: null,
+      },
     };
   });
   const cellIds = new Set(spaces.map(space => space.id));
@@ -123,10 +127,16 @@ function readCoreBuilding(xml) {
     const passage = all(edge, WC, 'Passage')[0];
     const weight = children(edge, CORE, 'weight')[0];
     const type = passage?.getAttribute('transitionType');
+    const higherEndpoint = passage?.getAttribute('higherEndpoint');
+    const advisoryRamp = passage?.getAttribute('slopePolicy') === 'advisory';
+    if (advisoryRamp && !endpoints.includes(higherEndpoint)) {
+      throw new Error('Invalid higher endpoint for ramp ' + id);
+    }
     return {
       id, from: endpoints[0], to: endpoints[1], routing: { cost: weight ? Number(weight.textContent) : 1 },
       accessibility: {
         wheelchairAccessible: passage?.getAttribute('wheelchairAccessible') !== 'false',
+        advisoryRampHighEnd: advisoryRamp ? higherEndpoint : null,
         accessNote: passage?.getAttribute('accessNote') || null,
         width: passage?.hasAttribute('width') ? Number(passage.getAttribute('width')) : null,
         slope: passage?.hasAttribute('slope') ? Number(passage.getAttribute('slope')) : null,

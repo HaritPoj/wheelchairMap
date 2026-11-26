@@ -283,6 +283,7 @@ export function normalizeBuildingData(buildingData) {
           transition.accessibility?.doorWidth === undefined
             ? null
             : transition.accessibility.doorWidth,
+        advisoryRampHighEnd: transition.accessibility?.advisoryRampHighEnd ?? null,
         accessNote: transition.accessibility?.accessNote ?? null,
         leaf_count: transition.accessibility?.leafCount ?? null,
         threshold:

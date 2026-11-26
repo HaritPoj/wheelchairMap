@@ -75,6 +75,7 @@ export function getRouteDoorReport(route, nodeMap, edges) {
 
 function describeRoomDoorConditions(roomId, nodeMap, edges, referenceWidth) {
   const room = nodeMap?.[roomId];
+  if (room?.accessibility?.doorwayNotice === 'directions') return null;
   if (!room || (room.type !== 'room' && room.type !== 'restroom')) return null;
 
   const doors = (edges || []).flatMap(edge => {
@@ -137,7 +138,7 @@ function getEdgeCost(edge, fromId, toId, nodeMap) {
   if (width !== null && width < 0.9) return Infinity;
 
   if (slope !== null) {
-    if (slope >= 5.0) return Infinity;
+    if (slope >= 5.0 && !edge.advisoryRampHighEnd) return Infinity;
     if (slope >= 3.0) cost += 50;
   }
 
