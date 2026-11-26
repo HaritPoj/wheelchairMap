@@ -28,8 +28,6 @@ function nodeLabel(node) {
 export default function HUD({
   mapData,
   currentFloor,
-  viewMode = 'floor',
-  onShowSite,
   onFloor,
   locationId,
   destination,
@@ -110,173 +108,149 @@ export default function HUD({
           )}
         </View>
 
-        {viewMode !== 'site' && (
-          <>
-            <View style={styles.routeCard}>
-              <TouchableOpacity
-                style={[
-                  styles.locationRow,
-                  mode === 'location' && styles.locationRowActive,
-                ]}
-                onPress={() => chooseMode('location')}
-                accessibilityRole="button"
-                accessibilityState={{ selected: mode === 'location' }}
-                accessibilityLabel="Choose starting location"
-              >
-                <View style={[styles.routeMarker, styles.startMarker]} />
-                <View style={styles.locationTextBox}>
-                  <Text style={styles.locationLabel}>FROM</Text>
-                  <Text style={styles.locationValue} numberOfLines={1}>
-                    {locationNode ? nodeLabel(locationNode) : 'Set your location'}
-                  </Text>
-                </View>
-                {locationNode ? (
-                  <TouchableOpacity
-                    style={styles.rowClearButton}
-                    onPress={onClearLocation}
-                    accessibilityRole="button"
-                    accessibilityLabel="Clear starting location"
-                  >
-                    <Text style={styles.rowClearText}>✕</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <Text style={styles.rowChevron}>›</Text>
-                )}
-              </TouchableOpacity>
-
-              <View style={styles.routeDivider} />
-
-              <TouchableOpacity
-                style={[
-                  styles.locationRow,
-                  mode === 'destination' && styles.locationRowActive,
-                ]}
-                onPress={() => chooseMode('destination')}
-                accessibilityRole="button"
-                accessibilityState={{ selected: mode === 'destination' }}
-                accessibilityLabel="Choose destination"
-              >
-                <View style={[styles.routeMarker, styles.destinationMarker]} />
-                <View style={styles.locationTextBox}>
-                  <Text style={styles.locationLabel}>TO</Text>
-                  <Text style={styles.locationValue} numberOfLines={1}>
-                    {destinationNode ? nodeLabel(destinationNode) : 'Choose destination'}
-                  </Text>
-                </View>
-                {destinationNode ? (
-                  <TouchableOpacity
-                    style={styles.rowClearButton}
-                    onPress={onClearDestination}
-                    accessibilityRole="button"
-                    accessibilityLabel="Clear destination"
-                  >
-                    <Text style={styles.rowClearText}>✕</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <Text style={styles.rowChevron}>›</Text>
-                )}
-              </TouchableOpacity>
+        <View style={styles.routeCard}>
+          <TouchableOpacity
+            style={[
+              styles.locationRow,
+              mode === 'location' && styles.locationRowActive,
+            ]}
+            onPress={() => chooseMode('location')}
+            accessibilityRole="button"
+            accessibilityState={{ selected: mode === 'location' }}
+            accessibilityLabel="Choose starting location"
+          >
+            <View style={[styles.routeMarker, styles.startMarker]} />
+            <View style={styles.locationTextBox}>
+              <Text style={styles.locationLabel}>FROM</Text>
+              <Text style={styles.locationValue} numberOfLines={1}>
+                {locationNode ? nodeLabel(locationNode) : 'Set your location'}
+              </Text>
             </View>
-
-            <View style={styles.searchRow}>
-              <Text style={styles.searchIcon}>⌕</Text>
-              <TextInput
-                style={styles.searchInput}
-                placeholder={
-                  mode === 'location'
-                    ? 'Search your current room'
-                    : 'Search room or destination'
-                }
-                placeholderTextColor="#9CA3AF"
-                value={query}
-                onChangeText={setQuery}
-                returnKeyType="search"
-                onSubmitEditing={() => Keyboard.dismiss()}
-                accessibilityLabel={
-                  mode === 'location'
-                    ? 'Search starting location'
-                    : 'Search destination'
-                }
-              />
-
-              {query.length > 0 && (
-                <TouchableOpacity
-                  style={styles.searchClearButton}
-                  onPress={() => setQuery('')}
-                  accessibilityRole="button"
-                  accessibilityLabel="Clear search"
-                >
-                  <Text style={styles.searchClearText}>✕</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-
-            {results.length > 0 && (
-              <ScrollView
-                style={styles.results}
-                keyboardShouldPersistTaps="handled"
-                nestedScrollEnabled
+            {locationNode ? (
+              <TouchableOpacity
+                style={styles.rowClearButton}
+                onPress={onClearLocation}
+                accessibilityRole="button"
+                accessibilityLabel="Clear starting location"
               >
-                {results.map(node => (
-                  <TouchableOpacity
-                    key={node.id}
-                    style={styles.resultItem}
-                    onPress={() => selectNode(node.id)}
-                    accessibilityRole="button"
-                    accessibilityLabel={nodeLabel(node) + ', Floor ' + node.floor}
-                  >
-                    <View style={styles.resultIconBox}>
-                      <Text style={styles.resultIcon}>{getIcon(node.type)}</Text>
-                    </View>
-                    <View style={styles.resultTextBox}>
-                      <Text style={styles.resultText} numberOfLines={1}>
-                        {nodeLabel(node)}
-                      </Text>
-                      <Text style={styles.resultSub}>Floor {node.floor}</Text>
-                    </View>
-                    <Text style={styles.resultChevron}>›</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+                <Text style={styles.rowClearText}>✕</Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={styles.rowChevron}>›</Text>
             )}
+          </TouchableOpacity>
 
-            {(routeMessage || accessibilityNotice) && (
-              <View style={styles.messageBox}>
-                <Text style={styles.messageIcon}>!</Text>
-                <Text style={styles.messageText}>
-                  {routeMessage || accessibilityNotice}
-                </Text>
-              </View>
+          <View style={styles.routeDivider} />
+
+          <TouchableOpacity
+            style={[
+              styles.locationRow,
+              mode === 'destination' && styles.locationRowActive,
+            ]}
+            onPress={() => chooseMode('destination')}
+            accessibilityRole="button"
+            accessibilityState={{ selected: mode === 'destination' }}
+            accessibilityLabel="Choose destination"
+          >
+            <View style={[styles.routeMarker, styles.destinationMarker]} />
+            <View style={styles.locationTextBox}>
+              <Text style={styles.locationLabel}>TO</Text>
+              <Text style={styles.locationValue} numberOfLines={1}>
+                {destinationNode ? nodeLabel(destinationNode) : 'Choose destination'}
+              </Text>
+            </View>
+            {destinationNode ? (
+              <TouchableOpacity
+                style={styles.rowClearButton}
+                onPress={onClearDestination}
+                accessibilityRole="button"
+                accessibilityLabel="Clear destination"
+              >
+                <Text style={styles.rowClearText}>✕</Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={styles.rowChevron}>›</Text>
             )}
-          </>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.searchRow}>
+          <Text style={styles.searchIcon}>⌕</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder={
+              mode === 'location'
+                ? 'Search your current room'
+                : 'Search room or destination'
+            }
+            placeholderTextColor="#9CA3AF"
+            value={query}
+            onChangeText={setQuery}
+            returnKeyType="search"
+            onSubmitEditing={() => Keyboard.dismiss()}
+            accessibilityLabel={
+              mode === 'location'
+                ? 'Search starting location'
+                : 'Search destination'
+            }
+          />
+
+          {query.length > 0 && (
+            <TouchableOpacity
+              style={styles.searchClearButton}
+              onPress={() => setQuery('')}
+              accessibilityRole="button"
+              accessibilityLabel="Clear search"
+            >
+              <Text style={styles.searchClearText}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {results.length > 0 && (
+          <ScrollView
+            style={styles.results}
+            keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled
+          >
+            {results.map(node => (
+              <TouchableOpacity
+                key={node.id}
+                style={styles.resultItem}
+                onPress={() => selectNode(node.id)}
+                accessibilityRole="button"
+                accessibilityLabel={nodeLabel(node) + ', Floor ' + node.floor}
+              >
+                <View style={styles.resultIconBox}>
+                  <Text style={styles.resultIcon}>{getIcon(node.type)}</Text>
+                </View>
+                <View style={styles.resultTextBox}>
+                  <Text style={styles.resultText} numberOfLines={1}>
+                    {nodeLabel(node)}
+                  </Text>
+                  <Text style={styles.resultSub}>Floor {node.floor}</Text>
+                </View>
+                <Text style={styles.resultChevron}>›</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
+
+        {(routeMessage || accessibilityNotice) && (
+          <View style={styles.messageBox}>
+            <Text style={styles.messageIcon}>!</Text>
+            <Text style={styles.messageText}>
+              {routeMessage || accessibilityNotice}
+            </Text>
+          </View>
         )}
       </View>
 
       <View style={styles.mapSwitcher}>
-        <Text style={styles.mapSwitcherLabel}>VIEW</Text>
+        <Text style={styles.mapSwitcherLabel}>FLOOR</Text>
         <View style={styles.mapSegments}>
-          <TouchableOpacity
-            style={[
-              styles.mapButton,
-              viewMode === 'site' && styles.siteButtonActive,
-            ]}
-            onPress={onShowSite}
-            accessibilityRole="button"
-            accessibilityState={{ selected: viewMode === 'site' }}
-            accessibilityLabel="Campus map overview"
-          >
-            <Text
-              style={[
-                styles.mapButtonText,
-                viewMode === 'site' && styles.mapButtonTextActive,
-              ]}
-            >
-              MAP
-            </Text>
-          </TouchableOpacity>
-
           {floors.map(floor => {
-            const selected = viewMode !== 'site' && currentFloor === floor;
+            const selected = currentFloor === floor;
             return (
               <TouchableOpacity
                 key={floor}
@@ -576,9 +550,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F3F4F6',
-  },
-  siteButtonActive: {
-    backgroundColor: '#0F9D8A',
   },
   floorButtonActive: {
     backgroundColor: '#2563EB',
