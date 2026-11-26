@@ -573,6 +573,29 @@ for (const [from, to] of screenshotCases) {
   assert.strictEqual(result.path[result.path.length - 1], to);
 }
 
+// Check the actual drawn line, including its 6-unit stroke. A corridor
+// edge can cross a room even when the room is absent from the node path.
+const room126 = roomByCode('126');
+const westHall = mapData.nodeMap.corridor_f1_west_area;
+const hallLeft = westHall.x - westHall.width / 2;
+const roomLeft = room126.x - room126.width / 2;
+const roomRight = room126.x + room126.width / 2;
+const roomTop = room126.y - room126.height / 2;
+const roomBottom = room126.y + room126.height / 2;
+const strokeRadius = 3;
+for (const [from, to] of [['room_124', 'room_125'], ['room_125', 'room_124']]) {
+  const { points } = screenshotRoutePoints(from, to);
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1], b = points[i];
+    const clearOfRoom = Math.max(a.x, b.x) + strokeRadius < roomLeft ||
+      Math.min(a.x, b.x) - strokeRadius > roomRight ||
+      Math.max(a.y, b.y) + strokeRadius < roomTop ||
+      Math.min(a.y, b.y) - strokeRadius > roomBottom;
+    assert.ok(clearOfRoom, from + ' -> ' + to + ': route stroke touches Room 126');
+    assert.ok(Math.min(a.x, b.x) - strokeRadius > hallLeft, 'Route leaves the west corridor');
+  }
+}
+
 const route109to110 = screenshotRoutePoints('room_109', 'room_110');
 sameValues(route109to110.path, [
   'room_109', 'corridor_f1_d109', 'corridor_f1_d110', 'room_110',
