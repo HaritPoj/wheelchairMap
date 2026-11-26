@@ -23,6 +23,7 @@ export function getDoorMeasurements(edge, from, to) {
     doorWidth,
     leafCount: numeric(edge.leaf_count),
     threshold,
+    accessNote: edge.accessNote ?? null,
     missingMeasurement: doorWidth === null || threshold === null,
   };
 }
@@ -35,7 +36,8 @@ export function formatDoorLeaves(door) {
 }
 
 export function needsDoorCaution(door, referenceWidth = 0.9) {
-  return (door.doorWidth === null && door.leafCount != null) ||
+  return Boolean(door.accessNote) ||
+    (door.doorWidth === null && door.leafCount != null) ||
     (door.doorWidth !== null && door.doorWidth < referenceWidth) ||
     (door.threshold !== null && door.threshold >= 0.01);
 }
@@ -99,7 +101,8 @@ function describeRoomDoorConditions(roomId, nodeMap, edges, referenceWidth) {
     if (door.threshold !== null) {
       attributes.push('threshold height ' + cm(door.threshold) + ' cm');
     }
-    return attributes.join(', ');
+    const measurements = attributes.join(', ');
+    return [measurements, door.accessNote].filter(Boolean).join('. ');
   });
   return (room.name || room.code || roomId) + ': ' + descriptions.join('; ') + '.';
 }

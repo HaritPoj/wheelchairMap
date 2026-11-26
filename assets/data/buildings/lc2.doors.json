@@ -22,6 +22,10 @@
   "f1_room125_top": { "doorWidth": 0.8, "leafCount": 2, "threshold": 0 },
   "f1_room126_bottom": { "doorWidth": 0.8, "leafCount": 1, "threshold": 0 },
   "f1_room126_top": { "doorWidth": 0.8, "leafCount": 2, "threshold": 0 },
+  "f1_wc_west_bottom": { "doorWidth": 0.83, "leafCount": 1, "threshold": 0.23 },
+  "f1_wc_center_top": { "doorWidth": 1, "leafCount": 1, "threshold": null },
+  "f1_wc_east_left": { "doorWidth": 0.9, "leafCount": 1, "threshold": 0.07 },
+  "f1_elevator": { "doorWidth": 0.9, "leafCount": null, "threshold": null },
   "f2_room211_bottom_left": { "doorWidth": 0.9, "leafCount": 2, "threshold": 0.07 },
   "f2_room212_left": { "doorWidth": 0.76, "leafCount": 2, "threshold": 0.04 },
   "f2_room213_top_left": { "doorWidth": 0.8, "leafCount": 2, "threshold": 0 },
@@ -31,5 +35,14 @@
   "f2_room220_top": { "doorWidth": 0.8, "leafCount": 1, "threshold": 0.04 },
   "f2_room221_top": { "doorWidth": 0.8, "leafCount": 1, "threshold": 0.04 },
   "f2_room222_top": { "doorWidth": 0.8, "leafCount": 1, "threshold": 0.04 },
-  "f2_room223_top": { "doorWidth": 1.09, "leafCount": 2, "threshold": 0 }
+  "f2_room223_top": { "doorWidth": 1.09, "leafCount": 2, "threshold": 0 },
+  "f2_room224_top": { "doorWidth": 0.79, "leafCount": 2, "threshold": 0.08 },
+  "f2_room225_top": { "doorWidth": 0.69, "leafCount": 2, "threshold": 0.08 },
+  "f2_room226_top": { "doorWidth": 0.83, "leafCount": 2, "threshold": 0.03 },
+  "f2_room227_top": { "doorWidth": 0.82, "leafCount": 2, "threshold": 0.03 },
+  "f2_room228_top": { "doorWidth": 0.87, "leafCount": 1, "threshold": 0.09 },
+  "f2_room229_top": { "doorWidth": 0.78, "leafCount": 2, "threshold": 0.09 },
+  "f2_room230_top": { "doorWidth": 0.79, "leafCount": 2, "threshold": 0.11 },
+  "f2_wc_east_left": { "doorWidth": 0.89, "leafCount": 1, "threshold": 0 },
+  "f2_elevator_bottom": { "doorWidth": 0.9, "leafCount": null, "threshold": null }
 }

@@ -22,7 +22,7 @@ export function getEdgeWarning(edge, destination, previous = null) {
   const slope = numeric(edge.slope);
   const width = numeric(edge.width);
 
-  const notices = [];
+  const notices = door?.accessNote ? [door.accessNote] : [];
   const leaves = door && needsDoorCaution(door) ? formatDoorLeaves(door) : '';
   if (leaves) {
     notices.push(leaves);

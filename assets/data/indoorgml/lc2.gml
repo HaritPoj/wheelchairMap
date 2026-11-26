@@ -1370,6 +1370,7 @@
             <core:connects xlink:href="#corridor_f1_d113"/>
           </core:Transition></core:transitionMember>
           <core:transitionMember><core:Transition gml:id="f1_wc_center_top">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage accessNote="Men's entrance: 2 steps, 13.5 cm each. Women's entrance: ramp, gradient not measured"/></gml:GenericMetaData></gml:metaDataProperty>
             <core:weight>1</core:weight>
             <core:connects xlink:href="#state_restroom_f1_center"/>
             <core:connects xlink:href="#corridor_f1_u13"/>

@@ -127,6 +127,7 @@ function readCoreBuilding(xml) {
       id, from: endpoints[0], to: endpoints[1], routing: { cost: weight ? Number(weight.textContent) : 1 },
       accessibility: {
         wheelchairAccessible: passage?.getAttribute('wheelchairAccessible') !== 'false',
+        accessNote: passage?.getAttribute('accessNote') || null,
         width: passage?.hasAttribute('width') ? Number(passage.getAttribute('width')) : null,
         slope: passage?.hasAttribute('slope') ? Number(passage.getAttribute('slope')) : null,
         doorWidth: null, leafCount: null, threshold: null,

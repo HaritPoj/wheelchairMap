@@ -184,6 +184,7 @@ export function migrateBuildingV1ToV2(
           connection.accessibility?.slope === undefined
             ? null
             : connection.accessibility.slope,
+        accessNote: connection.accessibility?.accessNote ?? null,
         // Door measurements belong to this transition; do not confuse
         // corridor width with clear doorway opening width.
         doorWidth:
