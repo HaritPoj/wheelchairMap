@@ -23,7 +23,7 @@
   "f1_room126_bottom": { "doorWidth": 0.8, "leafCount": 1, "threshold": 0 },
   "f1_room126_top": { "doorWidth": 0.8, "leafCount": 2, "threshold": 0 },
   "f1_wc_west_bottom": { "doorWidth": 0.83, "leafCount": 1, "threshold": 0.23 },
-  "f1_wc_center_top": { "doorWidth": 1, "leafCount": 1, "threshold": null },
+  "f1_wc_center_top": { "doorWidth": 1, "leafCount": 1, "threshold": 0 },
   "f1_wc_east_left": { "doorWidth": 0.9, "leafCount": 1, "threshold": 0.07 },
   "f1_elevator": { "doorWidth": 0.9, "leafCount": null, "threshold": null },
   "f2_room211_bottom_left": { "doorWidth": 0.9, "leafCount": 2, "threshold": 0.07 },

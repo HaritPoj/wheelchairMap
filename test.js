@@ -892,13 +892,13 @@ for (const [code, widthCm, thresholdCm] of [
 const centralRestroom = 'restroom_f1_center';
 const entranceWarning = selectedRoomWarning(centralRestroom);
 assert.ok(entranceWarning.includes("Men's entrance: 2 steps, 13.5 cm each"));
-assert.ok(entranceWarning.includes("Women's entrance: ramp, gradient not measured"));
+assert.ok(entranceWarning.includes("Women's entrance: slope."));
 for (const [from, to] of [[centralRestroom, 'corridor_f1_u13'], ['corridor_f1_u13', centralRestroom]]) {
   const route = solveConstrainedRoute(from, to, mapData);
   assert.ok(route.feasible);
   const [door] = getRouteDoorReport(route.path, mapData.nodeMap, mapData.edges).doors;
   assert.strictEqual(door.doorWidth, 1);
-  assert.strictEqual(door.threshold, null);
+  assert.strictEqual(door.threshold, 0);
   const steps = generateMeasuredSteps(route.path, mapData.nodeMap, mapData.edges);
   assert.ok(steps.some(step => step.warning.includes(door.accessNote)));
 }
