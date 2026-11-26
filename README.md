@@ -121,7 +121,7 @@ likely reject many/all routes.
 Edit doorway measurements in `assets/data/buildings/lc2.doors.json`. Use the
 transition ID for the physical doorway as the key. Omit unmeasured fields.
 
-Rooms 107–111 and 114 on Floor 1 each have double doors at one entrance and a 10 cm threshold. The reported clear opening is 74 cm for Rooms 107–111 and 84 cm for Room 114. The Room 109 record is shown below.
+Room 106 has double doors with a 92 cm clear opening and a 12 cm threshold. Rooms 107–111 and 114 on Floor 1 each have double doors at one entrance and a 10 cm threshold. The reported clear opening is 74 cm for Rooms 107–111 and 84 cm for Room 114. The Room 109 record is shown below.
 
 ```json
 {
