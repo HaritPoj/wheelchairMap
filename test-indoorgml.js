@@ -326,8 +326,9 @@ assert.strictEqual(corridor211.geometry.x, 1178);
 assert.strictEqual(corridor211.geometry.y, 168);
 
 const floorPlanSource = fs.readFileSync('./src/rendering/FloorPlan.js', 'utf8');
-assert.ok(
-  floorPlanSource.includes('stroke="none"\n                    />\n                    {renderRoomWalls(node, x, y, roomWidth, roomHeight)}'),
+assert.match(
+  floorPlanSource,
+  /stroke="none"\s*\/>\s*\{renderRoomWalls\(node, x, y, roomWidth, roomHeight\)\}/,
   'Standard Floor 2 rooms must render door gaps rather than fully closed rectangles'
 );
 
