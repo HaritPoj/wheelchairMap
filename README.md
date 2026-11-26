@@ -157,13 +157,13 @@ building and individual wheelchair user's needs.
 
 ### Floor 2, Rooms 211–213
 
-Each room has double doors at its mapped entrance. The clear opening width is unmeasured for all three rooms.
+Each room has double doors at its mapped entrance.
 
 | Room | Leaves | Clear opening width | Threshold height |
 | --- | ---: | ---: | ---: |
-| 211 | 2 | Unknown | 7 cm |
-| 212 | 2 | Unknown | 4 cm |
-| 213 | 2 | Unknown | 0 cm (flush) |
+| 211 | 2 | 90 cm | 7 cm |
+| 212 | 2 | 76 cm | 4 cm |
+| 213 | 2 | 80 cm | 0 cm (flush) |
 
 ### Floor 2, Rooms 217–222
 

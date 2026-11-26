@@ -856,17 +856,17 @@ for (const [from, to] of [[room223, landing223], [landing223, room223]]) {
   const steps = generateMeasuredSteps(route.path, mapData.nodeMap, mapData.edges);
   assert.ok(steps.every(step => !step.warning), 'A leaf count alone should not trigger a doorway warning');
 }
-for (const [code, thresholdCm] of [
-  ['211', 7], ['212', 4], ['213', 0],
+for (const [code, widthCm, thresholdCm] of [
+  ['211', 90, 7], ['212', 76, 4], ['213', 80, 0],
 ]) {
   const room = 'room_' + code;
   const opening = buildingData.openings.find(item => item.connects.includes(room));
   assert.strictEqual(opening.accessibility.leafCount, 2);
-  assert.strictEqual(opening.accessibility.width, null);
+  assert.strictEqual(opening.accessibility.width, widthCm / 100);
   assert.strictEqual(opening.accessibility.threshold, thresholdCm / 100);
   const leaves = 'Double doors';
   assert.ok(selectedRoomWarning(room).includes(
-    leaves + ', clear width not measured, threshold height ' + thresholdCm + ' cm.'
+    leaves + ', door width ' + widthCm + ' cm, threshold height ' + thresholdCm + ' cm.'
   ));
   const corridor = opening.connects.find(id => id !== room);
   for (const [from, to] of [[room, corridor], [corridor, room]]) {
@@ -877,15 +877,16 @@ for (const [code, thresholdCm] of [
     const [door] = report.doors;
     assert.strictEqual(door.unitId, room);
     assert.strictEqual(door.leafCount, 2);
-    assert.strictEqual(door.doorWidth, null);
+    assert.strictEqual(door.doorWidth, widthCm / 100);
     assert.strictEqual(door.threshold, thresholdCm / 100);
-    assert.strictEqual(report.unknownCount, 1);
-    assert.strictEqual(report.narrowCount, 0);
+    assert.strictEqual(report.unknownCount, 0);
+    assert.strictEqual(report.narrowCount, widthCm < 90 ? 1 : 0);
     assert.strictEqual(report.raisedThresholdCount, thresholdCm > 0 ? 1 : 0);
     assert.strictEqual(route.resources.thresholdSegments, thresholdCm > 0 ? 1 : 0);
-    assert.strictEqual(solveConstrainedRoute(from, to, mapData, {requireMeasuredDoorWidths: true}).feasible, false);
+    assert.strictEqual(solveConstrainedRoute(from, to, mapData, {requireMeasuredDoorWidths: true}).feasible, true);
     const steps = generateMeasuredSteps(route.path, mapData.nodeMap, mapData.edges);
-    assert.ok(steps.some(step => step.warning.includes(leaves) && step.warning.includes('Clear width not measured')));
+    const caution = widthCm < 90 ? 'Door width ' + widthCm + ' cm' : 'Raised threshold: ' + thresholdCm.toFixed(1) + ' cm';
+    assert.ok(steps.some(step => step.warning.includes(leaves) && step.warning.includes(caution)));
   }
 }
 const room217Warning = getRoomDoorWarningMessage('room_217', mapData.nodeMap, mapData.edges);
