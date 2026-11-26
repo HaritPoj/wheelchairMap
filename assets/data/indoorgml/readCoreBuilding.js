@@ -81,6 +81,8 @@ function readCoreBuilding(xml) {
     name: level.getAttribute('name'),
     map: {
       width: Number(level.getAttribute('width')), height: Number(level.getAttribute('height')),
+      walls: children(level, WC, 'Wall').map(wall =>
+        wall.getAttribute('points').trim().split(/\s+/).map(pair => numbers(pair.replace(',', ' ')))),
       boundary: level.getAttribute('boundary').trim().split(/\s+/).map(pair => numbers(pair.replace(',', ' '))),
     },
   }));

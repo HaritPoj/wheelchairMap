@@ -215,7 +215,7 @@ assert.strictEqual(
 );
 
 const stairs = mapData.nodes.filter(node => node.type === 'stairs');
-sameValues(stairs.map(node => node.floor).sort(), [1, 3]);
+sameValues(stairs.map(node => node.floor).sort(), [1]);
 assert.ok(
   stairs.every(
     stair => !mapData.edges.some(edge => edge.from === stair.id || edge.to === stair.id)

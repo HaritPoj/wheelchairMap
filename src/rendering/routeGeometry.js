@@ -8,9 +8,7 @@ function numberOrZero(value) {
 export function getDoorSpec(edge, node, other) {
   if (!node || !other) return null;
   const id = String(edge?.id || '');
-  const side = ['top', 'bottom', 'left', 'right'].find(candidate =>
-    id.includes('_' + candidate)
-  );
+  const side = id.split('_').find(token => ['top', 'bottom', 'left', 'right'].includes(token));
 
   if (side) {
     let position = 0.5;
@@ -120,7 +118,13 @@ export function getRouteSegmentPoints(nodeA, nodeB, edge) {
   if (close(start.x, end.x) || close(start.y, end.y)) return [start, end];
 
   let bend;
-  if (start.side === 'top' || start.side === 'bottom') {
+  if (nodeA.accessibility?.throughRoom || nodeB.accessibility?.throughRoom) {
+    const doorway = start.side ? start : end;
+    const interior = start.side ? end : start;
+    bend = doorway.side === 'left' || doorway.side === 'right'
+      ? { x: interior.x, y: doorway.y }
+      : { x: doorway.x, y: interior.y };
+  } else if (start.side === 'top' || start.side === 'bottom') {
     bend = { x: start.x, y: end.y };
   } else if (start.side === 'left' || start.side === 'right') {
     bend = { x: end.x, y: start.y };

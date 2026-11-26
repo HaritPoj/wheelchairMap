@@ -46,7 +46,7 @@ Floor 2: 17 numbered rooms (`211, 212, 213, 217, 218, 219, 220, 221,
 222, 223, 224, 225, 226, 227, 228, 229, 230`), WC and an elevator.
 The latest Floor 2 layout **does not include stairs**.
 
-Floor 3 uses the directory board rotated 180 degrees to match Floors 1 and 2, with approximate room outlines for Rooms 301–317, the restroom area and the central stairs. Rooms appear on the floor plan and in search. Rooms 314–317 open into Room 313, which connects to the landing outside its entrance. The other wings and elevator have no mapped connection to this group yet. Doorway measurements on this floor remain unknown.
+Floor 3 follows the supplied oriented plan, with traced interior walls, Rooms 301–317, a WC and an elevator marker along the upper corridor. Rooms appear on the floor plan and in search. Rooms 314–317 open into Room 313, which connects to the landing outside its entrance. The other wings and elevator have no mapped connection to this group yet. Doorway measurements on this floor remain unknown.
 
 Door-gap positions are driven by room-to-corridor transition metadata.
 Cross-floor routing uses the elevator, and A* applies wheelchair routing

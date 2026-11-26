@@ -7,7 +7,37 @@
   <gml:metaDataProperty><gml:GenericMetaData><wc:Map coordinateSystem="local">
     <wc:Level id="floor_1" number="1" name="Floor 1" width="1104" height="395" boundary="33,249 390,249 390,223 690,223 690,246 946,246 946,42 1082,42 1082,349 690,349 690,377 389,377 389,354 33,354"/>
     <wc:Level id="floor_2" number="2" name="Floor 2" width="1331" height="452" boundary="56,279 486,279 486,249 847,249 847,273 1156,273 1156,31 1288,31 1288,400 843,400 843,432 483,432 483,408 56,408"/>
-    <wc:Level id="floor_3" number="3" name="Floor 3" width="1324" height="370" boundary="1296,333 498,333 498,337 29,337 29,96 617,91 617,30 696,30 696,91 1296,91"/>
+    <wc:Level id="floor_3" number="3" name="Floor 3" width="970" height="253" boundary="14,78 289,78 290,46 672,46 672,72 954,72 954,209 671,209 671,238 285,238 285,211 14,211">
+      <wc:Wall points="14,78 289,78 290,46 672,46 672,72 954,72 954,209 671,209"/>
+      <wc:Wall points="14,82 14,210 241,210 241,178"/>
+      <wc:Wall points="14,187 84,187 84,153"/>
+      <wc:Wall points="84,78 84,113"/>
+      <wc:Wall points="241,151 241,105 285,105"/>
+      <wc:Wall points="241,166 285,166"/>
+      <wc:Wall points="241,211 285,211"/>
+      <wc:Wall points="285,95 285,238 671,238 671,106"/>
+      <wc:Wall points="285,121 302,121"/>
+      <wc:Wall points="316,121 335,121 335,238"/>
+      <wc:Wall points="357,238 357,186"/>
+      <wc:Wall points="355,160 355,108 438,108"/>
+      <wc:Wall points="355,172 430,172"/>
+      <wc:Wall points="430,108 430,238"/>
+      <wc:Wall points="457,108 570,108"/>
+      <wc:Wall points="510,108 510,238"/>
+      <wc:Wall points="593,108 613,108"/>
+      <wc:Wall points="600,108 600,238"/>
+      <wc:Wall points="632,108 702,108"/>
+      <wc:Wall points="671,205 954,205"/>
+      <wc:Wall points="761,205 761,105 830,105"/>
+      <wc:Wall points="856,205 856,105 895,105"/>
+      <wc:Wall points="856,158 893,158"/>
+      <wc:Wall points="892,105 892,145"/>
+      <wc:Wall points="894,171 894,205"/>
+      <wc:Wall points="914,72 914,92"/>
+      <wc:Wall points="914,145 914,105 954,105"/>
+      <wc:Wall points="920,158 954,158"/>
+      <wc:Wall points="918,171 918,205"/>
+    </wc:Level>
   </wc:Map></gml:GenericMetaData></gml:metaDataProperty>
   <gml:name>LC2</gml:name>
   <core:primalSpaceFeatures><core:PrimalSpaceFeatures gml:id="lc2_primal">
@@ -383,7 +413,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="301"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 301</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_301">
-        <gml:exterior><gml:LinearRing><gml:posList>1295 165 1178 165 1178 122 1295 122 1295 165</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>914 72 954 72 954 105 914 105 914 72</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_301"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -391,7 +421,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="302"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 302</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_302">
-        <gml:exterior><gml:LinearRing><gml:posList>1295 235 1249 235 1249 166 1295 166 1295 235</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>914 105 954 105 954 157 914 157 914 105</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_302"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -399,7 +429,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="303"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 303</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_303">
-        <gml:exterior><gml:LinearRing><gml:posList>1295 304 1249 304 1249 235 1295 235 1295 304</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>918 158 954 158 954 205 918 205 918 158</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_303"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -407,7 +437,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="304"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 304</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_304">
-        <gml:exterior><gml:LinearRing><gml:posList>1225 304 1178 304 1178 235 1225 235 1225 304</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>856 158 895 158 895 205 856 205 856 158</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_304"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -415,7 +445,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="305"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 305</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_305">
-        <gml:exterior><gml:LinearRing><gml:posList>1225 235 1178 235 1178 166 1225 166 1225 235</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>856 105 892 105 892 157 856 157 856 105</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_305"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -423,7 +453,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="306"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 306</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_306">
-        <gml:exterior><gml:LinearRing><gml:posList>1178 304 1063 304 1063 166 1178 166 1178 304</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>761 105 856 105 856 205 761 205 761 105</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_306"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -431,7 +461,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="307"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 307</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_307">
-        <gml:exterior><gml:LinearRing><gml:posList>1032 304 948 304 948 166 1032 166 1032 304</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>671 108 760 108 760 205 671 205 671 108</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_307"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -439,7 +469,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="308"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 308</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_308">
-        <gml:exterior><gml:LinearRing><gml:posList>930 333 821 333 821 169 930 169 930 333</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>600 108 671 108 671 238 600 238 600 108</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_308"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -447,7 +477,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="309"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 309</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_309">
-        <gml:exterior><gml:LinearRing><gml:posList>821 333 712 333 712 169 821 169 821 333</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>510 108 600 108 600 238 510 238 510 108</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_309"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -455,7 +485,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="310"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 310</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_310">
-        <gml:exterior><gml:LinearRing><gml:posList>712 333 607 333 607 169 712 169 712 333</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>430 108 510 108 510 238 430 238 430 108</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_310"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -463,7 +493,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="311"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 311</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_311">
-        <gml:exterior><gml:LinearRing><gml:posList>607 333 515 333 515 251 607 251 607 333</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>357 173 430 173 430 238 357 238 357 173</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_311"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -471,7 +501,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="312"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 312</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_312">
-        <gml:exterior><gml:LinearRing><gml:posList>607 251 515 251 515 169 607 169 607 251</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>355 108 430 108 430 172 355 172 355 108</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_312"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -479,7 +509,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="313" throughRoom="true"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 313</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_313">
-        <gml:exterior><gml:LinearRing><gml:posList>314 307 112 307 112 125 314 125 314 307</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>84 103 241 103 241 210 84 210 84 103</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_313"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -487,7 +517,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="314"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 314</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_314">
-        <gml:exterior><gml:LinearRing><gml:posList>369 307 314 307 314 237 369 237 369 307</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>241 167 285 167 285 210 241 210 241 167</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_314"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -495,7 +525,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="315"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 315</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_315">
-        <gml:exterior><gml:LinearRing><gml:posList>369 237 314 237 314 166 369 166 369 237</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>241 105 285 105 285 166 241 166 241 105</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_315"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -503,7 +533,7 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="316"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 316</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_316">
-        <gml:exterior><gml:LinearRing><gml:posList>112 308 34 308 34 264 112 264 112 308</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>14 187 84 187 84 210 14 210 14 187</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_316"/>
     </core:CellSpace></core:cellSpaceMember>
@@ -511,33 +541,25 @@
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="room" code="317"/></gml:GenericMetaData></gml:metaDataProperty>
       <gml:name>Room 317</gml:name>
       <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_room_317">
-        <gml:exterior><gml:LinearRing><gml:posList>112 264 34 264 34 126 112 126 112 264</gml:posList></gml:LinearRing></gml:exterior>
+        <gml:exterior><gml:LinearRing><gml:posList>14 78 84 78 84 187 14 187 14 78</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
       <core:duality xlink:href="#state_room_317"/>
     </core:CellSpace></core:cellSpaceMember>
-    <core:cellSpaceMember><core:CellSpace gml:id="restroom_f3_west">
+    <core:cellSpaceMember><core:CellSpace gml:id="restroom_f3">
       <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="restroom" code="WC"/></gml:GenericMetaData></gml:metaDataProperty>
-      <gml:name>Floor 3 west restroom</gml:name>
-      <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_restroom_f3_west">
-        <gml:exterior><gml:LinearRing><gml:posList>482 334 428 334 428 269 482 269 482 334</gml:posList></gml:LinearRing></gml:exterior>
+      <gml:name>Floor 3 restroom</gml:name>
+      <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_restroom_f3">
+        <gml:exterior><gml:LinearRing><gml:posList>285 121 335 121 335 238 285 238 285 121</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
-      <core:duality xlink:href="#state_restroom_f3_west"/>
+      <core:duality xlink:href="#state_restroom_f3"/>
     </core:CellSpace></core:cellSpaceMember>
-    <core:cellSpaceMember><core:CellSpace gml:id="restroom_f3_east">
-      <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="restroom" code="WC"/></gml:GenericMetaData></gml:metaDataProperty>
-      <gml:name>Floor 3 east restroom</gml:name>
-      <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_restroom_f3_east">
-        <gml:exterior><gml:LinearRing><gml:posList>425 334 371 334 371 237 425 237 425 334</gml:posList></gml:LinearRing></gml:exterior>
+    <core:cellSpaceMember><core:CellSpace gml:id="elevator_01_f3">
+      <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="elevator" code="Lift"/></gml:GenericMetaData></gml:metaDataProperty>
+      <gml:name>Elevator Floor 3</gml:name>
+      <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_elevator_01_f3">
+        <gml:exterior><gml:LinearRing><gml:posList>418 25 436 25 436 45 418 45 418 25</gml:posList></gml:LinearRing></gml:exterior>
       </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
-      <core:duality xlink:href="#state_restroom_f3_east"/>
-    </core:CellSpace></core:cellSpaceMember>
-    <core:cellSpaceMember><core:CellSpace gml:id="stairs_f3_central">
-      <gml:metaDataProperty><gml:GenericMetaData><wc:Space levelId="floor_3" category="stairs" code="Stairs" wheelchairAccessible="false"/></gml:GenericMetaData></gml:metaDataProperty>
-      <gml:name>Central stairs</gml:name>
-      <core:cellSpaceGeometry><core:Geometry2D><gml:Polygon gml:id="polygon_stairs_f3_central">
-        <gml:exterior><gml:LinearRing><gml:posList>695 95 619 95 619 31 695 31 695 95</gml:posList></gml:LinearRing></gml:exterior>
-      </gml:Polygon></core:Geometry2D></core:cellSpaceGeometry>
-      <core:duality xlink:href="#state_stairs_f3_central"/>
+      <core:duality xlink:href="#state_elevator_01_f3"/>
     </core:CellSpace></core:cellSpaceMember>
   </core:PrimalSpaceFeatures></core:primalSpaceFeatures>
   <core:multiLayeredGraph><core:MultiLayeredGraph gml:id="lc2_dual">
@@ -1256,62 +1278,62 @@
           <core:stateMember><core:State gml:id="state_room_301">
             <gml:name>Room 301</gml:name>
             <core:duality xlink:href="#room_301"/>
-            <core:geometry><gml:Point gml:id="point_state_room_301"><gml:pos>1236.5 143.5</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_301"><gml:pos>934 88.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_302">
             <gml:name>Room 302</gml:name>
             <core:duality xlink:href="#room_302"/>
-            <core:geometry><gml:Point gml:id="point_state_room_302"><gml:pos>1272 200.5</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_302"><gml:pos>934 131</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_303">
             <gml:name>Room 303</gml:name>
             <core:duality xlink:href="#room_303"/>
-            <core:geometry><gml:Point gml:id="point_state_room_303"><gml:pos>1272 269.5</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_303"><gml:pos>936 181.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_304">
             <gml:name>Room 304</gml:name>
             <core:duality xlink:href="#room_304"/>
-            <core:geometry><gml:Point gml:id="point_state_room_304"><gml:pos>1201.5 269.5</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_304"><gml:pos>875.5 181.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_305">
             <gml:name>Room 305</gml:name>
             <core:duality xlink:href="#room_305"/>
-            <core:geometry><gml:Point gml:id="point_state_room_305"><gml:pos>1201.5 200.5</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_305"><gml:pos>874 131</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_306">
             <gml:name>Room 306</gml:name>
             <core:duality xlink:href="#room_306"/>
-            <core:geometry><gml:Point gml:id="point_state_room_306"><gml:pos>1120.5 235</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_306"><gml:pos>808.5 155</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_307">
             <gml:name>Room 307</gml:name>
             <core:duality xlink:href="#room_307"/>
-            <core:geometry><gml:Point gml:id="point_state_room_307"><gml:pos>990 235</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_307"><gml:pos>715.5 156.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_308">
             <gml:name>Room 308</gml:name>
             <core:duality xlink:href="#room_308"/>
-            <core:geometry><gml:Point gml:id="point_state_room_308"><gml:pos>875.5 251</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_308"><gml:pos>635.5 173</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_309">
             <gml:name>Room 309</gml:name>
             <core:duality xlink:href="#room_309"/>
-            <core:geometry><gml:Point gml:id="point_state_room_309"><gml:pos>766.5 251</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_309"><gml:pos>555 173</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_310">
             <gml:name>Room 310</gml:name>
             <core:duality xlink:href="#room_310"/>
-            <core:geometry><gml:Point gml:id="point_state_room_310"><gml:pos>659.5 251</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_310"><gml:pos>470 173</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_311">
             <gml:name>Room 311</gml:name>
             <core:duality xlink:href="#room_311"/>
-            <core:geometry><gml:Point gml:id="point_state_room_311"><gml:pos>561 292</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_311"><gml:pos>393.5 205.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_312">
             <gml:name>Room 312</gml:name>
             <core:duality xlink:href="#room_312"/>
-            <core:geometry><gml:Point gml:id="point_state_room_312"><gml:pos>561 210</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_312"><gml:pos>392.5 140</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_313">
             <gml:name>Room 313</gml:name>
@@ -1320,53 +1342,48 @@
             <core:connects xlink:href="#f3_room314_left_top"/>
             <core:connects xlink:href="#f3_room315_left_bottom"/>
             <core:connects xlink:href="#f3_room316_right"/>
-            <core:connects xlink:href="#f3_room317_right_bottom"/>
-            <core:geometry><gml:Point gml:id="point_state_room_313"><gml:pos>213 216</gml:pos></gml:Point></core:geometry>
+            <core:connects xlink:href="#f3_room317_right"/>
+            <core:geometry><gml:Point gml:id="point_state_room_313"><gml:pos>162.5 156.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_314">
             <gml:name>Room 314</gml:name>
             <core:duality xlink:href="#room_314"/>
             <core:connects xlink:href="#f3_room314_left_top"/>
-            <core:geometry><gml:Point gml:id="point_state_room_314"><gml:pos>341.5 272</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_314"><gml:pos>263 188.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_315">
             <gml:name>Room 315</gml:name>
             <core:duality xlink:href="#room_315"/>
             <core:connects xlink:href="#f3_room315_left_bottom"/>
-            <core:geometry><gml:Point gml:id="point_state_room_315"><gml:pos>341.5 201.5</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_315"><gml:pos>263 135.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_316">
             <gml:name>Room 316</gml:name>
             <core:duality xlink:href="#room_316"/>
             <core:connects xlink:href="#f3_room316_right"/>
-            <core:geometry><gml:Point gml:id="point_state_room_316"><gml:pos>73 286</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_state_room_316"><gml:pos>49 198.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_317">
             <gml:name>Room 317</gml:name>
             <core:duality xlink:href="#room_317"/>
-            <core:connects xlink:href="#f3_room317_right_bottom"/>
-            <core:geometry><gml:Point gml:id="point_state_room_317"><gml:pos>73 195</gml:pos></gml:Point></core:geometry>
+            <core:connects xlink:href="#f3_room317_right"/>
+            <core:geometry><gml:Point gml:id="point_state_room_317"><gml:pos>49 132.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
-          <core:stateMember><core:State gml:id="state_restroom_f3_west">
-            <gml:name>Floor 3 west restroom</gml:name>
-            <core:duality xlink:href="#restroom_f3_west"/>
-            <core:geometry><gml:Point gml:id="point_state_restroom_f3_west"><gml:pos>455 301.5</gml:pos></gml:Point></core:geometry>
+          <core:stateMember><core:State gml:id="state_restroom_f3">
+            <gml:name>Floor 3 restroom</gml:name>
+            <core:duality xlink:href="#restroom_f3"/>
+            <core:geometry><gml:Point gml:id="point_state_restroom_f3"><gml:pos>310 179.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
-          <core:stateMember><core:State gml:id="state_restroom_f3_east">
-            <gml:name>Floor 3 east restroom</gml:name>
-            <core:duality xlink:href="#restroom_f3_east"/>
-            <core:geometry><gml:Point gml:id="point_state_restroom_f3_east"><gml:pos>398 285.5</gml:pos></gml:Point></core:geometry>
-          </core:State></core:stateMember>
-          <core:stateMember><core:State gml:id="state_stairs_f3_central">
-            <gml:name>Central stairs</gml:name>
-            <core:duality xlink:href="#stairs_f3_central"/>
-            <core:geometry><gml:Point gml:id="point_state_stairs_f3_central"><gml:pos>657 63</gml:pos></gml:Point></core:geometry>
+          <core:stateMember><core:State gml:id="state_elevator_01_f3">
+            <gml:name>Elevator Floor 3</gml:name>
+            <core:duality xlink:href="#elevator_01_f3"/>
+            <core:geometry><gml:Point gml:id="point_state_elevator_01_f3"><gml:pos>427 35</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="corridor_f3_313">
             <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
             <gml:name>Corridor outside Room 313</gml:name>
             <core:connects xlink:href="#f3_room313_top"/>
-            <core:geometry><gml:Point gml:id="point_corridor_f3_313"><gml:pos>213 107</gml:pos></gml:Point></core:geometry>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_313"><gml:pos>162.5 89</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
         </core:nodes>
         <core:edges gml:id="lc2_edges">
@@ -1903,7 +1920,7 @@
             <core:connects xlink:href="#state_room_316"/>
             <core:connects xlink:href="#state_room_313"/>
           </core:Transition></core:transitionMember>
-          <core:transitionMember><core:Transition gml:id="f3_room317_right_bottom">
+          <core:transitionMember><core:Transition gml:id="f3_room317_right">
             <core:weight>1</core:weight>
             <core:connects xlink:href="#state_room_317"/>
             <core:connects xlink:href="#state_room_313"/>

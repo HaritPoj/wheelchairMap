@@ -18,8 +18,8 @@ import Svg, {
 import { getRouteColor } from './routeColors';
 import { getDoorSpecs, getRouteSegmentPoints } from './routeGeometry';
 
-const FLOOR_ONE_FILL = '#B2B1CA';
-const FLOOR_ONE_STROKE = '#312E81';
+const INDOOR_FILL = '#B2B1CA';
+const INDOOR_STROKE = '#312E81';
 const WALL_COLOR = '#111111';
 
 export default function FloorPlan({
@@ -50,7 +50,8 @@ export default function FloorPlan({
 
   const mapWidthSource = Number(currentFloorData.map?.width) || 1200;
   const mapHeightSource = Number(currentFloorData.map?.height) || 450;
-  const isFloorOne = Number(currentFloor) === 1 || Number(currentFloor) === 2;
+  const useIndoorStyle = [1, 2, 3].includes(Number(currentFloor));
+  const wallLines = currentFloorData.map?.walls || [];
 
   const fitScale =
     viewport.width > 0 && viewport.height > 0
@@ -390,13 +391,23 @@ export default function FloorPlan({
         >
           <Polygon
             points={buildingFramePoints}
-            fill={isFloorOne ? FLOOR_ONE_FILL : '#ffffff'}
-            stroke={isFloorOne ? FLOOR_ONE_STROKE : '#888888'}
-            strokeWidth={(isFloorOne ? 2.5 : 4) * scale}
+            fill={useIndoorStyle ? INDOOR_FILL : '#ffffff'}
+            stroke={useIndoorStyle ? INDOOR_STROKE : '#888888'}
+            strokeWidth={(useIndoorStyle ? 2.5 : 4) * scale}
             strokeLinejoin="round"
           />
 
-          {!isFloorOne &&
+          {wallLines.map((line, index) => (
+            <Polyline
+              key={'wall-' + index}
+              points={line.map(([x, y]) => (x * scale) + ',' + (y * scale)).join(' ')}
+              fill="none"
+              stroke={WALL_COLOR}
+              strokeWidth={3 * scale}
+            />
+          ))}
+
+          {!useIndoorStyle &&
             floorNodes.map(node => {
               if (
                 node.type !== 'corridor' ||
@@ -434,16 +445,16 @@ export default function FloorPlan({
             const isStairs = node.type === 'stairs';
             const isRestroom = node.type === 'restroom' || node.type === 'toilet';
 
-            if (isFloorOne && isStairs) {
+            if (useIndoorStyle && isStairs) {
               return renderStairs(node, x, y, roomWidth, roomHeight);
             }
 
-            if (isFloorOne && isElevator) {
+            if (useIndoorStyle && isElevator) {
               return renderElevator(node, x, y, roomWidth, roomHeight);
             }
 
-            const structureFill = isFloorOne
-              ? FLOOR_ONE_FILL
+            const structureFill = useIndoorStyle
+              ? INDOOR_FILL
               : isElevator
                 ? '#d0d0d0'
                 : isStairs
@@ -457,7 +468,7 @@ export default function FloorPlan({
 
             return (
               <React.Fragment key={'structure-' + node.id}>
-                {isFloorOne ? (
+                {wallLines.length > 0 ? null : useIndoorStyle ? (
                   <>
                     <Rect
                       x={x - roomWidth / 2}
@@ -514,7 +525,7 @@ export default function FloorPlan({
                   fontSize={fontSize}
                   fill="#111111"
                   textAnchor="middle"
-                  fontWeight={isFloorOne ? 'normal' : 'bold'}
+                  fontWeight={useIndoorStyle ? 'normal' : 'bold'}
                 >
                   {isRestroom ? node.code || 'WC' : node.code || node.label || node.id}
                 </SvgText>
@@ -705,7 +716,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   fitButtonText: {
-    color: FLOOR_ONE_STROKE,
+    color: INDOOR_STROKE,
     fontSize: 14,
     fontWeight: '600',
   },
