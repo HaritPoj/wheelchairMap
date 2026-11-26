@@ -110,6 +110,9 @@ function routeAnchor(node, other, edge) {
 // and offset used by all other rooms, walls and waypoints.
 export function getRouteSegmentPoints(nodeA, nodeB, edge) {
   if (!nodeA || !nodeB) return [];
+  if (edge?.displayPath?.length >= 2) {
+    return nodeA.id === edge.from ? edge.displayPath : [...edge.displayPath].reverse();
+  }
   const start = nodeA.accessibility?.throughRoom ? { x: nodeA.x, y: nodeA.y } : routeAnchor(nodeA, nodeB, edge);
   const end = nodeB.accessibility?.throughRoom ? { x: nodeB.x, y: nodeB.y } : routeAnchor(nodeB, nodeA, edge);
   const close = (a, b) => Math.abs(a - b) < 0.00001;

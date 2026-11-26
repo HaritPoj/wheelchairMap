@@ -265,9 +265,14 @@ export function normalizeBuildingData(buildingData) {
       const fromState = stateMap[transition.from];
       const toState = stateMap[transition.to];
       if (!fromState?.unitId || !toState?.unitId) return null;
+      const transform = prepared.geometryTransforms[fromState.levelId];
 
       return {
         id: transition.id,
+        displayPath: transition.displayPath?.map(([x, y]) => {
+          const point = transform ? transform.point(x, y) : [x, y];
+          return { x: point[0], y: point[1] };
+        }),
         from: fromState.unitId,
         to: toState.unitId,
         weight: Number(transition.routing?.cost ?? 1),

@@ -128,6 +128,11 @@ function readCoreBuilding(xml) {
     const endpoints = children(edge, CORE, 'connects').map(link => routingIds.get(localReference(link)));
     if (endpoints.length !== 2 || endpoints.some(node => !node)) throw new Error('Invalid state endpoints on ' + id);
     const passage = all(edge, WC, 'Passage')[0];
+    const pathText = passage?.getAttribute('displayPath') || undefined;
+    const displayPath = pathText?.trim().split(/\s+/).map(pair => numbers(pair.replace(',', ' ')));
+    if (displayPath && (displayPath.length < 2 || displayPath.some(point => point.length !== 2))) {
+      throw new Error('Invalid display path for ' + id);
+    }
     const weight = children(edge, CORE, 'weight')[0];
     const type = passage?.getAttribute('transitionType');
     const higherEndpoint = passage?.getAttribute('higherEndpoint');
@@ -136,7 +141,8 @@ function readCoreBuilding(xml) {
       throw new Error('Invalid higher endpoint for ramp ' + id);
     }
     return {
-      id, from: endpoints[0], to: endpoints[1], routing: { cost: weight ? Number(weight.textContent) : 1 },
+      id, from: endpoints[0], to: endpoints[1],
+      ...(displayPath ? { displayPath } : {}), routing: { cost: weight ? Number(weight.textContent) : 1 },
       accessibility: {
         wheelchairAccessible: passage?.getAttribute('wheelchairAccessible') !== 'false',
         advisoryRampHighEnd: advisoryRamp ? higherEndpoint : null,

@@ -1278,61 +1278,73 @@
           <core:stateMember><core:State gml:id="state_room_301">
             <gml:name>Room 301</gml:name>
             <core:duality xlink:href="#room_301"/>
+            <core:connects xlink:href="#f3_room301_left"/>
             <core:geometry><gml:Point gml:id="point_state_room_301"><gml:pos>934 88.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_302">
             <gml:name>Room 302</gml:name>
             <core:duality xlink:href="#room_302"/>
+            <core:connects xlink:href="#f3_room302_left_bottom"/>
             <core:geometry><gml:Point gml:id="point_state_room_302"><gml:pos>934 131</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_303">
             <gml:name>Room 303</gml:name>
             <core:duality xlink:href="#room_303"/>
+            <core:connects xlink:href="#f3_room303_left_top"/>
             <core:geometry><gml:Point gml:id="point_state_room_303"><gml:pos>936 181.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_304">
             <gml:name>Room 304</gml:name>
             <core:duality xlink:href="#room_304"/>
+            <core:connects xlink:href="#f3_room304_right_top"/>
             <core:geometry><gml:Point gml:id="point_state_room_304"><gml:pos>875.5 181.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_305">
             <gml:name>Room 305</gml:name>
             <core:duality xlink:href="#room_305"/>
+            <core:connects xlink:href="#f3_room305_right_bottom"/>
             <core:geometry><gml:Point gml:id="point_state_room_305"><gml:pos>874 131</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_306">
             <gml:name>Room 306</gml:name>
             <core:duality xlink:href="#room_306"/>
+            <core:connects xlink:href="#f3_room306_top_right"/>
             <core:geometry><gml:Point gml:id="point_state_room_306"><gml:pos>808.5 155</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_307">
             <gml:name>Room 307</gml:name>
             <core:duality xlink:href="#room_307"/>
+            <core:connects xlink:href="#f3_room307_top"/>
             <core:geometry><gml:Point gml:id="point_state_room_307"><gml:pos>715.5 156.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_308">
             <gml:name>Room 308</gml:name>
             <core:duality xlink:href="#room_308"/>
+            <core:connects xlink:href="#f3_room308_top_left"/>
             <core:geometry><gml:Point gml:id="point_state_room_308"><gml:pos>635.5 173</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_309">
             <gml:name>Room 309</gml:name>
             <core:duality xlink:href="#room_309"/>
+            <core:connects xlink:href="#f3_room309_top_right"/>
             <core:geometry><gml:Point gml:id="point_state_room_309"><gml:pos>555 173</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_310">
             <gml:name>Room 310</gml:name>
             <core:duality xlink:href="#room_310"/>
+            <core:connects xlink:href="#f3_room310_top_left"/>
             <core:geometry><gml:Point gml:id="point_state_room_310"><gml:pos>470 173</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_311">
             <gml:name>Room 311</gml:name>
             <core:duality xlink:href="#room_311"/>
+            <core:connects xlink:href="#f3_room311_left_top"/>
             <core:geometry><gml:Point gml:id="point_state_room_311"><gml:pos>393.5 205.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_312">
             <gml:name>Room 312</gml:name>
             <core:duality xlink:href="#room_312"/>
+            <core:connects xlink:href="#f3_room312_left_bottom"/>
             <core:geometry><gml:Point gml:id="point_state_room_312"><gml:pos>392.5 140</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_room_313">
@@ -1372,6 +1384,7 @@
           <core:stateMember><core:State gml:id="state_restroom_f3">
             <gml:name>Floor 3 restroom</gml:name>
             <core:duality xlink:href="#restroom_f3"/>
+            <core:connects xlink:href="#f3_wc_top"/>
             <core:geometry><gml:Point gml:id="point_state_restroom_f3"><gml:pos>310 179.5</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
           <core:stateMember><core:State gml:id="state_elevator_01_f3">
@@ -1383,7 +1396,111 @@
             <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
             <gml:name>Corridor outside Room 313</gml:name>
             <core:connects xlink:href="#f3_room313_top"/>
-            <core:geometry><gml:Point gml:id="point_corridor_f3_313"><gml:pos>162.5 89</gml:pos></gml:Point></core:geometry>
+            <core:connects xlink:href="#f3_walk_313_to_wc"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_313"><gml:pos>154 89</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_wc">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_313_to_wc"/>
+            <core:connects xlink:href="#f3_walk_wc_to_west_hall"/>
+            <core:connects xlink:href="#f3_wc_top"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_wc"><gml:pos>311 89</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_west_hall">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_wc_to_west_hall"/>
+            <core:connects xlink:href="#f3_walk_west_hall_to_310"/>
+            <core:connects xlink:href="#f3_walk_west_hall_to_312"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_west_hall"><gml:pos>343 89</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_310">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_west_hall_to_310"/>
+            <core:connects xlink:href="#f3_walk_310_to_309"/>
+            <core:connects xlink:href="#f3_room310_top_left"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_310"><gml:pos>448 89</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_309">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_310_to_309"/>
+            <core:connects xlink:href="#f3_walk_309_to_308"/>
+            <core:connects xlink:href="#f3_room309_top_right"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_309"><gml:pos>582 89</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_308">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_309_to_308"/>
+            <core:connects xlink:href="#f3_walk_308_to_307"/>
+            <core:connects xlink:href="#f3_room308_top_left"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_308"><gml:pos>623 89</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_307">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_308_to_307"/>
+            <core:connects xlink:href="#f3_walk_307_to_306"/>
+            <core:connects xlink:href="#f3_room307_top"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_307"><gml:pos>732 89</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_306">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_307_to_306"/>
+            <core:connects xlink:href="#f3_walk_306_to_east_hall"/>
+            <core:connects xlink:href="#f3_room306_top_right"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_306"><gml:pos>844 89</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_east_hall">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_306_to_east_hall"/>
+            <core:connects xlink:href="#f3_walk_east_hall_to_301"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_east_hall"><gml:pos>904 89</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_312">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_west_hall_to_312"/>
+            <core:connects xlink:href="#f3_walk_312_to_311"/>
+            <core:connects xlink:href="#f3_room312_left_bottom"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_312"><gml:pos>343 165</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_311">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_312_to_311"/>
+            <core:connects xlink:href="#f3_room311_left_top"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_311"><gml:pos>343 181</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_301">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_east_hall_to_301"/>
+            <core:connects xlink:href="#f3_walk_301_to_305"/>
+            <core:connects xlink:href="#f3_room301_left"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_301"><gml:pos>904 98</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_305">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_301_to_305"/>
+            <core:connects xlink:href="#f3_walk_305_to_304"/>
+            <core:connects xlink:href="#f3_room302_left_bottom"/>
+            <core:connects xlink:href="#f3_room305_right_bottom"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_305"><gml:pos>904 151</gml:pos></gml:Point></core:geometry>
+          </core:State></core:stateMember>
+          <core:stateMember><core:State gml:id="corridor_f3_304">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Waypoint levelId="floor_3"/></gml:GenericMetaData></gml:metaDataProperty>
+            <gml:name>Floor 3 corridor</gml:name>
+            <core:connects xlink:href="#f3_walk_305_to_304"/>
+            <core:connects xlink:href="#f3_room303_left_top"/>
+            <core:connects xlink:href="#f3_room304_right_top"/>
+            <core:geometry><gml:Point gml:id="point_corridor_f3_304"><gml:pos>904 165</gml:pos></gml:Point></core:geometry>
           </core:State></core:stateMember>
         </core:nodes>
         <core:edges gml:id="lc2_edges">
@@ -1901,29 +2018,190 @@
             <core:connects xlink:href="#corridor_f2_v04"/>
           </core:Transition></core:transitionMember>
           <core:transitionMember><core:Transition gml:id="f3_room313_top">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="154,159 154,89"/></gml:GenericMetaData></gml:metaDataProperty>
             <core:weight>1</core:weight>
             <core:connects xlink:href="#state_room_313"/>
             <core:connects xlink:href="#corridor_f3_313"/>
           </core:Transition></core:transitionMember>
           <core:transitionMember><core:Transition gml:id="f3_room314_left_top">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="241,173 154,173 154,159"/></gml:GenericMetaData></gml:metaDataProperty>
             <core:weight>1</core:weight>
             <core:connects xlink:href="#state_room_314"/>
             <core:connects xlink:href="#state_room_313"/>
           </core:Transition></core:transitionMember>
           <core:transitionMember><core:Transition gml:id="f3_room315_left_bottom">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="241,159 154,159"/></gml:GenericMetaData></gml:metaDataProperty>
             <core:weight>1</core:weight>
             <core:connects xlink:href="#state_room_315"/>
             <core:connects xlink:href="#state_room_313"/>
           </core:Transition></core:transitionMember>
           <core:transitionMember><core:Transition gml:id="f3_room316_right">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="84,203 154,203 154,159"/></gml:GenericMetaData></gml:metaDataProperty>
             <core:weight>1</core:weight>
             <core:connects xlink:href="#state_room_316"/>
             <core:connects xlink:href="#state_room_313"/>
           </core:Transition></core:transitionMember>
           <core:transitionMember><core:Transition gml:id="f3_room317_right">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="84,135 154,135 154,159"/></gml:GenericMetaData></gml:metaDataProperty>
             <core:weight>1</core:weight>
             <core:connects xlink:href="#state_room_317"/>
             <core:connects xlink:href="#state_room_313"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_313_to_wc">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="154,89 311,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>8</core:weight>
+            <core:connects xlink:href="#corridor_f3_313"/>
+            <core:connects xlink:href="#corridor_f3_wc"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_wc_to_west_hall">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="311,89 343,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>2</core:weight>
+            <core:connects xlink:href="#corridor_f3_wc"/>
+            <core:connects xlink:href="#corridor_f3_west_hall"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_west_hall_to_310">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="343,89 448,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>5</core:weight>
+            <core:connects xlink:href="#corridor_f3_west_hall"/>
+            <core:connects xlink:href="#corridor_f3_310"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_310_to_309">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="448,89 582,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>7</core:weight>
+            <core:connects xlink:href="#corridor_f3_310"/>
+            <core:connects xlink:href="#corridor_f3_309"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_309_to_308">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="582,89 623,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>2</core:weight>
+            <core:connects xlink:href="#corridor_f3_309"/>
+            <core:connects xlink:href="#corridor_f3_308"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_308_to_307">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="623,89 732,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>5</core:weight>
+            <core:connects xlink:href="#corridor_f3_308"/>
+            <core:connects xlink:href="#corridor_f3_307"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_307_to_306">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="732,89 844,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>6</core:weight>
+            <core:connects xlink:href="#corridor_f3_307"/>
+            <core:connects xlink:href="#corridor_f3_306"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_306_to_east_hall">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="844,89 904,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>3</core:weight>
+            <core:connects xlink:href="#corridor_f3_306"/>
+            <core:connects xlink:href="#corridor_f3_east_hall"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_west_hall_to_312">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="343,89 343,165"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>4</core:weight>
+            <core:connects xlink:href="#corridor_f3_west_hall"/>
+            <core:connects xlink:href="#corridor_f3_312"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_312_to_311">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="343,165 343,181"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#corridor_f3_312"/>
+            <core:connects xlink:href="#corridor_f3_311"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_east_hall_to_301">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="904,89 904,98"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#corridor_f3_east_hall"/>
+            <core:connects xlink:href="#corridor_f3_301"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_301_to_305">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="904,98 904,151"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>3</core:weight>
+            <core:connects xlink:href="#corridor_f3_301"/>
+            <core:connects xlink:href="#corridor_f3_305"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_walk_305_to_304">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="904,151 904,165"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#corridor_f3_305"/>
+            <core:connects xlink:href="#corridor_f3_304"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room301_left">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="914,98 904,98"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_301"/>
+            <core:connects xlink:href="#corridor_f3_301"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room302_left_bottom">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="914,151 904,151"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_302"/>
+            <core:connects xlink:href="#corridor_f3_305"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room303_left_top">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="918,165 904,165"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_303"/>
+            <core:connects xlink:href="#corridor_f3_304"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room304_right_top">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="894,165 904,165"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_304"/>
+            <core:connects xlink:href="#corridor_f3_304"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room305_right_bottom">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="892,151 904,151"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_305"/>
+            <core:connects xlink:href="#corridor_f3_305"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room306_top_right">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="844,105 844,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_306"/>
+            <core:connects xlink:href="#corridor_f3_306"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room307_top">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="732,108 732,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_307"/>
+            <core:connects xlink:href="#corridor_f3_307"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room308_top_left">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="623,108 623,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_308"/>
+            <core:connects xlink:href="#corridor_f3_308"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room309_top_right">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="582,108 582,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_309"/>
+            <core:connects xlink:href="#corridor_f3_309"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room310_top_left">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="448,108 448,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_310"/>
+            <core:connects xlink:href="#corridor_f3_310"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room311_left_top">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="357,181 343,181"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_311"/>
+            <core:connects xlink:href="#corridor_f3_311"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_room312_left_bottom">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="355,165 343,165"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>1</core:weight>
+            <core:connects xlink:href="#state_room_312"/>
+            <core:connects xlink:href="#corridor_f3_312"/>
+          </core:Transition></core:transitionMember>
+          <core:transitionMember><core:Transition gml:id="f3_wc_top">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage displayPath="311,121 311,89"/></gml:GenericMetaData></gml:metaDataProperty>
+            <core:weight>2</core:weight>
+            <core:connects xlink:href="#state_restroom_f3"/>
+            <core:connects xlink:href="#corridor_f3_wc"/>
           </core:Transition></core:transitionMember>
         </core:edges>
       </core:SpaceLayer></core:spaceLayerMember>

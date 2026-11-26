@@ -167,6 +167,7 @@ export function migrateBuildingV1ToV2(
       to: "state:" + connection.to,
       type,
       openingId: openingByConnectionId[connection.id] || null,
+      displayPath: connection.displayPath,
       routing: {
         cost: Number(connection.routing?.cost ?? 1),
       },

@@ -82,7 +82,29 @@ const floor3 = filterFloor('floor_3');
 assert.deepStrictEqual(floor3.spaces.filter(space => space.type === 'room').map(space => space.code).sort(),
   Array.from({ length: 17 }, (_, i) => String(301 + i)));
 assert.strictEqual(floor3.spaces.filter(space => space.type === 'restroom').length, 1);
-assert.strictEqual(floor3.connections.length, 5);
+assert.ok(floor3.connections.every(edge => edge.displayPath?.length >= 2));
+assert.strictEqual(floor3.connections.filter(edge => edge.from.startsWith('room_')).length, 17);
+// The traced routes are orthogonal. Even a segment ending on a solid wall
+// would put the drawn line outside a door gap.
+function intersectsWall(a, b, c, d) {
+  const turn = (p, q, r) =>
+    (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
+  const overlaps = [0, 1].every(i =>
+    Math.max(Math.min(a[i], b[i]), Math.min(c[i], d[i])) <=
+    Math.min(Math.max(a[i], b[i]), Math.max(c[i], d[i]))
+  );
+  return overlaps && turn(a, b, c) * turn(a, b, d) <= 0 && turn(c, d, a) * turn(c, d, b) <= 0;
+}
+for (const edge of floor3.connections) {
+  const path = edge.displayPath;
+  for (let i = 1; i < path.length; i++) {
+    for (const wall of floor3.floors[0].map.walls) {
+      for (let j = 1; j < wall.length; j++) {
+        assert.ok(!intersectsWall(path[i - 1], path[i], wall[j - 1], wall[j]), edge.id);
+      }
+    }
+  }
+}
 // The directory board is rotated 180 degrees to match the other floor plans.
 const room301 = floor3.spaces.find(space => space.code === '301');
 const room317 = floor3.spaces.find(space => space.code === '317');

@@ -68,7 +68,7 @@ export default function NavigationScreen() {
       setShowDirections(false);
       setRouteMessage(
         mapData.nodeMap[locationId]?.floor === 3 || mapData.nodeMap[destination]?.floor === 3
-          ? 'No mapped route connects these locations yet. Floor 3 routing is currently available in the Room 313 area.'
+          ? 'No mapped route connects these locations yet. The Floor 3 elevator connection has not been confirmed.'
           : 'No route meets the recorded hard accessibility constraints. Check blocked passages, corridor widths, slopes, stairs and elevator availability.'
       );
       return;

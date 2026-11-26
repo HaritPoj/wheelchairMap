@@ -566,6 +566,14 @@ export default function FloorPlan({
               );
             })}
 
+          {route.length < 2 && mapData.edges.filter(edge =>
+            edge.displayPath?.length && mapData.nodeMap[edge.from]?.floor === currentFloor
+          ).map(edge => (
+            <Polyline key={'possible-' + edge.id}
+              points={edge.displayPath.map(p => (p.x * scale) + ',' + (p.y * scale)).join(' ')}
+              fill="none" stroke="#38AFFF" strokeWidth={3 * scale}
+              strokeLinejoin="round" strokeLinecap="round" pointerEvents="none" />
+          ))}
           {routeDrawOrder.map(routeIndex =>
             routePaths[routeIndex].map((nodeId, index) => {
               if (index === 0) return null;

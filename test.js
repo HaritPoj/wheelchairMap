@@ -230,9 +230,7 @@ const routeDestinations = mapData.nodes.filter(
 for (const start of routeDestinations) {
   for (const goal of routeDestinations) {
     const path = findPath(start.id, goal.id, mapData);
-    const in313Group = node => ['313', '314', '315', '316', '317'].includes(node.code);
-    if (start.id !== goal.id && (start.floor === 3 || goal.floor === 3) &&
-        !(in313Group(start) && in313Group(goal))) {
+    if (start.floor !== goal.floor && (start.floor === 3 || goal.floor === 3)) {
       assert.strictEqual(path.length, 0, 'No confirmed connection between these areas');
       continue;
     }
