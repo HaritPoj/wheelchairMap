@@ -8,6 +8,8 @@
   "f1_room114_left": { "doorWidth": 0.84, "leafCount": 2, "threshold": 0.1 },
   "f1_room115_bottom": { "doorWidth": 0.8, "leafCount": 2, "threshold": 0.09 },
   "f1_room115_top": { "doorWidth": 0.8, "leafCount": 2, "threshold": 0.09 },
+  "f1_room116_bottom": { "doorWidth": 0.9, "threshold": 0.07 },
+  "f1_room116_top": { "doorWidth": 0.9, "threshold": 0.07 },
   "f1_room120_bottom": { "doorWidth": 0.89, "threshold": 0.08 },
   "f1_room120_top": { "doorWidth": 0.89, "threshold": 0.08 },
   "f1_room121_bottom": { "doorWidth": 0.89, "threshold": 0.08 },
