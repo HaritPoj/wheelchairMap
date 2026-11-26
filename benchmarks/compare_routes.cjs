@@ -388,10 +388,10 @@ function runSuite(config, mapData, constrained) {
   const rawAdjacency = adjacencyFor(mapData);
   const scenarios = getPairs(mapData, config.pairs, config.seed);
   const constrainedDijkstra = (a, b) => solveConstrainedRoute(a, b, mapData, {
-    maxElevatorTransfers: 1, useHeuristic: false,
+    maxElevatorTransfers: 1,
   });
   const algorithms = constrained ? {
-    'Resource-Constrained A*': (a, b) => solveConstrainedRoute(a, b, mapData, { maxElevatorTransfers: 1 }),
+    'Resource-Constrained A*': (a, b) => solveConstrainedRoute(a, b, mapData, { maxElevatorTransfers: 1, useHeuristic: true }),
     'Resource-Constrained Dijkstra': constrainedDijkstra,
   } : {
     'A*': (a, b) => ({ path: findAStarPath(a, b, mapData) }),
@@ -515,7 +515,7 @@ function runSuite(config, mapData, constrained) {
       '- Both methods call the production solveConstrainedRoute() with maxElevatorTransfers = 1.',
       '- The Dijkstra reference uses the same solver with h = 0 and skips heuristic preparation.',
     ] : [
-    '- A* is the preserved baseline findAStarPath(); the live app now uses Resource-Constrained A* with COP constraints. Dijkstra is the optimal-cost reference for nonnegative weights.',
+    '- A* is the preserved baseline findAStarPath(); the live app uses Resource-Constrained Dijkstra with COP constraints. Dijkstra is the optimal-cost reference for nonnegative weights.',
     '- Greedy means Greedy Best-First Search using the production heuristic (not Greedy Nearest Neighbor).',
     '- ABC is a stochastic, fixed-budget Artificial Bee Colony **route-search adaptation** with employed/onlooker/scout phases and randomized feasible-path repair; it does not call Dijkstra/A* internally.',
     ]),

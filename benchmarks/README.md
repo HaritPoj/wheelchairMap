@@ -28,7 +28,7 @@ node benchmarks/create_charts.cjs
 
 This writes `execution_time.svg`, `optimal_answers.svg`, and `success_rate.svg` to `benchmarks/results/`. You can open these SVGs in a browser or insert them into slides.
 
-Run `npm ci` from the repository root to install the XML reader and project dependencies. The benchmark runs in Node.js. Its A* baseline remains separate from the app’s Resource-Constrained A* solver.
+Run `npm ci` from the repository root to install the XML reader and project dependencies. The benchmark runs in Node.js. Its A* baseline remains separate from the app’s Resource-Constrained Dijkstra solver.
 
 Run the benchmarking harness smoke test:
 
@@ -54,7 +54,7 @@ Options: `--pairs`, `--runs`, `--seed`, `--abc-sources`, `--abc-cycles`, `--abc-
 
 **Cost is the existing graph routing weight**, not meters, walking time, or surveyed accessibility. Some door widths/slopes remain unknown in the map data.
 
-The same command also writes a second report and CSVs under `results/constrained/`. Both runs use identical scenarios. This second suite compares the live Resource-Constrained A* against the same solver with a zero heuristic (Resource-Constrained Dijkstra). Both enforce the app's limit of one elevator ride per route. Use the second suite for comparisons under that limit.
+The same command also writes a second report and CSVs under `results/constrained/`. Both runs use identical scenarios. This second suite compares the live Resource-Constrained Dijkstra against the same solver with its A* heuristic enabled. Both enforce the app's limit of one elevator ride per route. Use the second suite for comparisons under that limit.
 
 ## Methodology and limits
 

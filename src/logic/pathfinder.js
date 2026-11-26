@@ -379,11 +379,11 @@ export function findAStarPath(startId, goalId, mapData) {
 
 
 // Constraint Optimization Problem (COP): minimum-cost accessible path
-// with optional *route-wide* resource limits. Resource-Constrained A*
-// keeps non-dominated labels and orders the frontier by g + admissible h.
+// with optional *route-wide* resource limits. Dijkstra keeps non-dominated labels and
+// expands them by accumulated cost. The benchmark can enable an A* heuristic.
 // It is an exact search for nonnegative edge costs, not a CP-SAT solver.
 //
-// Inputs are the same graph used by the app's A*. Unmeasured width,
+// Inputs are the app's routing graph. Unmeasured width,
 // slope, and door size are unknown, not assumed certified accessible.
 // Clients may opt into conservative "requireMeasured..." constraints.
 function routeLimit(value, label) {
@@ -465,7 +465,7 @@ export function solveConstrainedRoute(startId, goalId, mapData, options = {}) {
   const adjacency = createAdjacency(nodes, edges);
   // A* lower bound remains admissible after imposing extra constraints:
   // restricting feasible paths cannot decrease the true remaining cost.
-  const heuristic = options.useHeuristic === false ? () => 0 : createHeuristic(mapData);
+  const heuristic = options.useHeuristic === true ? createHeuristic(mapData) : () => 0;
   const frontier = new MinHeap((a, b) =>
     a.f - b.f || a.cost - b.cost || a.id.localeCompare(b.id)
   );
@@ -569,7 +569,7 @@ export function solveConstrainedRoute(startId, goalId, mapData, options = {}) {
   return emptyConstrainedResult();
 }
 
-// App entry point: Resource-Constrained A* applies COP during search,
+// App entry point: Resource-Constrained Dijkstra applies COP during search,
 // never as a post-filter.
 export function findPath(startId, goalId, mapData, constraints = {}) {
   return solveConstrainedRoute(startId, goalId, mapData, constraints).path;

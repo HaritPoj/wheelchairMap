@@ -493,7 +493,7 @@ const wcTo107 = solveConstrainedRoute('restroom_f1_center', 'room_107', mapData)
 assert.ok(wcTo107.feasible);
 assert.ok(wcTo107.path.includes('corridor_f1_u15'));
 
-// A* must retain higher-cost labels when their resource budget is better.
+// Dijkstra must retain higher-cost labels when their resource budget is better.
 const resourceNodes = [
   { id: 's', type: 'corridor', floor: 1, x: 0, y: 0 },
   { id: 'limited', type: 'corridor', floor: 1, x: 1, y: 0, threshold: 0.01 },
@@ -961,4 +961,4 @@ const hudWithDoorNotices = fs.readFileSync('./src/rendering/HUD.js', 'utf8');
 assert.match(screenWithDoorNotices, /getRoomDoorWarningMessage\(\s*\[locationId,\s*destination\]/);
 assert.ok(hudWithDoorNotices.includes('accessibilityNotice'));
 
-console.log('LC2 constrained A* advisory narrow-door routing and screenshot regressions passed.');
+console.log('LC2 constrained Dijkstra advisory narrow-door routing and screenshot regressions passed.');

@@ -22,7 +22,7 @@ lc2.gml + lc2.doors.json
              |
     nodes / edges / floors
              |
-   Resource-Constrained A* + COP → FloorPlan
+   Resource-Constrained Dijkstra + COP → FloorPlan
 ```
 
 The app converts the XML/GML into the existing generic schema v2 with
@@ -49,7 +49,7 @@ The latest Floor 2 layout **does not include stairs**.
 Floor 3 follows the supplied oriented plan, with traced interior walls, Rooms 301–317, a WC and an elevator marker along the upper corridor. Rooms appear on the floor plan and in search. Rooms 314–317 open into Room 313, which connects to the landing outside its entrance. The mapped corridor connects all 17 rooms and the WC on Floor 3. A short approach links the Floor 3 elevator door to the main corridor. The same elevator serves Floors 1, 2 and 3, with one ride between any two stops. Doorway measurements are recorded for Rooms 308–313 and the Floor 3 WC.
 
 Door-gap positions are driven by room-to-corridor transition metadata.
-Cross-floor routing uses the elevator, and A* applies wheelchair routing
+Cross-floor routing uses the elevator, and Dijkstra applies wheelchair routing
 restrictions. Unmeasured accessibility attributes are not fabricated.
 
 The route overlay shares the same door-gap geometry as the wall renderer,
@@ -67,17 +67,16 @@ touch targets, so narrow rooms no longer paint over adjacent rooms.
 
 The user-facing navigation screen now calls `solveConstrainedRoute()` in
 `src/logic/pathfinder.js` directly. It solves a **Constraint Optimization
-Problem** on the wheelchair-accessible weighted indoor graph using an
-**Resource-Constrained A*** (A* priority `f = g + h` with non-dominated
-resource labels). It searches for a minimum-cost feasible route using an
-admissible distance-based lower bound and nonnegative edge costs.
+Problem** on the wheelchair-accessible weighted indoor graph using
+**Resource-Constrained Dijkstra**. It explores non-dominated resource labels
+in order of accumulated cost to find a minimum-cost feasible route.
 This is an on-device, pure-JavaScript solver; it does **not** require
 OR-Tools, CP-SAT, a backend, or an internet connection.
 
 ```text
 lc2.gml + lc2.doors.json → validated/normalized graph
     → COP hard constraints (stairs, known width/slope, elevator)
-    → Resource-Constrained A* (g + h, resource-label dominance)
+    → Resource-Constrained Dijkstra (accumulated cost, resource-label dominance)
     → feasible, lowest-cost path or "no feasible route"
     → FloorPlan and directions
 ```
@@ -104,7 +103,7 @@ const result = solveConstrainedRoute('room_124', 'room_211', mapData, {
 ```
 
 `findPath(startId, goalId, mapData, optionalConstraints)` remains available
-as a compatibility wrapper around constrained A*. The original unconstrained
+as a compatibility wrapper around constrained Dijkstra. The original unconstrained
 A* (with existing per-edge accessibility filtering) remains available as
 `findAStarPath()` for a separate baseline in the standalone benchmark.
 
@@ -141,7 +140,7 @@ Room 106 has double doors with a 92 cm clear opening and a 12 cm threshold. Room
 
 The app joins the survey to the map before schema-v2 migration and normalization.
 **Measured room-door widths below 0.9 m are advisory
-only**, not hard barriers: Resource-Constrained A* still finds routes into
+only**, not hard barriers: Resource-Constrained Dijkstra still finds routes into
 and out of these rooms, while the app displays a caution that wheelchair
 access may not be possible for some users. Recorded thresholds from **1 cm**
 and **2 cm** retain the prototype's route-cost penalties (50 and 200).

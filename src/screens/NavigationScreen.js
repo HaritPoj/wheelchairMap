@@ -50,7 +50,7 @@ export default function NavigationScreen() {
       return;
     }
 
-    // Resource-Constrained A*: minimize route cost while checking all
+    // Resource-Constrained Dijkstra: minimize route cost while checking all
     // edge-accessibility and route-wide COP constraints during search.
     const optimized = solveConstrainedRoute(
       locationId, destination, mapData, WHEELCHAIR_ROUTE_CONSTRAINTS
