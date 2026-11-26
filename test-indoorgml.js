@@ -27,11 +27,15 @@ const parseIndoorGML = loadNamedExport(
 );
 
 const xml = fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8');
+assert.doesNotMatch(xml, /\bwc:(?:doorWidth|leafCount|leafWidth|threshold)\s*=/,
+  'LC2 door survey values belong in lc2.doors.json');
 assert.strictEqual((xml.match(/<core:IndoorFeatures/g) || []).length, 1);
 assert.strictEqual((xml.match(/<core:MultiLayeredGraph/g) || []).length, 1);
 const gmlIds = Array.from(xml.matchAll(/gml:id="([^"]+)"/g), match => match[1]);
 assert.strictEqual(new Set(gmlIds).size, gmlIds.length, 'All GML identifiers must be unique');
 const building = parseIndoorGML(xml);
+assert.throws(() => parseIndoorGML(xml, { missing_door: { threshold: 0 } }), /unknown transition: missing_door/);
+assert.throws(() => parseIndoorGML(xml, { f1_room114_left: { width: 0.84 } }), /f1_room114_left\.width/);
 assert.strictEqual(building.floors.length, 2, 'A single GML must contain both floors');
 assert.strictEqual(
   building.connections.filter(edge => edge.transition?.type === 'elevator').length,

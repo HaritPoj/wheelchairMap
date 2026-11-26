@@ -1,0 +1,16 @@
+{
+  "f1_room109_top": { "doorWidth": 0.74, "leafCount": 2, "threshold": 0.1 },
+  "f1_room110_top": { "doorWidth": 0.74, "leafCount": 2, "threshold": 0.1 },
+  "f1_room111_top": { "doorWidth": 0.74, "leafCount": 2, "threshold": 0.1 },
+  "f1_room114_left": { "doorWidth": 0.84, "leafCount": 2, "threshold": 0.1 },
+  "f2_room211_bottom_left": { "leafCount": 2, "leafWidth": 0.9, "threshold": 0.07 },
+  "f2_room212_left": { "leafCount": 2, "leafWidth": 0.76, "threshold": 0.04 },
+  "f2_room213_top_left": { "leafCount": 2, "leafWidth": 0.8, "threshold": 0 },
+  "f2_room217_top": { "doorWidth": 0.8, "threshold": 0.04 },
+  "f2_room218_top": { "doorWidth": 0.8, "threshold": 0.04 },
+  "f2_room219_top": { "doorWidth": 0.8, "threshold": 0.04 },
+  "f2_room220_top": { "doorWidth": 0.8, "threshold": 0.04 },
+  "f2_room221_top": { "doorWidth": 0.8, "threshold": 0.04 },
+  "f2_room222_top": { "doorWidth": 0.8, "threshold": 0.04 },
+  "f2_room223_top": { "doorWidth": 1.09, "leafCount": 2, "threshold": 0 }
+}

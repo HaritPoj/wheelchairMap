@@ -43,7 +43,8 @@ const {
 function readMap() {
   const gmlDir = path.join(ROOT, 'assets', 'data', 'indoorgml');
   const merged = parseIndoorGML(
-    fs.readFileSync(path.join(gmlDir, 'lc2.gml'), 'utf8')
+    fs.readFileSync(path.join(gmlDir, 'lc2.gml'), 'utf8'),
+    require('../assets/data/buildings/lc2.doors.json')
   );
   if (merged.floors.length !== 2) {
     throw new Error('Unified LC2 GML must contain both building levels.');
@@ -482,7 +483,7 @@ function main() {
       generated_at: new Date().toISOString(),
       runtime: { node: process.version, platform: process.platform,
         arch: process.arch, cpu: os.cpus()[0]?.model },
-      input: ['assets/data/indoorgml/lc2.gml'],
+      input: ['assets/data/indoorgml/lc2.gml', 'assets/data/buildings/lc2.doors.json'],
       config, nodes: mapData.nodes.length, edges: mapData.edges.length,
       scenarios,
     }, null, 2) + '\n');
@@ -503,7 +504,7 @@ function main() {
     table,
     '',
     '## Experimental method',
-    '- The graph comes from the current unified LC2 IndoorGML GML source file via the project parser and adapter.',
+    '- The graph combines the LC2 IndoorGML map and its doorway survey via the project parser and adapter.',
     '- Identical wheelchair eligibility and directed transition costs come from the production pathfinder getEdgeCost().',
     '- A* is the preserved baseline findAStarPath(); the live app now uses Resource-Constrained A* with COP constraints. Dijkstra is the optimal-cost reference for nonnegative weights.',
     '- Greedy means Greedy Best-First Search using the production heuristic (not Greedy Nearest Neighbor).',

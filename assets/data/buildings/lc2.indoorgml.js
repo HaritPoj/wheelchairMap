@@ -1,11 +1,12 @@
 import lc2Gml from '../indoorgml/lc2.gml';
+import lc2Doors from './lc2.doors.json';
 import lc2Site from './lc2.site.json';
 import { parseIndoorGML } from '../indoorgml/indoorGMLParser';
 import { migrateBuildingV1ToV2 } from '../schemaV2';
 
 // Single canonical IndoorGML document contains both levels and the
 // inter-floor elevator transition.
-const lc2Source = parseIndoorGML(lc2Gml);
+const lc2Source = parseIndoorGML(lc2Gml, lc2Doors);
 
 const lc2 = migrateBuildingV1ToV2(lc2Source, lc2Site, {
   siteId: 'tu_rangsit',
@@ -14,6 +15,6 @@ const lc2 = migrateBuildingV1ToV2(lc2Source, lc2Site, {
 });
 
 lc2.sourceFormat = 'IndoorGML-GML';
-lc2.sourceFiles = ['assets/data/indoorgml/lc2.gml'];
+lc2.sourceFiles = ['assets/data/indoorgml/lc2.gml', 'assets/data/buildings/lc2.doors.json'];
 
 export default lc2;

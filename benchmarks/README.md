@@ -1,6 +1,6 @@
 # LC2 routing algorithm benchmark (standalone)
 
-This experiment is **outside the React Native/Expo app**. It reads the single LC2 IndoorGML document containing Floor 1 and Floor 2, uses the existing parser and adapter, and compares four methods on the **same accessibility-aware weighted graph**.
+This experiment is **outside the React Native/Expo app**. It reads `lc2.gml` and `lc2.doors.json` through the same parser and adapter as the app, then compares four methods on the **same accessibility-aware weighted graph**.
 
 | Algorithm | Definition | Qualification |
 |---|---|---|
@@ -56,7 +56,7 @@ Options: `--pairs`, `--runs`, `--seed`, `--abc-sources`, `--abc-cycles`, `--abc-
 
 ## Methodology and limits
 
-1. All algorithms use the same unified LC2 GML source and production `getEdgeCost()` rules. Wheelchair-inaccessible transitions, forbidden stairs, applicable width/slope/threshold constraints, and elevator-only cross-floor movement are treated identically.
+1. All algorithms use the LC2 map, doorway survey and production `getEdgeCost()` rules. Wheelchair-inaccessible transitions, forbidden stairs, applicable width/slope/threshold constraints, and elevator-only cross-floor movement are treated identically.
 2. Scenarios include same-floor and cross-floor room pairs. Extra pairs use deterministic seeded sampling.
 3. Warm-up runs are excluded. Timed order rotates between methods to reduce systematic ordering effects. The graph is prepared for each timed query.
 4. Repeat each query; ABC uses a reproducible random seed and a configurable number of food sources/cycles.

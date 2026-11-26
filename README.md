@@ -2,17 +2,17 @@
 
 Accessible indoor-navigation prototype for the LC2 building at Thammasat University.
 
-## Source of truth: one IndoorGML document
+## LC2 map and doorway survey
 
-`assets/data/indoorgml/lc2.gml` is the **single active map source** for
-**Floor 1 and Floor 2**. Both levels, room/corridor geometries, routing
-states, transitions, and the inter-floor elevator connection live in that
-document. Do not maintain additional LC2 floor source files.
+`assets/data/indoorgml/lc2.gml` contains both floors, room and corridor
+geometries, routing states, transitions, and the inter-floor elevator connection.
+`assets/data/buildings/lc2.doors.json` contains the doorway survey.
+Each JSON key matches the `gml:id` of a transition in the map.
 
 Data loading:
 
 ```text
-assets/data/indoorgml/lc2.gml
+lc2.gml + lc2.doors.json
              |
         parseIndoorGML()
              |
@@ -70,7 +70,7 @@ This is an on-device, pure-JavaScript solver; it does **not** require
 OR-Tools, CP-SAT, a backend, or an internet connection.
 
 ```text
-Unified lc2.gml → validated/normalized graph
+lc2.gml + lc2.doors.json → validated/normalized graph
     → COP hard constraints (stairs, known width/slope, elevator)
     → Resource-Constrained A* (g + h, resource-label dominance)
     → feasible, lowest-cost path or "no feasible route"
@@ -115,37 +115,27 @@ likely reject many/all routes.
 
 ## Recording doorway measurements and informing users
 
-Doorway measurements are **optional, per physical doorway**. Add surveyed values
-to the corresponding `core:Transition` in the **single source**
-`assets/data/indoorgml/lc2.gml`. Keep attributes **absent** when not measured;
-do not estimate meters from map pixels.
+Edit doorway measurements in `assets/data/buildings/lc2.doors.json`. Use the
+transition ID for the physical doorway as the key. Omit unmeasured fields.
 
 Rooms 109, 110, 111 and 114 on Floor 1 each have double doors at one entrance and a 10 cm threshold. The reported clear opening is 74 cm for Rooms 109–111 and 84 cm for Room 114. The Room 109 record is shown below.
 
-```xml
-<core:Transition
-  gml:id="f1_room109_top"
-  wc:from="room_109"
-  wc:to="corridor_f1_d109"
-  wc:cost="1"
-  wc:doorWidth="0.74"
-  wc:leafCount="2"
-  wc:threshold="0.10" />
+```json
+{
+  "f1_room109_top": { "doorWidth": 0.74, "leafCount": 2, "threshold": 0.10 }
+}
 ```
 
-- `wc:doorWidth`: **clear usable doorway width**, in meters. `0.95` means 95 cm.
-- Record the number of leaves at one opening in `wc:leafCount`. A value of `2` represents double doors at a single entrance. For equal-width leaves, include `wc:leafWidth` when the width of one leaf is known. Use `wc:doorWidth` for the measured clear opening.
-- `wc:threshold`: **vertical threshold height**, in meters. `0.015` means 1.5 cm.
-  Record an observed flush threshold as `0`; an unknown threshold is **not** zero.
-- `wc:width` is the **corridor/edge passage width**, which is a different quantity.
-- For rooms with multiple doors, measure each door separately using its own
-  transition ID. Older `CellSpace` `wc:doorWidth` / `wc:threshold` metadata is
-  supported as a fallback, but transition-specific measurements take priority.
+- `doorWidth` records the measured clear opening in meters. A value of `0.74` means 74 cm.
+- `leafCount` records the number of leaves at one opening. A value of `2` represents double doors. For equal-width leaves, include `leafWidth` when the width of one leaf is known.
+- `threshold` records the vertical threshold height in meters. Use `0` for a measured flush threshold.
+- Corridor width stays on the GML transition as `wc:width`.
+- For older maps, the parser also reads inline GML measurements. Supplied JSON fields take precedence over inline transition values.
 - Invalid negative heights or nonpositive doorway widths fail schema-v2 data
   validation; measurements are not treated as certified accessibility.
 
-The app reads these measurements through the XML parser, schema-v2 migration
-and building adapter. **Measured room-door widths below 0.9 m are advisory
+The app joins the survey to the map before schema-v2 migration and normalization.
+**Measured room-door widths below 0.9 m are advisory
 only**, not hard barriers: Resource-Constrained A* still finds routes into
 and out of these rooms, while the app displays a caution that wheelchair
 access may not be possible for some users. Recorded thresholds from **1 cm**
@@ -175,7 +165,7 @@ Each room has double doors at its mapped entrance. The clear opening width is un
 ### Floor 2, Rooms 217–222
 
 The user-supplied door measurements for **Rooms 217, 218, 219, 220, 221
-and 222** are recorded on their individual `f2_roomNNN_top` transitions:
+and 222** are recorded under their individual `f2_roomNNN_top` keys in the doorway survey:
 
 - **Clear doorway width:** `0.80` m (80 cm).
 - **Raised doorway threshold:** `0.04` m (4 cm).

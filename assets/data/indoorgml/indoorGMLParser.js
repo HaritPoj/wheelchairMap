@@ -114,7 +114,7 @@ function parsePoint(body, attrs = {}) {
   };
 }
 
-export function parseIndoorGML(xmlText) {
+export function parseIndoorGML(xmlText, doorwayMeasurements = {}) {
   if (typeof xmlText !== 'string' || !xmlText.includes('IndoorFeatures')) {
     throw new Error('Invalid IndoorGML document: IndoorFeatures root is missing.');
   }
@@ -200,6 +200,22 @@ export function parseIndoorGML(xmlText) {
       ...(transitionType ? { transition: { type: transitionType } } : {}),
     };
   });
+
+  const connectionsById = new Map(connections.map(edge => [edge.id, edge]));
+  const doorFields = ['doorWidth', 'threshold', 'leafCount', 'leafWidth'];
+  for (const [id, measurements] of Object.entries(doorwayMeasurements)) {
+    const edge = connectionsById.get(id);
+    if (!edge) throw new Error('Door measurements reference an unknown transition: ' + id);
+    if (!measurements || typeof measurements !== 'object' || Array.isArray(measurements)) {
+      throw new Error('Expected doorway measurements for transition ' + id);
+    }
+    for (const [field, value] of Object.entries(measurements)) {
+      if (!doorFields.includes(field) || (value !== null && !Number.isFinite(value))) {
+        throw new Error('Invalid doorway measurement ' + id + '.' + field);
+      }
+      edge.accessibility[field] = value;
+    }
+  }
 
   return {
     schemaVersion: '1.0',

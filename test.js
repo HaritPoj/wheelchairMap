@@ -69,7 +69,8 @@ const parseIndoorGML = loadNamedExport(
   'parseIndoorGML'
 );
 const mergedLegacy = parseIndoorGML(
-  fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8')
+  fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8'),
+  require('./assets/data/buildings/lc2.doors.json')
 );
 const floor1Data = {
   floors: mergedLegacy.floors.filter(floor => floor.id === 'floor_1'),
@@ -614,10 +615,8 @@ assert.ok(floorPlanSourceLatest.includes("width={roomWidth}"));
 assert.ok(floorPlanSourceLatest.includes("getRouteSegmentPoints(previous, current, edge)"));
 
 
-// Start the simulated surveys with two unmeasured entrances.
-const rawGmlForDoorTests = fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8')
-  .replace(/<core:Transition gml:id="f1_room(?:109|110)_top"[^>]*\/>/g,
-    tag => tag.replace(/\s+wc:(?:doorWidth|leafCount|leafWidth|threshold)="[^"]*"/g, ''));
+// Exercise the legacy inline-measurement format independently of the LC2 survey.
+const rawGmlForDoorTests = fs.readFileSync('./assets/data/indoorgml/lc2.gml', 'utf8');
 function insertDoorMeasurement(xml, transitionId, doorWidth, threshold) {
   const pattern = new RegExp('(<core:Transition gml:id="' + transitionId + '"[^>]*?)(\\s*/>)');
   assert.ok(pattern.test(xml), 'Expected doorway transition ' + transitionId);
@@ -636,6 +635,13 @@ function surveyedMap(gml) {
 const oneDoorSurvey = surveyedMap(insertDoorMeasurement(
   rawGmlForDoorTests, 'f1_room109_top', '0.95', '0.015'
 ));
+const updatedSurvey = parseIndoorGML(
+  insertDoorMeasurement(rawGmlForDoorTests, 'f1_room109_top', '0.95', '0.015'),
+  { f1_room109_top: { threshold: 0 } }
+);
+const updatedDoor = updatedSurvey.connections.find(edge => edge.id === 'f1_room109_top');
+assert.strictEqual(updatedDoor.accessibility.threshold, 0, 'A measured flush threshold overrides the inline value');
+assert.strictEqual(updatedDoor.accessibility.doorWidth, 0.95, 'An omitted JSON field retains the inline measurement');
 assert.strictEqual(
   oneDoorSurvey.legacy.connections.find(edge => edge.id === 'f1_room109_top')
     .accessibility.doorWidth, 0.95
