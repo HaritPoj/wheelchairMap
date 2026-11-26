@@ -119,18 +119,18 @@ likely reject many/all routes.
 ## Recording doorway measurements and informing users
 
 Edit doorway measurements in `assets/data/buildings/lc2.doors.json`. Use the
-transition ID for the physical doorway as the key. Omit unmeasured fields.
+transition ID for the physical doorway as the key. Include all four fields for every entry. Use `null` for an unknown value.
 
 Room 106 has double doors with a 92 cm clear opening and a 12 cm threshold. Rooms 107–111 and 114 on Floor 1 each have double doors at one entrance and a 10 cm threshold. The reported clear opening is 74 cm for Rooms 107–111 and 84 cm for Room 114. The Room 109 record is shown below.
 
 ```json
 {
-  "f1_room109_top": { "doorWidth": 0.74, "leafCount": 2, "threshold": 0.10 }
+  "f1_room109_top": { "doorWidth": 0.74, "leafCount": 2, "leafWidth": null, "threshold": 0.10 }
 }
 ```
 
 - `doorWidth` records the measured clear opening in meters. A value of `0.74` means 74 cm.
-- `leafCount` records the number of leaves at one opening. A value of `2` represents double doors. For equal-width leaves, include `leafWidth` when the width of one leaf is known.
+- `leafCount` records the number of leaves at one opening. A value of `2` represents double doors. For equal-width leaves, `leafWidth` records the measured width of one leaf in meters.
 - `threshold` records the vertical threshold height in meters. Use `0` for a measured flush threshold.
 - In the Core file, corridor width and slope can be recorded as `width` and `slope` on `wc:Passage` in transition metadata.
 - For older maps, the parser also reads inline GML measurements. Supplied JSON fields take precedence over inline transition values.
