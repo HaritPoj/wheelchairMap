@@ -69,7 +69,7 @@ export default function NavigationScreen() {
     if (paths.length === 0) {
       setShowDirections(false);
       setRouteMessage(
-        'No route meets the recorded hard accessibility constraints. Check blocked passages, corridor widths, stairs and elevator availability.'
+        'No route meets the recorded hard accessibility constraints. Check blocked passages, corridor widths, slopes, stairs and elevator availability.'
       );
       return;
     }

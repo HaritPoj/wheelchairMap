@@ -230,6 +230,10 @@ const routeDestinations = mapData.nodes.filter(
 for (const start of routeDestinations) {
   for (const goal of routeDestinations) {
     const path = findPath(start.id, goal.id, mapData);
+    if (start.id !== goal.id && (start.id === room106.id || goal.id === room106.id)) {
+      assert.strictEqual(path.length, 0, 'The east ramp is the only mapped approach to Room 106');
+      continue;
+    }
     assert.ok(
       path.length > 0,
       `Expected a wheelchair route from ${start.id} to ${goal.id}`
@@ -271,13 +275,15 @@ assert.ok(
   'All alternatives must remain wheelchair accessible'
 );
 
-const verticalWingRoute = findPath(room124.id, room106.id, mapData);
-assert.strictEqual(verticalWingRoute[0], room124.id);
-assert.strictEqual(verticalWingRoute[verticalWingRoute.length - 1], room106.id);
-assert.ok(
-  verticalWingRoute.some(id => id === 'corridor_f1_v04'),
-  'Room 106 should be reached through the vertical east wing'
-);
+const eastRamp = mapData.edges.find(edge => edge.id === 'f1_v03_v04');
+assert.strictEqual(eastRamp.width, 1.02);
+assert.ok(Math.abs(eastRamp.slope - Math.atan2(16.5, 67.5) * 180 / Math.PI) < 0.000001);
+assert.strictEqual(eastRamp.accessNote, 'Ramp rises from the east restroom toward Room 106');
+for (const [from, to] of [['restroom_f1_east', room106.id], [room106.id, 'restroom_f1_east']]) {
+  assert.strictEqual(solveConstrainedRoute(from, to, mapData).feasible, false);
+}
+assert.strictEqual(findPath(room124.id, room106.id, mapData).length, 0);
+assert.ok(findPath('corridor_f1_v04', room106.id, mapData).length > 0);
 
 const crossFloor = findPath(room124.id, room211.id, mapData);
 assert.strictEqual(crossFloor[0], room124.id);
@@ -439,15 +445,15 @@ const noThreshold = solveConstrainedRoute('start', 'goal', thresholdMap, {
 assert.strictEqual(noThreshold.cost, 110);
 sameValues(noThreshold.path, ['start', 'wide', 'goal']);
 
-// Regression: the screenshot route from Room 109 to 106 must no longer
+// Regression: the screenshot route from Room 109 to 107 must no longer
 // turn west before travelling east to the vertical wing.
-const room109To106 = solveConstrainedRoute('room_109', 'room_106', mapData, {
+const room109To107 = solveConstrainedRoute('room_109', 'room_107', mapData, {
   maxElevatorTransfers: 1,
 });
-assert.strictEqual(room109To106.feasible, true);
-sameValues(room109To106.path.slice(0, 2), ['room_109', 'corridor_f1_d109']);
+assert.strictEqual(room109To107.feasible, true);
+sameValues(room109To107.path.slice(0, 2), ['room_109', 'corridor_f1_d109']);
 assert.ok(
-  !room109To106.path.includes('corridor_f1_u14'),
+  !room109To107.path.includes('corridor_f1_u14'),
   'Room 109 must not backtrack through the west corridor waypoint'
 );
 
@@ -482,9 +488,9 @@ assert.strictEqual(room211Door[room211Door.length - 1].y, 145);
 
 // Central WC -> Room 106 follows a straight horizontal corridor and
 // turns into the vertical wing without unnecessary lateral moves.
-const wcTo106 = solveConstrainedRoute('restroom_f1_center', 'room_106', mapData);
-assert.ok(wcTo106.feasible);
-assert.ok(wcTo106.path.includes('corridor_f1_u15'));
+const wcTo107 = solveConstrainedRoute('restroom_f1_center', 'room_107', mapData);
+assert.ok(wcTo107.feasible);
+assert.ok(wcTo107.path.includes('corridor_f1_u15'));
 
 // A* must retain higher-cost labels when their resource budget is better.
 const resourceNodes = [

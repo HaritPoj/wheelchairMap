@@ -1260,6 +1260,7 @@
             <core:connects xlink:href="#corridor_f1_v03"/>
           </core:Transition></core:transitionMember>
           <core:transitionMember><core:Transition gml:id="f1_v03_v04">
+            <gml:metaDataProperty><gml:GenericMetaData><wc:Passage width="1.02" rise="0.165" horizontalRun="0.675" slope="13.736268" higherEndpoint="corridor_f1_v04" accessNote="Ramp rises from the east restroom toward Room 106"/></gml:GenericMetaData></gml:metaDataProperty>
             <core:weight>2</core:weight>
             <core:connects xlink:href="#corridor_f1_v03"/>
             <core:connects xlink:href="#corridor_f1_v04"/>
